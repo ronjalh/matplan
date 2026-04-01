@@ -1,18 +1,31 @@
-import { Calendar } from "lucide-react";
+import { getWeekData } from "./actions";
+import { WeekView } from "./week-view";
+import { getMonday, getWeekDays, toISODate } from "@/lib/date-utils";
 
-export default function KalenderPage() {
+export default async function KalenderPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ week?: string }>;
+}) {
+  const params = await searchParams;
+  const baseDate = params.week ? new Date(params.week) : new Date();
+  const days = getWeekDays(baseDate);
+  const startDate = toISODate(days[0]);
+  const endDate = toISODate(days[6]);
+
+  const { meals, events, allRecipes } = await getWeekData(startDate, endDate);
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-[family-name:var(--font-fraunces)] font-semibold mb-2">
+    <div className="max-w-6xl mx-auto space-y-4">
+      <h1 className="text-2xl font-[family-name:var(--font-fraunces)] font-semibold">
         Kalender
       </h1>
-      <p className="text-muted-foreground mb-8">
-        Planlegg ukens måltider og aktiviteter.
-      </p>
-      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-        <Calendar className="w-12 h-12 mb-4 opacity-30" />
-        <p>Kalenderen kommer snart</p>
-      </div>
+      <WeekView
+        days={days.map((d) => d.toISOString())}
+        meals={meals}
+        events={events}
+        allRecipes={allRecipes}
+      />
     </div>
   );
 }
