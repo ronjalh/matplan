@@ -1,0 +1,116 @@
+name: teststrategi
+description: Test types, tools (Vitest + Testing Library + Playwright), coverage targets per layer, and CI integration
+version: 1.0.0
+tags: [testing, vitest, playwright, ci, coverage]
+
+instructions: |
+  # Teststrategi — Test Strategy
+
+  ## Tools
+  | Tool             | Purpose                          | Config File         |
+  |------------------|----------------------------------|---------------------|
+  | Vitest           | Unit + integration tests         | vitest.config.ts    |
+  | Testing Library  | React component tests (JSDOM)    | (via Vitest)        |
+  | Playwright       | E2E + visual regression + a11y   | playwright.config.ts|
+  | @axe-core/playwright | Accessibility testing         | (via Playwright)    |
+
+  ## Test File Locations
+  ```
+  src/
+    lib/nutrition/
+      eight-a-day.ts
+      eight-a-day.test.ts          ← co-located unit tests
+    components/nutrition/
+      plate-model.tsx
+      plate-model.test.tsx         ← co-located component tests
+  tests/
+    e2e/
+      meal-planning.spec.ts        ← E2E tests (Playwright)
+      budget.spec.ts
+      auth.spec.ts
+  ```
+
+  ## Coverage Targets
+  | Layer                    | Target | Rationale                              |
+  |--------------------------|--------|----------------------------------------|
+  | `lib/nutrition/`         | 95%+   | Nutrition math MUST be correct          |
+  | `lib/budget/`            | 90%+   | Money calculations must be accurate     |
+  | `lib/meal-plan/`         | 90%+   | Aggregation, conversion, estimation     |
+  | `data/` (static)         | 100%   | Validate completeness and correctness   |
+  | `scraper/`               | 70%    | Mocked responses, can't control Oda     |
+  | Key components           | 80%    | Plate model, calendar, budget views     |
+  | Other components         | 60%    | Standard UI, lower risk                 |
+
+  Configured in `vitest.config.ts`:
+  ```typescript
+  test: {
+    coverage: {
+      thresholds: {
+        'src/lib/nutrition': { lines: 95 },
+        'src/lib/budget': { lines: 90 },
+        'src/lib/meal-plan': { lines: 90 },
+      }
+    }
+  }
+  ```
+
+  ## Test Naming Convention
+  ```typescript
+  describe('calculateEightADay', () => {
+    it('should count 3 servings when meal has 300g vegetables', () => {});
+    it('should not count potatoes as vegetable servings', () => {});
+    it('should limit juice to 1 serving regardless of quantity', () => {});
+  });
+  ```
+  Pattern: `should [expected behavior] when [condition]`
+
+  ## Commands
+  ```bash
+  npm test              # Run Vitest (unit + integration)
+  npm run test:watch    # Vitest in watch mode
+  npm run test:coverage # Vitest with coverage report
+  npm run test:e2e      # Playwright E2E tests
+  npm run test:a11y     # Playwright accessibility tests
+  npm run test:all      # All tests
+  ```
+
+  ## What to Test Per Feature
+
+  ### New Domain Logic (lib/)
+  - Happy path
+  - Edge cases (zero, null, empty, boundary values)
+  - Error conditions
+  - Norwegian-specific: number formatting, date handling
+
+  ### New Component
+  - Renders correctly with typical props
+  - Handles empty/null/undefined props gracefully
+  - Interactive elements respond to clicks/keyboard
+  - Accessibility: aria attributes present
+  - Both light and dark theme (via CSS variable mocking)
+  - Both nb and en locale
+
+  ### New Page/Route
+  - Add E2E test for the primary user flow
+  - Accessibility scan (axe-core)
+  - Visual regression screenshot (optional)
+
+  ## Mocking Strategy
+  - Database: use in-memory SQLite for integration tests
+  - Oda scraper: mock HTTP responses with saved HTML fixtures
+  - next-intl: provide test translations
+  - next-themes: mock theme context
+  - NEVER mock domain logic (lib/) — test it directly
+
+  ## CI Integration
+  - `npm test` runs on every push
+  - Coverage thresholds enforced — build fails if under target
+  - E2E tests run on PR merge to main
+  - Accessibility scan results logged as PR comment
+
+  ## Rules
+  - EVERY new `lib/` function gets tests before marking task complete
+  - NEVER skip tests to "finish faster" — they are part of "done"
+  - Fix failing tests immediately — never leave red tests
+  - Co-locate test files with source (not in a separate `__tests__` directory)
+  - Use `describe`/`it` structure — not loose test functions

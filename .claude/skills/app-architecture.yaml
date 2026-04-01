@@ -1,0 +1,69 @@
+name: app-architecture
+description: Tech stack, project structure, data flow, and architectural patterns for the Matplan app
+version: 1.0.0
+tags: [architecture, next.js, typescript, patterns]
+
+instructions: |
+  # Matplan — App Architecture
+
+  ## Tech Stack
+  - **Framework:** Next.js 15 (App Router), TypeScript strict mode
+  - **UI:** shadcn/ui + Tailwind CSS v4
+  - **Database:** SQLite via Drizzle ORM (better-sqlite3 driver)
+  - **Auth:** NextAuth.js v5 (Credentials provider, bcryptjs)
+  - **i18n:** next-intl (nb/en, URL-prefix routing)
+  - **Theming:** next-themes (light/dark, system detection)
+  - **Scraping:** Playwright (headless Chromium for Oda.com)
+  - **Testing:** Vitest + Testing Library + Playwright E2E
+  - **Scheduling:** node-cron (in-process, weekly price updates)
+
+  ## Project Structure
+  ```
+  matplan/
+    src/
+      app/[locale]/          # next-intl locale routing (nb, en)
+        layout.tsx            # Root layout: sidebar, theme, i18n provider
+        page.tsx              # Dashboard
+        login/page.tsx
+        kalender/             # Universal calendar (meals + events)
+        oppskrifter/          # Recipes CRUD
+        budsjett/             # Budget overview
+        handleliste/          # Shopping list
+        sesong/               # Seasonal produce
+      components/
+        ui/                   # shadcn/ui primitives
+        icons/                # Custom icon components
+        calendar/             # Calendar views (day/week/month)
+        meal-plan/            # Meal cards, drag-and-drop
+        nutrition/            # Plate model, 8-a-day, fish tracker
+        budget/               # Budget charts, expense forms
+        recipe/               # Recipe cards, ingredient picker
+      lib/
+        nutrition/            # Pure business logic (no framework deps)
+        budget/               # Budget calculations
+        meal-plan/            # Shopping list generation, cost estimation
+      messages/               # nb.json, en.json (i18n)
+      db/                     # Drizzle schema, migrations, seed
+      scraper/                # Oda.com Playwright scraper
+      data/                   # Static Norwegian data (seasons, nutrition)
+  ```
+
+  ## Architectural Patterns
+  - **Server Components by default.** Only use `'use client'` when interactivity requires it (forms, drag-and-drop, theme toggle).
+  - **Server Actions for mutations.** No REST API layer. Use `'use server'` functions.
+  - **`lib/` is the domain logic layer.** Pure TypeScript functions, no framework imports. Easy to test in isolation.
+  - **`data/` is static reference data.** TypeScript files (not JSON) for type-checking. Seasonal produce, nutritional categories, plate model ratios.
+  - **Components are feature-grouped.** `components/calendar/`, `components/nutrition/`, not by type.
+
+  ## Data Flow
+  1. Page (Server Component) → reads from SQLite via Drizzle → renders
+  2. User action → Server Action → writes to SQLite → revalidates path
+  3. Scraper → Playwright fetches Oda → updates odaProducts table → node-cron schedules weekly
+
+  ## Key Constraints
+  - NEVER use `'use client'` unless the component needs browser APIs, event handlers, or hooks
+  - NEVER put business logic in components — it belongs in `lib/`
+  - NEVER use raw SQL — always Drizzle ORM
+  - NEVER hardcode Norwegian text in components — always use next-intl `t()` function
+  - All database access goes through `db/` module, never imported directly in components
+  - URL routes use Norwegian slugs: `/kalender`, `/oppskrifter`, `/budsjett`, `/handleliste`, `/sesong`

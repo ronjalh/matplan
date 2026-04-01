@@ -1,0 +1,186 @@
+name: e2e-testmønstre
+description: Playwright E2E patterns — critical user flows, visual regression for plate model/calendar, accessibility testing, i18n verification
+version: 1.0.0
+tags: [e2e, playwright, testing, visual-regression]
+
+instructions: |
+  # E2E Testmønstre — End-to-End Test Patterns
+
+  ## Playwright Configuration
+  ```typescript
+  // playwright.config.ts
+  export default defineConfig({
+    testDir: './tests/e2e',
+    baseURL: 'http://localhost:3000',
+    use: {
+      locale: 'nb-NO',
+      timezoneId: 'Europe/Oslo',
+    },
+    projects: [
+      { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+      { name: 'mobile', use: { ...devices['iPhone 13'] } },
+    ],
+  });
+  ```
+
+  ## Critical User Flows
+
+  ### Flow 1: Authentication
+  ```typescript
+  test('register, logout, and login', async ({ page }) => {
+    await page.goto('/nb/login');
+    // Register
+    await page.click('[data-testid="register-tab"]');
+    await page.fill('[name="email"]', 'test@example.com');
+    await page.fill('[name="password"]', 'SecurePass123');
+    await page.fill('[name="name"]', 'Test Bruker');
+    await page.click('[data-testid="register-button"]');
+    await expect(page).toHaveURL('/nb');
+    // Logout
+    await page.click('[data-testid="user-menu"]');
+    await page.click('[data-testid="logout"]');
+    await expect(page).toHaveURL('/nb/login');
+    // Login
+    await page.fill('[name="email"]', 'test@example.com');
+    await page.fill('[name="password"]', 'SecurePass123');
+    await page.click('[data-testid="login-button"]');
+    await expect(page).toHaveURL('/nb');
+  });
+  ```
+
+  ### Flow 2: Recipe → Plate Model
+  ```typescript
+  test('create recipe and see plate model assessment', async ({ page }) => {
+    await page.goto('/nb/oppskrifter/ny');
+    await page.fill('[name="name"]', 'Laksemiddag');
+    await page.fill('[name="servings"]', '4');
+    // Add ingredients
+    await addIngredient(page, 'Laks', 400, 'g');       // protein
+    await addIngredient(page, 'Brokkoli', 300, 'g');    // vegetable
+    await addIngredient(page, 'Ris', 300, 'g');          // carb
+    await page.click('[data-testid="save-recipe"]');
+    // Verify plate model shows balanced
+    await expect(page.locator('[data-testid="plate-model"]'))
+      .toHaveAttribute('aria-label', /balansert/i);
+  });
+  ```
+
+  ### Flow 3: Meal Planning → 8-om-dagen
+  ```typescript
+  test('plan meals and track 8-om-dagen progress', async ({ page }) => {
+    await page.goto('/nb/kalender');
+    // Add breakfast with fruit
+    await page.click('[data-testid="slot-frokost-monday"]');
+    await selectRecipe(page, 'Havregrøt med blåbær');
+    // Check 8-om-dagen updates
+    const tracker = page.locator('[data-testid="eight-a-day-tracker"]');
+    await expect(tracker).toHaveAttribute('aria-valuenow', /[1-8]/);
+  });
+  ```
+
+  ### Flow 4: Shopping List Generation
+  ```typescript
+  test('generate shopping list from weekly meal plan', async ({ page }) => {
+    // Assumes meals are already planned for the week
+    await page.goto('/nb/handleliste');
+    await page.click('[data-testid="generate-from-plan"]');
+    // Verify aggregation
+    const items = page.locator('[data-testid="shopping-item"]');
+    await expect(items).not.toHaveCount(0);
+    // Check total cost is displayed
+    await expect(page.locator('[data-testid="total-cost"]')).toContainText('kr');
+  });
+  ```
+
+  ### Flow 5: Budget
+  ```typescript
+  test('create budget and add expenses', async ({ page }) => {
+    await page.goto('/nb/budsjett');
+    // Set monthly limit
+    await page.click('[data-testid="edit-category-mat"]');
+    await page.fill('[name="monthlyLimit"]', '4000');
+    await page.click('[data-testid="save-category"]');
+    // Add expense
+    await page.click('[data-testid="add-expense"]');
+    await page.fill('[name="amount"]', '249.90');
+    await page.fill('[name="description"]', 'Oda-bestilling');
+    await page.click('[data-testid="save-expense"]');
+    // Verify progress bar updated
+    await expect(page.locator('[data-testid="budget-progress-mat"]'))
+      .toHaveAttribute('aria-valuenow', '24990');
+  });
+  ```
+
+  ### Flow 6: Language Switching
+  ```typescript
+  test('switch language nb → en → nb', async ({ page }) => {
+    await page.goto('/nb');
+    await expect(page.locator('h1')).toContainText(/Hjem|Dashboard/);
+    // Switch to English
+    await page.click('[data-testid="language-toggle"]');
+    await page.click('[data-testid="locale-en"]');
+    await expect(page).toHaveURL(/\/en\//);
+    await expect(page.locator('nav')).toContainText('Calendar');
+    // Switch back
+    await page.click('[data-testid="language-toggle"]');
+    await page.click('[data-testid="locale-nb"]');
+    await expect(page).toHaveURL(/\/nb\//);
+    await expect(page.locator('nav')).toContainText('Kalender');
+  });
+  ```
+
+  ### Flow 7: Dark Mode
+  ```typescript
+  test('toggle dark mode and verify contrast', async ({ page }) => {
+    await page.goto('/nb');
+    await page.click('[data-testid="theme-toggle"]');
+    // Verify dark class is applied
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    // Visual regression screenshot
+    await expect(page).toHaveScreenshot('dashboard-dark.png', { maxDiffPixels: 100 });
+  });
+  ```
+
+  ### Flow 8: Calendar Events
+  ```typescript
+  test('add meal and activity to same day', async ({ page }) => {
+    await page.goto('/nb/kalender');
+    // Add meal
+    await page.click('[data-testid="slot-middag-tuesday"]');
+    await selectRecipe(page, 'Kyllinggryte');
+    // Add activity
+    await page.click('[data-testid="add-event-tuesday"]');
+    await page.fill('[name="title"]', 'Trening');
+    await page.selectOption('[name="eventType"]', 'aktivitet');
+    await page.click('[data-testid="save-event"]');
+    // Verify both visible
+    await expect(page.locator('[data-testid="day-tuesday"]')).toContainText('Kyllinggryte');
+    await expect(page.locator('[data-testid="day-tuesday"]')).toContainText('Trening');
+  });
+  ```
+
+  ## Accessibility Testing
+  ```typescript
+  import { checkA11y } from '@axe-core/playwright';
+
+  test('dashboard has no accessibility violations', async ({ page }) => {
+    await page.goto('/nb');
+    const results = await checkA11y(page);
+    expect(results.violations).toHaveLength(0);
+  });
+  ```
+  Run on every page: dashboard, calendar, recipes, budget, shopping list, seasonal.
+
+  ## Visual Regression
+  - Take screenshots of key visualizations: plate model, budget chart, calendar week view
+  - Compare against baseline with `toHaveScreenshot()`
+  - Allow small pixel differences (anti-aliasing): `maxDiffPixels: 100`
+
+  ## Test Data
+  - Use a seeded test database with known recipes, ingredients, and meal plans
+  - Reset database before each test suite (not each test — too slow)
+  - Test user: `test@matplan.local` / `TestPass123`
+
+  ## data-testid Convention
+  Format: `[component]-[element]-[variant]`
+  Examples: `slot-frokost-monday`, `budget-progress-mat`, `plate-model`, `eight-a-day-tracker`

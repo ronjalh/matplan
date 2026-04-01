@@ -1,0 +1,82 @@
+name: norsk-sesong-mat
+description: Detailed seasonal calendar for Norwegian produce — harvest periods, storage, regional variations, import vs. domestic
+version: 1.0.0
+tags: [seasonal, norwegian, produce, food]
+
+instructions: |
+  # Norsk Sesongmat — Seasonal Produce Calendar
+
+  ## Seasonal Produce by Month
+
+  ### Grønnsaker (Vegetables)
+  | Produce (nb)    | Produce (en)     | Harvest     | Stored Until | Region Notes         |
+  |-----------------|------------------|-------------|--------------|----------------------|
+  | Gulrot          | Carrot           | Jul–Okt     | Mar          | Nationwide           |
+  | Potet           | Potato           | Jul–Okt     | Apr          | Nationwide           |
+  | Kålrot (kålrabi)| Swede/Rutabaga   | Sep–Nov     | Mar          | Nationwide           |
+  | Løk             | Onion            | Aug–Okt     | Mar          | Vestfold, Rogaland   |
+  | Purre           | Leek             | Sep–Nov     | Jan          | Vestfold             |
+  | Blomkål         | Cauliflower      | Jul–Okt     | —            | Vestfold, Rogaland   |
+  | Brokkoli        | Broccoli         | Jul–Sep     | —            | Vestfold             |
+  | Hodekål         | Cabbage          | Jul–Nov     | Mar          | Nationwide           |
+  | Rødkål          | Red cabbage      | Sep–Nov     | Feb          | Nationwide           |
+  | Grønnkål        | Kale             | Sep–Des     | —            | Tåler frost          |
+  | Spinat          | Spinach          | Mai–Okt     | —            | Vestfold, Østfold    |
+  | Salat           | Lettuce          | Mai–Okt     | —            | Greenhouse year-round|
+  | Agurk           | Cucumber         | Mai–Sep     | —            | Greenhouse possible  |
+  | Tomat           | Tomato           | Jun–Okt     | —            | Greenhouse, Rogaland |
+  | Squash          | Zucchini         | Jul–Sep     | —            | Østlandet            |
+  | Gresskar        | Pumpkin          | Sep–Okt     | Des          | Østlandet            |
+  | Erter           | Peas             | Jun–Aug     | —            | Frozen year-round    |
+  | Bønner (grønne) | Green beans      | Jul–Sep     | —            | Østlandet            |
+  | Rødbeter        | Beetroot         | Aug–Okt     | Feb          | Nationwide           |
+  | Sellerirot      | Celeriac         | Sep–Nov     | Feb          | Østlandet            |
+  | Pastinakk       | Parsnip          | Sep–Nov     | Feb          | Nationwide           |
+  | Nepe            | Turnip           | Jul–Okt     | Feb          | Nationwide           |
+  | Mais            | Corn             | Aug–Sep     | —            | Limited, Sørlandet   |
+  | Asparges        | Asparagus        | Mai–Jun     | —            | Vestfold             |
+
+  ### Frukt og Bær (Fruits and Berries)
+  | Produce (nb)    | Produce (en)     | Harvest     | Stored Until | Region Notes         |
+  |-----------------|------------------|-------------|--------------|----------------------|
+  | Jordbær         | Strawberry       | Jun–Jul     | —            | Short season! Vestf. |
+  | Bringebær       | Raspberry        | Jul–Aug     | —            | Nationwide           |
+  | Blåbær          | Blueberry        | Jul–Sep     | —            | Wild, nationwide     |
+  | Tyttebær        | Lingonberry      | Aug–Sep     | —            | Wild, nationwide     |
+  | Multer          | Cloudberry       | Jul–Aug     | —            | North Norway, Trøndelag |
+  | Rips            | Redcurrant       | Jul–Aug     | —            | Nationwide           |
+  | Solbær          | Blackcurrant     | Jul–Aug     | —            | Nationwide           |
+  | Stikkelsbær     | Gooseberry       | Jul–Aug     | —            | Nationwide           |
+  | Epler           | Apples           | Aug–Okt     | Jan          | Hardanger, Sogn, Telemark |
+  | Pærer           | Pears            | Aug–Okt     | Nov          | Hardanger, Sogn      |
+  | Plommer         | Plums            | Aug–Sep     | —            | Hardanger, Lier      |
+  | Kirsebær        | Cherries         | Jul–Aug     | —            | Hardanger            |
+  | Rabarbra        | Rhubarb          | Mai–Jul     | —            | Nationwide, early    |
+
+  ### Urter (Herbs)
+  | Herb (nb)       | Harvest     | Notes                       |
+  |-----------------|-------------|-----------------------------|
+  | Dill            | Jun–Sep     | Grows easily in Norway      |
+  | Persille        | Mai–Okt     | Common garden herb          |
+  | Gressløk        | Mai–Okt     | Hardy, widespread           |
+  | Timian          | Jun–Sep     | Perennial in mild areas     |
+  | Basilikum       | Jun–Sep     | Greenhouse or indoor        |
+
+  ## What "In Season" Means for the App
+  - **In season (i sesong):** Currently being harvested in Norway → badge: 🌱 green
+  - **From storage (lagervare):** Norwegian-grown but from cold storage → badge: 📦 blue
+  - **Imported (import):** Not available from Norwegian sources → badge: ❄ grey
+  - **Greenhouse (drivhus):** Norwegian greenhouse production → badge: 🏠 teal
+
+  ## How to Use in Meal Planning
+  1. When user adds ingredient to recipe: show seasonal status for current month
+  2. In meal suggestions: prioritize in-season ingredients
+  3. On shopping list: highlight in-season items (likely cheaper and fresher)
+  4. Sesong page (`/sesong`): monthly grid showing what is available NOW
+  5. Cost correlation: in-season items from Oda are typically cheaper
+
+  ## Rules
+  - ALWAYS check the month when showing seasonal status — January ≠ July
+  - Storage produce is still "Norwegian" — mark as lagervare, not import
+  - Wild berries (blåbær, tyttebær, multer) have short seasons — be precise
+  - Greenhouse production (tomat, agurk, salat) can extend the season but note it

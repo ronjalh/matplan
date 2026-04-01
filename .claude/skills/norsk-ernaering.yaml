@@ -1,0 +1,86 @@
+name: norsk-ernaering
+description: Norwegian dietary guidelines — tallerkensmodellen, 8 om dagen, fish recommendations, and food group classifications
+version: 1.0.0
+tags: [nutrition, norwegian, health, domain]
+
+instructions: |
+  # Norsk Ernæring — Domain Knowledge
+
+  ## Tallerkensmodellen (The Plate Model)
+  Source: Helsedirektoratet (Norwegian Directorate of Health)
+
+  The plate is divided into three equal parts:
+  - **1/3 Grønnsaker/frukt** (vegetables/fruit) — color: green
+  - **1/3 Karbohydrater** (carbohydrates) — potatoes, rice, pasta, bread — color: beige/warm
+  - **1/3 Protein** — fish, meat, eggs, legumes — color: terracotta
+
+  ### Scoring
+  A meal's plate model score is calculated as:
+  ```
+  { vegetable: 0.0–1.0, carbohydrate: 0.0–1.0, protein: 0.0–1.0 }
+  ```
+  Sum should equal 1.0. A "balanced" meal has each component between 0.25 and 0.40.
+
+  ### Assessment
+  - ✅ Balanced: all three between 0.25–0.40
+  - ⚠️ Slightly off: one component below 0.20 or above 0.45
+  - ❌ Unbalanced: any component below 0.10 or above 0.60
+
+  ## 8 om dagen (8 a Day)
+  Norwegian variant of "5 a day" — **8 servings per day** of:
+  - 5 servings of fruit and vegetables
+  - 3 servings of whole grains
+
+  ### What counts as 1 serving
+  | Type                    | 1 serving =                    | Grams  |
+  |------------------------|--------------------------------|--------|
+  | Fruit (medium)         | 1 apple, 1 banana, 1 orange    | ~130g  |
+  | Berries                | 1 dl (deciliter)               | ~100g  |
+  | Vegetables (raw)       | 1 handful / 1 gulrot           | ~100g  |
+  | Vegetables (cooked)    | 0.5 dl cooked                  | ~80g   |
+  | Salad/greens           | 1 big handful                  | ~50g   |
+  | Whole grain bread      | 1 slice                        | ~40g   |
+  | Whole grain cereal     | 1 dl (e.g., havregryn)         | ~40g   |
+  | Whole grain rice/pasta | 0.75 dl cooked                 | ~60g   |
+
+  ### What does NOT count
+  - Potatoes (they are carbohydrates, not vegetables for 8-om-dagen)
+  - Juice counts as max 1 serving regardless of quantity
+  - Jam, fruit yogurt — too much added sugar
+  - White bread, white rice — not whole grain
+
+  ## Fish Recommendations
+  Source: Helsedirektoratet
+  - **2–3 fish dinners per week**
+  - At least one should be **fatty fish** (fet fisk): laks, makrell, sild, ørret, sardiner
+  - Lean fish (mager fisk): torsk, sei, hyse, flyndre
+
+  ### Tracking
+  - Count `isFishMeal = true` per week
+  - ✅ 2–3 fish meals
+  - ⚠️ 1 fish meal
+  - ❌ 0 fish meals
+
+  ## Norwegian Food Group Taxonomy
+  | Category (nb)      | Category (en)       | Plate Model Part | 8-om-dagen |
+  |--------------------|---------------------|------------------|------------|
+  | Grønnsaker         | Vegetables          | vegetable        | Yes (5/day)|
+  | Frukt              | Fruit               | vegetable        | Yes (5/day)|
+  | Bær                | Berries             | vegetable        | Yes (5/day)|
+  | Fullkorn           | Whole grains        | carbohydrate     | Yes (3/day)|
+  | Poteter            | Potatoes            | carbohydrate     | No         |
+  | Ris/pasta          | Rice/pasta          | carbohydrate     | Only whole |
+  | Brød               | Bread               | carbohydrate     | Only whole |
+  | Fisk               | Fish                | protein          | No         |
+  | Kjøtt              | Meat                | protein          | No         |
+  | Egg                | Eggs                | protein          | No         |
+  | Belgfrukter        | Legumes             | protein          | No         |
+  | Meieriprodukter    | Dairy               | (separate)       | No         |
+  | Fett/olje          | Fats/oils           | (separate)       | No         |
+
+  ## Common Mistakes to Avoid
+  - Counting potatoes as vegetables (they are carbs)
+  - Counting juice as unlimited servings (max 1)
+  - Confusing "8 om dagen" with just fruit/veg (it includes whole grains)
+  - Treating all bread as whole grain (must be "grovt" / "fullkorn")
+  - Forgetting that the plate model applies per meal, 8-om-dagen is per day

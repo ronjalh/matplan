@@ -1,0 +1,107 @@
+name: dato-og-tid
+description: Norwegian date format (dd.mm.yyyy), Monday week start, ISO 8601 week numbers, Norwegian holidays, locale-aware formatting
+version: 1.0.0
+tags: [date, time, locale, norwegian, formatting]
+
+instructions: |
+  # Dato og Tid — Date and Time Conventions
+
+  ## Norwegian Date Format
+  | Context      | Format         | Example            |
+  |-------------|----------------|--------------------|
+  | Full date   | d. MMMM yyyy  | 1. april 2026      |
+  | Short date  | dd.mm.yyyy     | 01.04.2026         |
+  | Medium date | d. MMM yyyy    | 1. apr 2026        |
+  | Day + month | d. MMMM       | 1. april           |
+  | Day only    | d.             | 1.                 |
+  | ISO (data)  | yyyy-MM-dd     | 2026-04-01         |
+
+  **CRITICAL:** The separator is a period (.), not a slash.
+  "01.04.2026" NOT "01/04/2026" in Norwegian.
+
+  ## English Date Format (when locale = en)
+  | Context      | Format         | Example            |
+  |-------------|----------------|--------------------|
+  | Full date   | MMMM d, yyyy  | April 1, 2026      |
+  | Short date  | MM/dd/yyyy     | 04/01/2026         |
+
+  ## Time Format
+  - Norwegian: **24-hour clock** — "14:30" not "2:30 PM"
+  - English: 12-hour clock with AM/PM — "2:30 PM"
+  - Always use locale-aware formatter
+
+  ## Week Conventions
+  - **Week starts on MONDAY** (ISO 8601, Norwegian standard)
+  - `getDay()` returns 0 for Sunday — adjust: `(getDay() + 6) % 7` for Monday=0
+  - Week numbers: ISO 8601 — "Uke 1" is the week containing the first Thursday of January
+  - Always display week numbers in calendar views
+
+  ## Norwegian Day Names
+  | # | Full (nb)  | Short (nb) | Full (en)  |
+  |---|------------|------------|------------|
+  | 0 | mandag     | man        | Monday     |
+  | 1 | tirsdag    | tir        | Tuesday    |
+  | 2 | onsdag     | ons        | Wednesday  |
+  | 3 | torsdag    | tor        | Thursday   |
+  | 4 | fredag     | fre        | Friday     |
+  | 5 | lørdag     | lør        | Saturday   |
+  | 6 | søndag     | søn        | Sunday     |
+
+  ## Norwegian Month Names
+  | # | Full (nb)   | Short (nb) |
+  |---|-------------|------------|
+  | 1 | januar      | jan        |
+  | 2 | februar     | feb        |
+  | 3 | mars        | mar        |
+  | 4 | april       | apr        |
+  | 5 | mai         | mai        |
+  | 6 | juni        | jun        |
+  | 7 | juli        | jul        |
+  | 8 | august      | aug        |
+  | 9 | september   | sep        |
+  |10 | oktober     | okt        |
+  |11 | november    | nov        |
+  |12 | desember    | des        |
+
+  Note: All lowercase in Norwegian (not capitalized like in English).
+
+  ## Date Calculations
+  - **Week range:** Monday 00:00 to Sunday 23:59
+  - **Month grocery cost:** 1st to last day of calendar month
+  - **Seasonal produce:** check current month number (1-12)
+  - **Week number display:** use `Intl.DateTimeFormat` with `weekNumbering: 'iso8601'` or `date-fns/getISOWeek`
+
+  ## Norwegian Holidays (Computed)
+  Fixed holidays have known dates. Easter-based holidays require computation:
+  ```
+  Easter = computus algorithm (Gauss or Meeus)
+  Skjærtorsdag = Easter - 3 days
+  Langfredag = Easter - 2 days
+  2. påskedag = Easter + 1 day
+  Kristi himmelfartsdag = Easter + 39 days
+  1. pinsedag = Easter + 49 days
+  2. pinsedag = Easter + 50 days
+  ```
+
+  ## Implementation
+  Use `Intl.DateTimeFormat` for locale-aware formatting:
+  ```typescript
+  const formatDate = (date: Date, locale: string) =>
+    new Intl.DateTimeFormat(locale === 'nb' ? 'nb-NO' : 'en-US', {
+      dateStyle: 'long'
+    }).format(date);
+  ```
+
+  Or with next-intl `useFormatter()`:
+  ```tsx
+  const format = useFormatter();
+  format.dateTime(date, { dateStyle: 'long' }); // locale-aware
+  ```
+
+  ## Rules
+  - NEVER use `MM/dd/yyyy` in Norwegian context — use `dd.mm.yyyy`
+  - NEVER assume Sunday is day 0 of the week in calendar views
+  - ALWAYS compute Easter-based holidays dynamically (they change yearly)
+  - ALWAYS display week numbers in calendar views
+  - Store dates in ISO format (yyyy-MM-dd) in database, format for display only
+  - Use `Intl` APIs or next-intl for formatting — NEVER format dates manually with string concatenation

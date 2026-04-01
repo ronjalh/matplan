@@ -1,0 +1,111 @@
+name: dark-mode
+description: Tailwind dark mode classes, CSS variables for both themes, next-themes setup, and SVG/image adaptation
+version: 1.0.0
+tags: [theming, dark-mode, tailwind, design]
+
+instructions: |
+  # Dark Mode
+
+  ## Setup
+  - Library: **next-themes** with `attribute="class"` strategy
+  - Tailwind: `darkMode: 'class'` in config
+  - Detection: system preference on first visit, then user choice persisted
+
+  ## CSS Variables (globals.css)
+  ```css
+  :root {
+    --color-bg: #FAF7F2;
+    --color-surface: #FFFFFF;
+    --color-primary: #7C9A7E;
+    --color-primary-dark: #5A7A5C;
+    --color-accent: #C27B5A;
+    --color-text: #2D3436;
+    --color-text-muted: #636E72;
+    --color-border: #E2DDD5;
+    --color-success: #6ABF69;
+    --color-warning: #E8A838;
+    --color-error: #E17055;
+    --color-fish: #4A90A4;
+  }
+
+  .dark {
+    --color-bg: #1A1D1E;
+    --color-surface: #2A2D2E;
+    --color-primary: #8FB891;
+    --color-primary-dark: #7C9A7E;
+    --color-accent: #D4926E;
+    --color-text: #E8E4DE;
+    --color-text-muted: #9CA3A6;
+    --color-border: #3A3D3E;
+    --color-success: #7CCF7B;
+    --color-warning: #F0B84A;
+    --color-error: #E88577;
+    --color-fish: #5AA8BC;
+  }
+  ```
+
+  ## Tailwind Usage
+  Use semantic CSS variables instead of `dark:` overrides where possible:
+  ```tsx
+  // ✅ GOOD — uses CSS variable, auto-adapts
+  <div className="bg-[var(--color-surface)] text-[var(--color-text)]">
+
+  // ✅ ALSO GOOD — Tailwind dark: when semantic vars aren't set up
+  <div className="bg-white dark:bg-gray-900">
+
+  // ❌ BAD — hardcoded color, ignores theme
+  <div className="bg-white text-gray-900">
+  ```
+
+  Best practice: configure Tailwind theme to use CSS variables, then use `bg-surface`, `text-primary`, etc.
+
+  ## Theme Toggle Component
+  ```tsx
+  'use client';
+  import { useTheme } from 'next-themes';
+  import { SunMoon } from 'lucide-react';
+
+  export function ThemeToggle() {
+    const { theme, setTheme } = useTheme();
+    return (
+      <button
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      >
+        <SunMoon />
+      </button>
+    );
+  }
+  ```
+
+  ## SVG Adaptation
+  - Tallerkensmodellen SVG: use `currentColor` or CSS variables for fills
+  - Chart colors: use CSS variable references, not hardcoded hex
+  - Lucide icons: inherit text color via `currentColor` (automatic)
+
+  ## Image Handling
+  - Oda product images: no adaptation needed (real product photos)
+  - Placeholder images: provide light and dark variants
+  - Background illustrations: use opacity or SVG with CSS variables
+
+  ## Contrast Requirements (Dark Mode)
+  | Element          | Light BG (#FAF7F2) | Dark BG (#1A1D1E) |
+  |------------------|--------------------|--------------------|
+  | Body text        | #2D3436 (12.8:1) ✅ | #E8E4DE (11.2:1) ✅ |
+  | Muted text       | #636E72 (4.7:1) ✅  | #9CA3A6 (5.1:1) ✅  |
+  | Primary on bg    | #7C9A7E (3.2:1) ⚠️  | #8FB891 (5.8:1) ✅  |
+  | Success badge    | #6ABF69 on white ✅ | #7CCF7B on #2A2D2E ✅ |
+
+  Note: Primary sage on light cream is 3.2:1 — use only for large text or icons, NOT small body text. For primary-colored small text, use `--color-primary-dark` (#5A7A5C, 5.8:1).
+
+  ## Hydration Safety
+  - next-themes needs `suppressHydrationWarning` on `<html>` to avoid mismatch
+  - Never conditionally render based on theme during SSR — use CSS variables instead
+  - The `ThemeToggle` must be a client component
+
+  ## Rules
+  - EVERY new component must look correct in both themes — check both
+  - NEVER use hardcoded colors — always CSS variables or Tailwind semantic classes
+  - ALWAYS test contrast ratios in BOTH themes
+  - SVG fills must use `currentColor` or CSS variables
+  - Charts/visualizations: test that all data series are distinguishable in dark mode

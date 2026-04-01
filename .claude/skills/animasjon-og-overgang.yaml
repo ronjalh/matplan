@@ -1,0 +1,112 @@
+name: animasjon-og-overgang
+description: Micro-interactions, loading/skeleton states, page transitions, and reduced-motion support for a polished Matplan UX
+version: 1.0.0
+tags: [animation, transitions, ux, polish]
+
+instructions: |
+  # Animasjon og Overgang — Animations and Transitions
+
+  ## Philosophy
+  Animations serve function, not decoration. Every animation should:
+  1. Guide attention (what changed?)
+  2. Provide feedback (did my action work?)
+  3. Create spatial continuity (where am I?)
+
+  ## Standard Timing
+  | Type          | Duration | Easing                  | Use Case                |
+  |---------------|----------|-------------------------|-------------------------|
+  | Micro         | 150ms    | ease-out                | Button press, toggle     |
+  | Short         | 200ms    | ease-in-out             | Card hover, badge update |
+  | Medium        | 300ms    | ease-in-out             | Dialog open/close, slide |
+  | Long          | 500ms    | ease-in-out             | Page transition, chart   |
+
+  Tailwind classes:
+  - `transition-all duration-150 ease-out` (micro)
+  - `transition-all duration-200` (short)
+  - `transition-all duration-300` (medium)
+
+  ## Specific Animations
+
+  ### Meal Card — Add to Calendar
+  - Card fades in from 0 opacity + slight scale (0.95 → 1.0)
+  - Duration: 200ms
+  ```css
+  @keyframes card-enter { from { opacity: 0; transform: scale(0.95); } }
+  ```
+
+  ### 8-om-dagen — Serving Added
+  - Circle fills with scale pulse (1.0 → 1.2 → 1.0)
+  - Color transitions from muted to success
+  - Duration: 300ms
+
+  ### Plate Model — Segment Update
+  - SVG arc paths animate via CSS `stroke-dashoffset` transition
+  - Duration: 500ms (smooth, noticeable)
+
+  ### Budget Progress Bar
+  - Width animates from 0 to current value on first render
+  - Color transitions smoothly when crossing thresholds (green → amber → red)
+  - Duration: 500ms
+
+  ### Calendar Navigation
+  - Day/week switch: slide left (forward) or right (backward)
+  - Duration: 300ms
+  - Use `transform: translateX(±100%)`
+
+  ### Dialog/Sheet Open
+  - Backdrop: fade in (0 → 0.5 opacity black)
+  - Content: slide up from bottom (mobile) or scale in from center (desktop)
+  - Duration: 300ms
+
+  ### Drag and Drop (Meal Cards)
+  - Pickup: card lifts with shadow increase + slight scale (1.0 → 1.03)
+  - Over target: target slot highlights with dashed primary border
+  - Drop: card settles into position with spring-like ease
+
+  ## Loading States
+
+  ### Skeleton Screens
+  Replace content with animated placeholder blocks:
+  ```tsx
+  <div className="animate-pulse space-y-3">
+    <div className="h-4 bg-muted rounded w-3/4" />
+    <div className="h-4 bg-muted rounded w-1/2" />
+    <div className="h-20 bg-muted rounded" />
+  </div>
+  ```
+  - Match the layout of the actual content
+  - Use `bg-[var(--color-border)]` with `animate-pulse`
+
+  ### Inline Loading
+  - Small spinner (16px) for buttons during Server Action execution
+  - Button text changes: "Lagre" → "Lagrer..." with disabled state
+  - Never block the entire page for a single action
+
+  ## Page Transitions
+  - Use Next.js `loading.tsx` for route-level loading states
+  - Content area transitions, navigation stays stable
+  - Avoid full-page loading screens — show skeleton of the target page
+
+  ## Reduced Motion
+  ```css
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  ```
+  - Skeleton screens: show static muted blocks (no shimmer)
+  - Chart animations: instant render (no transition)
+  - Page navigation: instant (no slide)
+  - Test with `prefers-reduced-motion: reduce` in browser devtools
+
+  ## Rules
+  - EVERY animation must respect `prefers-reduced-motion`
+  - NEVER animate longer than 500ms for UI elements
+  - NEVER use animation that blocks user interaction
+  - Loading states must be instant (no delay before showing skeleton)
+  - Use CSS transitions over JavaScript animation when possible
+  - Tailwind `animate-pulse` for skeletons, custom keyframes for specific animations

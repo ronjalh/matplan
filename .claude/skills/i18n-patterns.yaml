@@ -1,0 +1,135 @@
+name: i18n-patterns
+description: next-intl setup, translation key conventions, date/number formatting per locale, and language switching patterns
+version: 1.0.0
+tags: [i18n, internationalization, next-intl, locale]
+
+instructions: |
+  # i18n Patterns — Internationalization
+
+  ## Setup
+  - Library: **next-intl** with App Router integration
+  - Locales: `nb` (Norwegian Bokmål, default), `en` (English)
+  - Routing: URL prefix — `/nb/kalender`, `/en/calendar`
+  - Default locale: `nb` (can be configured to not show prefix for default)
+
+  ## Translation File Structure
+  Files: `src/messages/nb.json`, `src/messages/en.json`
+
+  ```json
+  {
+    "common": {
+      "save": "Lagre",
+      "cancel": "Avbryt",
+      "delete": "Slett",
+      "edit": "Rediger",
+      "add": "Legg til",
+      "search": "Søk",
+      "loading": "Laster...",
+      "error": "Noe gikk galt",
+      "back": "Tilbake"
+    },
+    "nav": {
+      "dashboard": "Hjem",
+      "calendar": "Kalender",
+      "recipes": "Oppskrifter",
+      "budget": "Budsjett",
+      "shoppingList": "Handleliste",
+      "seasonal": "Sesong",
+      "settings": "Innstillinger"
+    },
+    "meals": {
+      "breakfast": "Frokost",
+      "lunch": "Lunsj",
+      "dinner": "Middag",
+      "supper": "Kveldsmat",
+      "snack": "Mellommåltid"
+    },
+    "nutrition": {
+      "plateModel": "Tallerkensmodellen",
+      "eightADay": "8 om dagen",
+      "servings": "{count} porsjoner",
+      "fishThisWeek": "{count} av {target} fiskmåltider denne uken",
+      "balanced": "Balansert",
+      "unbalanced": "Ubalansert"
+    },
+    "budget": {
+      "monthlyBudget": "Månedsbudsjett",
+      "remaining": "Gjenstår: {amount}",
+      "overBudget": "Over budsjett: {amount}",
+      "weeklyGroceries": "Ukentlige dagligvarer"
+    },
+    "calendar": {
+      "week": "Uke {number}",
+      "today": "I dag",
+      "addMeal": "Legg til måltid",
+      "addEvent": "Legg til hendelse"
+    }
+  }
+  ```
+
+  ## Key Naming Convention
+  - Dot-separated namespaces: `section.subsection.key`
+  - camelCase keys: `shoppingList`, not `shopping_list` or `shopping-list`
+  - Interpolation: `{variableName}` (next-intl syntax)
+  - Plurals: use ICU format `{count, plural, one {# porsjon} other {# porsjoner}}`
+
+  ## Usage in Components
+  ```tsx
+  import { useTranslations } from 'next-intl';
+
+  export function MealCard() {
+    const t = useTranslations('meals');
+    return <h3>{t('dinner')}</h3>; // "Middag" or "Dinner"
+  }
+  ```
+
+  Server Components:
+  ```tsx
+  import { getTranslations } from 'next-intl/server';
+
+  export default async function Page() {
+    const t = await getTranslations('nav');
+    return <h1>{t('dashboard')}</h1>;
+  }
+  ```
+
+  ## Date and Number Formatting
+
+  ### Dates
+  | Format     | Norwegian (nb)    | English (en)      |
+  |------------|-------------------|-------------------|
+  | Full date  | 1. april 2026     | April 1, 2026     |
+  | Short date | 01.04.2026        | 04/01/2026        |
+  | Day+month  | 1. apr            | Apr 1             |
+  | Weekday    | mandag            | Monday            |
+  | Week       | Uke 14            | Week 14           |
+
+  Use `useFormatter()` from next-intl:
+  ```tsx
+  const format = useFormatter();
+  format.dateTime(date, { dateStyle: 'long' });
+  ```
+
+  ### Numbers
+  | Format     | Norwegian (nb)    | English (en)      |
+  |------------|-------------------|-------------------|
+  | Currency   | kr 1 234,50       | NOK 1,234.50      |
+  | Decimal    | 3,5               | 3.5               |
+  | Percentage | 75 %              | 75%               |
+
+  Use `Intl.NumberFormat` or next-intl `format.number()`.
+
+  ## Language Switcher
+  - Located in header/sidebar
+  - Uses `Globe` icon from Lucide
+  - Switches URL prefix: `/nb/kalender` ↔ `/en/calendar`
+  - Preserves current page state (doesn't reload data)
+  - Current language shown as flag or 2-letter code (NB / EN)
+
+  ## Rules
+  - NEVER hardcode text in components — always use `t()` function
+  - EVERY new string must be added to BOTH nb.json and en.json simultaneously
+  - Use ICU message format for plurals and interpolation
+  - Date/number formatting MUST use locale-aware formatters
+  - Keep translation keys organized by feature namespace
+  - Default locale is `nb` — Norwegian text comes first, English is the translation

@@ -1,0 +1,98 @@
+name: datavisualisering
+description: Chart type selection, color accessibility, responsive graphs for nutrition, budget, and seasonal data
+version: 1.0.0
+tags: [charts, visualization, data, graphs]
+
+instructions: |
+  # Datavisualisering — Data Visualization
+
+  ## Chart Library
+  Recommended: **Recharts** (React-native, lightweight, good Tailwind integration)
+  Alternative: Raw SVG for simple visualizations (plate model, progress bars)
+
+  ## Visualization Types by Feature
+
+  ### Tallerkensmodellen (Plate Model)
+  - **Type:** Donut/pie chart (3 segments)
+  - **Implementation:** Custom SVG (not chart library — more control)
+  - **Colors:** Green (vegetables), Warm beige (carbs), Terracotta (protein)
+  - **Labels:** Percentage on each segment
+  - **Size:** 200px diameter desktop, 160px mobile
+  - **Accessibility:** `role="img"` + `aria-label` with text description
+  - **Colorblind:** Add patterns (hatching) to each segment in addition to color
+
+  ### 8-om-dagen Tracker
+  - **Type:** Segmented progress indicator (8 circles/dots)
+  - **Implementation:** Custom SVG or HTML divs
+  - **States:** Empty (border only), Filled (success color), Overflow (if > 8)
+  - **Below each day in calendar** + **summary in dashboard**
+
+  ### Budget Overview
+  - **Type:** Horizontal stacked bar chart
+  - **X-axis:** Amount (kr)
+  - **Y-axis:** Categories
+  - **Colors:** Category-specific, from design system palette
+  - **Overlay:** Budget limit as a vertical dashed line
+  - **Status colors:** Green (under), Amber (70-90%), Coral (over)
+
+  ### Weekly Spending Trend
+  - **Type:** Line chart
+  - **X-axis:** Weeks (Uke 1, Uke 2, ...)
+  - **Y-axis:** kr
+  - **Lines:** Actual spending (solid) + Budget limit (dashed)
+  - **Fill:** Area under the actual line, light primary color
+
+  ### Seasonal Produce Calendar
+  - **Type:** Heat map / availability grid
+  - **X-axis:** Months (Jan–Des)
+  - **Y-axis:** Produce items
+  - **Colors:** Green (harvest), Blue (from storage), Grey (not available)
+  - **Interactive:** Hover/tap to see details
+
+  ### Fish Week Progress
+  - **Type:** Simple counter with icons
+  - **Display:** Fish icons (filled vs outline) — e.g., 🐟🐟○ (2 of 3)
+
+  ### Price Trends (Oda)
+  - **Type:** Sparkline or small line chart
+  - **Context:** Shown on product/ingredient detail
+  - **X-axis:** Time (last 8 weeks)
+  - **Y-axis:** Price (kr)
+  - **Color:** Primary, with trend indicator (↑↓→)
+
+  ## Color Accessibility for Charts
+  - NEVER rely on color alone to distinguish data series
+  - Use **color + pattern + label** for each series:
+    - Vegetables: Green + diagonal hatch + "Grønnsaker"
+    - Carbohydrates: Beige + dots pattern + "Karbohydrater"
+    - Protein: Terracotta + cross-hatch + "Protein"
+  - Test with colorblind simulation (protanopia, deuteranopia, tritanopia)
+  - All charts must have a text-based alternative (table or `aria-label`)
+
+  ## Responsive Charts
+  - Use `ResponsiveContainer` from Recharts (width="100%", height auto)
+  - Mobile: simplify — fewer labels, larger touch targets
+  - Desktop: full labels, hover tooltips
+  - Minimum chart height: 200px mobile, 300px desktop
+  - Font size in charts: minimum 12px for readability
+
+  ## Dark Mode Charts
+  - Background: transparent (inherits from container)
+  - Grid lines: `--color-border` (subtle)
+  - Text: `--color-text-muted`
+  - Data colors: use the dark mode variants from CSS variables
+  - Test all charts in both themes
+
+  ## Number Formatting in Charts
+  - Axis labels: abbreviated — "kr 1k", "kr 2k" for budgets
+  - Tooltips: full format — "kr 1 234,50"
+  - Percentages: "35 %" (Norwegian: space before %)
+  - Use `Intl.NumberFormat` for all formatted numbers
+
+  ## Rules
+  - EVERY chart must have a text alternative for screen readers
+  - NEVER use more than 6 colors in a single chart
+  - ALWAYS test colorblind accessibility
+  - ALWAYS make charts responsive
+  - ALWAYS use CSS variables for chart colors (dark mode support)
+  - Tooltips must show precise values — charts show trends, tooltips show data

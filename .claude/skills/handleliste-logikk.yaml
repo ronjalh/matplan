@@ -1,0 +1,92 @@
+name: handleliste-logikk
+description: Shopping list generation — ingredient aggregation, duplicate merging, unit conversion, and Oda product mapping
+version: 1.0.0
+tags: [shopping, ingredients, aggregation, conversion]
+
+instructions: |
+  # Handleliste — Shopping List Logic
+
+  ## Generation Flow
+  1. User selects date range (typically one week)
+  2. Fetch all mealPlan entries in range → get recipeIds
+  3. Fetch all recipeIngredients for those recipes
+  4. Aggregate: merge same ingredient across meals
+  5. Map to Oda products where linked
+  6. Calculate estimated total cost
+  7. Group by category for display
+
+  ## Ingredient Aggregation Rules
+
+  ### Merge Same Ingredient
+  When the same ingredientId appears multiple times:
+  - Same unit: sum quantities (`200g + 300g = 500g`)
+  - Different units: convert to common unit, then sum
+
+  ### Unit Conversion Table (Norwegian)
+  | From        | To    | Factor    |
+  |-------------|-------|-----------|
+  | 1 ss (spiseskje) | ml | 15   |
+  | 1 ts (teskje)    | ml | 5    |
+  | 1 dl              | ml | 100  |
+  | 1 l               | ml | 1000 |
+  | 1 kg              | g  | 1000 |
+  | 1 stk (medium fruit) | g | ~130 |
+  | 1 fedd (hvitløk)  | g  | ~4   |
+  | 1 bunt (herbs)    | g  | ~30  |
+
+  ### Cannot Convert
+  Some units cannot be merged:
+  - "stk" and "g" for items without a known weight (e.g., "2 stk paprika" vs "100g paprika")
+  - Keep as separate line items with a note
+
+  ## Norwegian Unit Abbreviations
+  | Full name       | Abbreviation | English     |
+  |-----------------|-------------|-------------|
+  | spiseskje       | ss          | tablespoon  |
+  | teskje          | ts          | teaspoon    |
+  | desiliter       | dl          | deciliter   |
+  | liter           | l           | liter       |
+  | gram            | g           | gram        |
+  | kilogram        | kg          | kilogram    |
+  | stykk           | stk         | piece       |
+  | pakke           | pk          | package     |
+  | boks            | bx          | can/tin     |
+  | bunt            | bnt         | bunch       |
+  | fedd            | fedd        | clove       |
+
+  ## Oda Product Mapping
+  - Each ingredient can be linked to 0-1 Oda products
+  - When linked: show Oda price and calculate cost
+  - When not linked: show "pris ukjent" with option to search Oda
+  - Smart suggestion: fuzzy match ingredient name to Oda product name (Levenshtein distance < 3)
+
+  ## Cost Estimation
+  ```
+  For each shopping list item:
+    if odaProduct linked:
+      cost = quantity * odaProduct.pricePerUnit
+    else:
+      cost = null (show "—")
+
+  totalEstimated = sum of known costs
+  unknownCount = count of items without price
+  ```
+  Display: `Estimert totalt: kr 1 234,50 (3 varer uten pris)`
+
+  ## Display Grouping
+  Group shopping list by ingredient category:
+  1. Frukt og grønt
+  2. Kjøtt og fisk
+  3. Meieriprodukter
+  4. Brød og bakervarer
+  5. Tørrvarer (ris, pasta, mel)
+  6. Krydder og tilbehør
+  7. Annet
+
+  ## Rules
+  - ALWAYS aggregate before display — never show "gulrot" twice
+  - ALWAYS use integer øre for price calculations
+  - NEVER lose precision during unit conversion — use exact fractions
+  - Round display quantities to sensible precision (not "203.333g" but "200g")
+  - Show "ca." prefix when quantity is approximate (from conversion)
+  - Checked items (already purchased) move to bottom of list, greyed out

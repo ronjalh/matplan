@@ -1,0 +1,111 @@
+name: kalender-design
+description: Visual calendar layout — timeline rendering, event color coding, overlapping events, mini calendar, week numbers, and Norwegian holidays
+version: 1.0.0
+tags: [calendar, design, visual, layout]
+
+instructions: |
+  # Kalender Design — Visual Calendar Patterns
+
+  ## Day View Layout
+  ```
+  ┌──────────────────────────────────┐
+  │ ◀ Mandag 1. april 2026 ▶        │  ← date navigation
+  │ [8/dag: ●●●●●○○○] [🐟 1/3]     │  ← daily nutrition summary
+  ├──────────────────────────────────┤
+  │ 07:00 ┤ ┌──────────────────┐    │
+  │       │ │ 🌅 Frokost       │    │  ← meal slot (special card)
+  │ 08:00 ┤ │ Havregrøt m/bær  │    │
+  │       │ └──────────────────┘    │
+  │ 09:00 ┤                         │
+  │ 10:00 ┤ ┌─ blue border ──────┐  │
+  │       │ │ 🏋 Trening, SATS   │  │  ← activity event
+  │ 11:00 ┤ └────────────────────┘  │
+  │       ┤ ┌──────────────────┐    │
+  │ 12:00 ┤ │ ☀ Lunsj          │    │  ← meal slot
+  │       │ │ Laksewrap         │    │
+  │ 13:00 ┤ └──────────────────┘    │
+  │  ...  │                         │
+  │ 17:00 ┤ ┌──────────────────┐    │
+  │       │ │ 🌅 Middag         │    │  ← meal slot
+  │ 18:00 ┤ │ Kyllinggryte     │    │
+  │       │ └──────────────────┘    │
+  └──────────────────────────────────┘
+  ```
+
+  ## Week View Layout
+  ```
+  ┌─────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┐
+  │Uke14│ Man  │ Tir  │ Ons  │ Tor  │ Fre  │ Lør  │ Søn  │
+  │     │ 30.3 │ 31.3 │ 1.4  │ 2.4  │ 3.4  │ 4.4  │ 5.4  │
+  ├─────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤
+  │Frok │ card │ card │ card │  +   │  +   │ card │  +   │
+  │Lunsj│ card │  +   │ card │ card │  +   │  +   │  +   │
+  │Mid  │ card │ card │ card │ card │ card │ card │ card │
+  │Kveld│  +   │  +   │  +   │  +   │  +   │ card │  +   │
+  ├─────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤
+  │Annet│  🏋  │      │  📅  │      │  🔔  │  🎂  │      │
+  ├─────┼──────┴──────┴──────┴──────┴──────┴──────┴──────┤
+  │8/dag│ ●●●●● ●●○●● ●●●●● ○○○○○ ○○○○○ ●●●●○ ○○○○○   │
+  │Fisk │ ✓✓○  (2 av 3 denne uken)                       │
+  │Kost │ Estimert: kr 1 247                              │
+  └─────┴─────────────────────────────────────────────────┘
+  ```
+
+  ## Month View Layout
+  Compact grid. Each day cell shows:
+  - Meal count indicator (0-4 dots)
+  - Event count (small number badge if > 0)
+  - Today highlighted with primary color ring
+  - Norwegian holidays in red
+
+  ## Event Color Coding
+  Each event type has a left-border color:
+  | Event Type  | Border Color      | Width |
+  |-------------|-------------------|-------|
+  | Måltid      | --color-primary   | 3px   |
+  | Aktivitet   | --color-fish      | 3px   |
+  | Avtale      | --color-accent    | 3px   |
+  | Påminnelse  | --color-warning   | 3px   |
+  | Hendelse    | --color-text-muted| 3px   |
+
+  ## Overlapping Events
+  When multiple events occupy the same time:
+  - Stack side-by-side (up to 3)
+  - If > 3: show first 2 + "+N more" badge
+  - Meals always take priority in visual ordering
+
+  ## Mini Calendar (sidebar)
+  - Small month grid for quick date navigation
+  - Dot indicators under dates that have events
+  - Today highlighted, selected date has primary bg
+  - Click a date → navigates main calendar to that date
+
+  ## Norwegian Holidays (Røde Dager)
+  Must be marked in the calendar:
+  | Date        | Holiday (nb)                | Holiday (en)          |
+  |-------------|-----------------------------|-----------------------|
+  | 1. januar   | Nyttårsdag                  | New Year's Day        |
+  | Variable    | Skjærtorsdag                | Maundy Thursday       |
+  | Variable    | Langfredag                  | Good Friday           |
+  | Variable    | 1. påskedag                 | Easter Sunday         |
+  | Variable    | 2. påskedag                 | Easter Monday         |
+  | 1. mai      | Arbeidernes dag             | Labour Day            |
+  | 17. mai     | Grunnlovsdag                | Constitution Day      |
+  | Variable    | Kristi himmelfartsdag       | Ascension Day         |
+  | Variable    | 1. pinsedag                 | Whit Sunday           |
+  | Variable    | 2. pinsedag                 | Whit Monday           |
+  | 25. desember| 1. juledag                  | Christmas Day         |
+  | 26. desember| 2. juledag                  | St. Stephen's Day     |
+
+  Display: red text for date, holiday name shown on hover/tap.
+
+  ## Week Numbers
+  - Always display ISO 8601 week numbers
+  - Format: "Uke 14" (nb) / "Week 14" (en)
+  - Calculate with: `getISOWeek()` from date-fns or equivalent
+
+  ## Animations
+  - View transitions: slide left/right when navigating days/weeks
+  - Card add: fade-in with slight scale
+  - Drag-and-drop: card lifts with shadow, target slot highlights
+  - Respect `prefers-reduced-motion`

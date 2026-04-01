@@ -1,0 +1,96 @@
+name: accessibility-patterns
+description: WCAG 2.1 AA requirements, ARIA for SVG visualizations, keyboard navigation, and Norwegian locale considerations
+version: 1.0.0
+tags: [accessibility, wcag, aria, a11y]
+
+instructions: |
+  # Accessibility Patterns — WCAG 2.1 AA
+
+  ## Language
+  - Set `<html lang="nb">` for Norwegian Bokmål (or `lang="en"` when English is selected)
+  - Language attribute must update when user switches locale
+
+  ## Color and Contrast
+  - **Minimum contrast ratio: 4.5:1** for normal text, 3:1 for large text (18px+ or 14px+ bold)
+  - **NEVER use color alone** to convey information. Every colored indicator must also have:
+    - A text label, OR
+    - An icon/shape, OR
+    - A pattern
+  - Examples:
+    - Budget status: green bar + "Under budsjett" text
+    - 8-om-dagen: filled circles + "5/8 porsjoner" text
+    - Plate model: colored segments + percentage labels
+
+  ## SVG Visualizations (Critical for this app)
+
+  ### Tallerkensmodellen (Plate Model SVG)
+  ```html
+  <svg role="img" aria-label="Tallerkensmodell: 35% grønnsaker, 30% karbohydrater, 35% protein">
+    <!-- segments with both color AND pattern fills for colorblind users -->
+    <title>Tallerkensmodell for dette måltidet</title>
+    <desc>Grønnsaker: 35%, Karbohydrater: 30%, Protein: 35%</desc>
+  </svg>
+  ```
+
+  ### 8-om-dagen Tracker
+  ```html
+  <div role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="8"
+       aria-label="8 om dagen: 5 av 8 porsjoner">
+    <!-- visual circles -->
+  </div>
+  ```
+
+  ### Budget Progress Bar
+  ```html
+  <div role="progressbar" aria-valuenow="3200" aria-valuemax="4000"
+       aria-label="Mat og drikke: kr 3 200 av kr 4 000 budsjett">
+  </div>
+  ```
+
+  ## Keyboard Navigation
+  - All interactive elements reachable via Tab
+  - Enter/Space to activate buttons and links
+  - Escape to close dialogs and dropdown menus
+  - Arrow keys for calendar day navigation
+  - Tab order follows visual layout (left-to-right, top-to-bottom)
+
+  ## Focus Indicators
+  - Visible focus ring: `focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`
+  - NEVER use `outline: none` without a visible alternative
+  - Focus ring must be visible in both light and dark mode
+
+  ## Forms
+  - Every input has a visible `<label>` (not just placeholder)
+  - Error messages linked via `aria-describedby`
+  - Required fields marked with `aria-required="true"` and visible indicator
+  - Form validation errors announced to screen readers via `aria-live="polite"`
+
+  ## Calendar Accessibility
+  - Calendar grid: `role="grid"` with `role="gridcell"` for each day
+  - Arrow keys navigate between days
+  - Today's date: `aria-current="date"`
+  - Selected date: `aria-selected="true"`
+  - Events in a day cell: announced as part of the cell's accessible name
+
+  ## Reduced Motion
+  ```css
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  ```
+  - All animations must respect `prefers-reduced-motion`
+  - Skeleton loading screens: static (no shimmer) when reduced motion is preferred
+
+  ## Screen Reader Announcements
+  - Use `aria-live="polite"` for: budget updates, shopping list total changes, nutrition score changes
+  - Use `aria-live="assertive"` for: error messages, form validation failures
+  - Toast notifications: `role="alert"`
+
+  ## Rules
+  - EVERY new component must pass these checks before merging
+  - Test with keyboard only (unplug mouse) for all interactive flows
+  - Run Playwright accessibility tests (axe-core) on every page
+  - Color-only indicators are a HARD BLOCK — always add text/icon alternative

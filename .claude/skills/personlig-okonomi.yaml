@@ -1,0 +1,82 @@
+name: personlig-okonomi
+description: Norwegian personal economy — SIFO reference budgets, fixed vs. variable expenses, savings goals, income-to-food flow
+version: 1.0.0
+tags: [economy, budget, norwegian, finance, sifo]
+
+instructions: |
+  # Personlig Økonomi — Personal Economy
+
+  ## Budget Flow (Norwegian Household)
+  ```
+  Inntekt (netto etter skatt)
+    → Faste utgifter (bolig, forsikring, kommunikasjon, barnehage)
+    → Sparing (10-20% anbefalt)
+    → Variable utgifter (mat, klær, fritid, transport)
+        → Mat og drikke (this app's primary focus)
+  ```
+
+  ## SIFO Reference Budget (2025 approximations)
+  Source: OsloMet/SIFO Referansebudsjettet
+
+  ### Monthly food budget by household type
+  | Household          | Food (kr/month) | Total (kr/month) |
+  |--------------------|-----------------|------------------|
+  | Single adult       | 3 200           | 10 800           |
+  | Couple             | 5 600           | 18 500           |
+  | Couple + 1 child   | 7 000           | 23 000           |
+  | Couple + 2 children| 8 400           | 28 000           |
+  | Single parent + 1  | 5 000           | 16 000           |
+
+  These are MINIMUM reference budgets for a "reasonable" standard of living.
+  Useful as: comparison benchmark, not a target.
+
+  ### Food sub-categories (approximate split)
+  | Sub-category     | % of food budget | Example monthly (couple) |
+  |------------------|------------------|--------------------------|
+  | Kjøtt og fisk    | 25%              | kr 1 400                 |
+  | Meieri og egg    | 15%              | kr 840                   |
+  | Frukt og grønt   | 20%              | kr 1 120                 |
+  | Brød og kornvarer| 10%              | kr 560                   |
+  | Drikkevarer      | 10%              | kr 560                   |
+  | Annen mat        | 20%              | kr 1 120                 |
+
+  ## Fixed vs. Variable Expenses
+  | Type     | Characteristics                    | Examples                    |
+  |----------|------------------------------------|-----------------------------|
+  | Fast     | Same amount each month             | Husleie, lån, forsikring    |
+  | Variabel | Changes month to month             | Mat, klær, bensin, fritid   |
+  | Semi-fast| Mostly fixed with some variation   | Strøm, mobil, transport     |
+
+  ## Budget Setup Flow
+  When user first creates their budget:
+  1. Ask for household type (single/couple/family+children)
+  2. Pre-fill with SIFO reference values as starting point
+  3. Ask for net monthly income
+  4. Calculate: income - fixed expenses - savings = available for variable expenses
+  5. Food budget is a subset of variable expenses
+
+  ## Norwegian-Specific Financial Context
+  - **BSU (Boligsparing for ungdom):** Tax-deductible savings for young adults (up to kr 27,500/year)
+  - **Strømstøtte:** Government electricity support (variable by season)
+  - **Matpriser:** Norwegian food prices are among the highest in Europe
+  - **"Strøm" (electricity):** Major variable cost, especially in winter
+
+  ## Savings Goals
+  The app can track savings goals:
+  - Emergency fund (bufferkonto): 3-6 months of expenses recommended
+  - Specific goals: "Ferie" (vacation), "Ny sofa", "Jul" (Christmas)
+  - Display: progress bar with target amount and deadline
+
+  ## Smart Budget Suggestions
+  When user is over budget on food:
+  - Suggest more seasonal produce (typically cheaper)
+  - Suggest batch cooking (fewer meals to plan, less waste)
+  - Show "billig" (budget) tagged recipes
+  - Compare Oda prices for cheaper alternatives
+
+  ## Rules
+  - Show SIFO reference as context, not as a requirement
+  - NEVER give financial advice — only show data and comparisons
+  - Always use øre (integers) for calculations, kr for display
+  - Budget period is always monthly (align with Norwegian salary cycles: monthly pay)
+  - Allow users to customize categories freely — SIFO is just the starting template

@@ -1,0 +1,182 @@
+name: testmønstre-domene
+description: Patterns for testing nutrition calculations, budget rounding, shopping list aggregation, and seasonal logic edge cases
+version: 1.0.0
+tags: [testing, patterns, domain, edge-cases]
+
+instructions: |
+  # Testmønstre — Domain Test Patterns
+
+  ## Nutrition Calculation Tests
+
+  ### 8-om-dagen
+  ```typescript
+  // Boundary: exactly 1 serving
+  it('should count 1 serving for 100g raw vegetables', () => {
+    expect(countServings([{ category: 'grønnsaker', grams: 100 }])).toBe(1);
+  });
+
+  // Exclusion: potatoes
+  it('should NOT count potatoes as vegetable servings', () => {
+    expect(countServings([{ category: 'poteter', grams: 300 }])).toBe(0);
+  });
+
+  // Cap: juice max 1
+  it('should cap juice at 1 serving regardless of quantity', () => {
+    expect(countServings([{ category: 'juice', ml: 500 }])).toBe(1);
+  });
+
+  // Combined: fruit + veg + whole grain
+  it('should sum fruit, vegetable, and whole grain servings separately', () => {
+    const result = countDetailedServings([
+      { category: 'frukt', grams: 260 },    // 2 servings
+      { category: 'grønnsaker', grams: 300 }, // 3 servings
+      { category: 'fullkorn', grams: 120 },   // 3 servings
+    ]);
+    expect(result.fruitVeg).toBe(5);
+    expect(result.wholeGrain).toBe(3);
+    expect(result.total).toBe(8);
+  });
+  ```
+
+  ### Plate Model
+  ```typescript
+  // Balanced meal
+  it('should score as balanced when all thirds are 0.25-0.40', () => {
+    const score = calculatePlateModel([
+      { category: 'vegetable', grams: 200 },
+      { category: 'carbohydrate', grams: 180 },
+      { category: 'protein', grams: 170 },
+    ]);
+    expect(score.assessment).toBe('balanced');
+    expect(score.vegetable + score.carbohydrate + score.protein).toBeCloseTo(1.0);
+  });
+
+  // All protein (unbalanced)
+  it('should score as unbalanced when one category dominates', () => {
+    const score = calculatePlateModel([
+      { category: 'protein', grams: 500 },
+    ]);
+    expect(score.assessment).toBe('unbalanced');
+    expect(score.protein).toBeCloseTo(1.0);
+  });
+
+  // Empty meal
+  it('should return zero scores for empty ingredient list', () => {
+    const score = calculatePlateModel([]);
+    expect(score.vegetable).toBe(0);
+    expect(score.carbohydrate).toBe(0);
+    expect(score.protein).toBe(0);
+  });
+  ```
+
+  ## Budget Calculation Tests
+
+  ### Integer Arithmetic (øre)
+  ```typescript
+  // Precision: no floating point errors
+  it('should calculate total in øre without floating point errors', () => {
+    const items = [
+      { priceOre: 4990 },  // kr 49,90
+      { priceOre: 2990 },  // kr 29,90
+      { priceOre: 1550 },  // kr 15,50
+    ];
+    expect(sumOre(items)).toBe(9530); // kr 95,30 exactly
+  });
+
+  // Display formatting
+  it('should format 9530 øre as "kr 95,30" in Norwegian locale', () => {
+    expect(formatNOK(9530, 'nb')).toBe('kr 95,30');
+  });
+
+  it('should format 9530 øre as "NOK 95.30" in English locale', () => {
+    expect(formatNOK(9530, 'en')).toBe('NOK 95.30');
+  });
+
+  // Budget status thresholds
+  it('should return "warning" when spent is 75% of limit', () => {
+    expect(budgetStatus(7500, 10000)).toBe('warning');
+  });
+
+  it('should return "over" when spent exceeds limit', () => {
+    expect(budgetStatus(10500, 10000)).toBe('over');
+  });
+  ```
+
+  ## Shopping List Aggregation Tests
+
+  ### Merging
+  ```typescript
+  // Same ingredient, same unit
+  it('should merge 200g + 300g carrots into 500g', () => {
+    const merged = aggregateIngredients([
+      { ingredientId: 1, quantity: 200, unit: 'g' },
+      { ingredientId: 1, quantity: 300, unit: 'g' },
+    ]);
+    expect(merged).toHaveLength(1);
+    expect(merged[0].quantity).toBe(500);
+  });
+
+  // Unit conversion
+  it('should convert 2 dl + 100 ml milk into 300 ml', () => {
+    const merged = aggregateIngredients([
+      { ingredientId: 5, quantity: 2, unit: 'dl' },
+      { ingredientId: 5, quantity: 100, unit: 'ml' },
+    ]);
+    expect(merged[0].quantity).toBe(300);
+    expect(merged[0].unit).toBe('ml');
+  });
+
+  // Incompatible units
+  it('should NOT merge "2 stk" and "150g" of same ingredient', () => {
+    const merged = aggregateIngredients([
+      { ingredientId: 3, quantity: 2, unit: 'stk' },
+      { ingredientId: 3, quantity: 150, unit: 'g' },
+    ]);
+    expect(merged).toHaveLength(2);
+  });
+  ```
+
+  ## Seasonal Logic Tests
+  ```typescript
+  // In season
+  it('should mark strawberries as in-season in June', () => {
+    expect(getSeasonalStatus('jordbær', 6)).toBe('in-season');
+  });
+
+  // Out of season
+  it('should mark strawberries as imported in January', () => {
+    expect(getSeasonalStatus('jordbær', 1)).toBe('imported');
+  });
+
+  // Storage produce
+  it('should mark carrots as from-storage in February', () => {
+    expect(getSeasonalStatus('gulrot', 2)).toBe('from-storage');
+  });
+
+  // All months covered
+  it('should return a valid status for every month', () => {
+    for (let month = 1; month <= 12; month++) {
+      const status = getSeasonalStatus('gulrot', month);
+      expect(['in-season', 'from-storage', 'imported']).toContain(status);
+    }
+  });
+  ```
+
+  ## Date/Calendar Tests
+  ```typescript
+  // Monday week start
+  it('should return Monday as first day of week', () => {
+    const week = getWeekDays(new Date('2026-04-01'));
+    expect(week[0].getDay()).toBe(1); // Monday
+  });
+
+  // Week number
+  it('should return week 14 for April 1, 2026', () => {
+    expect(getISOWeekNumber(new Date('2026-04-01'))).toBe(14);
+  });
+
+  // Easter computation
+  it('should compute Easter 2026 as April 5', () => {
+    expect(getEasterDate(2026).toISOString().slice(0, 10)).toBe('2026-04-05');
+  });
+  ```

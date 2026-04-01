@@ -1,0 +1,69 @@
+name: qa-matplan
+description: Quality gate for all AI-generated code in Matplan — nutrition accuracy, budget correctness, scraper resilience
+version: 1.0.0
+tags: [qa, testing, quality, verification]
+
+instructions: |
+  # QA — Matplan Quality Gate
+
+  ## Before Marking Any Task Complete
+
+  ### Architecture Checks
+  - [ ] No business logic in components (check: component functions < 10 lines of logic)
+  - [ ] Server Components used by default (`'use client'` only when necessary)
+  - [ ] All mutations use Server Actions (no fetch to API routes for writes)
+  - [ ] All text uses `t()` from next-intl (no hardcoded Norwegian or English strings)
+  - [ ] Dark mode works: check `dark:` variants on all new components
+  - [ ] Responsive: test at 640px (mobile) and 1024px (desktop)
+
+  ### Nutrition Accuracy
+  - [ ] Plate model scores sum to 1.0
+  - [ ] 8-om-dagen counter does NOT count potatoes as vegetables
+  - [ ] 8-om-dagen counter limits juice to 1 serving max
+  - [ ] Fish tracker counts isFishMeal correctly per week (Mon-Sun)
+  - [ ] Serving size calculations use the correct grams (see norsk-ernaering skill)
+  - [ ] Whole grain check: only "grovt"/"fullkorn" items count for the 3 grain servings
+
+  ### Budget Correctness
+  - [ ] All amounts calculated in øre (integers), displayed in kr (formatted)
+  - [ ] NOK formatting uses `Intl.NumberFormat('nb-NO')` with comma decimal
+  - [ ] Budget progress bar colors match thresholds (0-70% green, 70-90% amber, 90%+ red)
+  - [ ] Recurring expenses appear correctly in each new month
+  - [ ] Weekly grocery cost feeds into "Mat og drikke" category
+
+  ### Calendar Correctness
+  - [ ] Week starts on Monday (not Sunday)
+  - [ ] Week numbers are ISO 8601 compliant
+  - [ ] Date format is dd.mm.yyyy in Norwegian, locale-appropriate in English
+  - [ ] 24-hour time format in Norwegian locale
+  - [ ] Norwegian holidays are marked
+
+  ### Scraper Resilience
+  - [ ] Rate limiting: minimum 2 seconds between requests
+  - [ ] Graceful degradation when scraper fails (show last known prices)
+  - [ ] Price parsing handles Norwegian number format (comma as decimal)
+  - [ ] Price stored as integer øre, not float
+
+  ### i18n Completeness
+  - [ ] All new strings added to BOTH nb.json and en.json
+  - [ ] No hardcoded text in any component
+  - [ ] Date/number formatting is locale-aware
+  - [ ] Language switcher works without page reload issues
+
+  ### Accessibility
+  - [ ] All images/SVGs have alt text or aria-label
+  - [ ] Color-only indicators have a text/icon alternative
+  - [ ] Interactive elements are keyboard-navigable
+  - [ ] Contrast ratio ≥ 4.5:1 for all text
+
+  ### Common AI Mistakes in This Codebase
+  - Forgetting `'use server'` on Server Actions
+  - Using `useState` for data that should come from the server
+  - Hardcoding "kr" instead of using Intl formatter
+  - Using `new Date().getDay()` which returns 0 for Sunday (Norwegian week starts Monday)
+  - Calculating with floats instead of integer øre
+  - Forgetting to add both nb.json and en.json keys for new text
+
+  ## After Every Session
+  Ask: "What mistakes did we fix today that aren't in this QA skill yet?"
+  Add new entries to the checklist above.

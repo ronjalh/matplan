@@ -1,0 +1,90 @@
+name: budsjett-logikk
+description: Budget calculation patterns, Norwegian expense categories, NOK formatting, and SIFO reference budgets
+version: 1.0.0
+tags: [budget, finance, calculations, norwegian]
+
+instructions: |
+  # Budsjett — Budget Logic
+
+  ## Budget Structure
+  The app tracks two levels:
+  1. **Food budget** — derived from meal plans + Oda prices
+  2. **Total household budget** — food + all other expense categories
+
+  ## Default Norwegian Budget Categories
+  Based on SIFO (Statens institutt for forbruksforskning) reference budget structure:
+
+  | Category (nb)        | Category (en)         | Type     | Icon     |
+  |----------------------|-----------------------|----------|----------|
+  | Mat og drikke        | Food and beverages    | Variable | Cart     |
+  | Bolig og energi      | Housing and energy    | Fixed    | Home     |
+  | Transport            | Transport             | Mixed    | Car      |
+  | Klær og sko          | Clothing and shoes    | Variable | Shirt    |
+  | Helse og hygiene     | Health and hygiene    | Variable | Heart    |
+  | Fritid og kultur     | Leisure and culture   | Variable | Music    |
+  | Kommunikasjon        | Communication         | Fixed    | Phone    |
+  | Barnehage/SFO        | Childcare             | Fixed    | Baby     |
+  | Forsikringer         | Insurance             | Fixed    | Shield   |
+  | Sparing              | Savings               | Fixed    | PiggyBank|
+  | Annet                | Other                 | Variable | More     |
+
+  ## Calculation Rules
+
+  ### Weekly Food Cost
+  ```
+  weeklyFoodCost = sum(
+    for each meal in weekMealPlan:
+      for each ingredient in meal.recipe.ingredients:
+        ingredient.quantity * bestAvailableUnitPrice(ingredient)
+  )
+  ```
+  `bestAvailableUnitPrice` priority:
+  1. Linked Oda product price (if fresh, scraped within 7 days)
+  2. Last known Oda price (if older)
+  3. User-entered manual price
+  4. Category average (fallback)
+
+  ### Monthly Budget Summary
+  ```
+  monthlySpent[category] = sum of budgetEntries for category in current month
+  monthlyRemaining[category] = category.monthlyLimitNok - monthlySpent[category]
+  totalMonthlyBudget = sum of all category limits
+  totalMonthlySpent = sum of all category entries
+  ```
+
+  ### Budget Status
+  | Ratio (spent/limit) | Status  | Color          |
+  |---------------------|---------|----------------|
+  | 0–0.70              | OK      | --color-success|
+  | 0.70–0.90           | Warning | --color-warning|
+  | 0.90–1.00           | Near    | --color-warning|
+  | > 1.00              | Over    | --color-error  |
+
+  ## NOK Formatting
+  - Currency: Norwegian krone (NOK)
+  - Display format: `kr 1 234,50` (space as thousands separator, comma as decimal)
+  - Always show 2 decimal places for amounts
+  - Use `Intl.NumberFormat('nb-NO', { style: 'currency', currency: 'NOK' })`
+  - In English locale: `NOK 1,234.50`
+  - Negative amounts: `- kr 234,50` (not parentheses)
+
+  ## Recurring Expenses
+  - Users can mark budget entries as recurring (monthly)
+  - Recurring entries auto-populate each month
+  - recurrenceRule: "monthly" | "biweekly" | "weekly" | null
+  - Recurring entries are shown as faded/muted until confirmed for the current month
+
+  ## SIFO Reference Budget (for comparison)
+  Useful for showing users how their budget compares to national averages.
+  Reference: SIFO referansebudsjettet (updated annually by OsloMet/SIFO)
+  - Single adult: ~kr 10,800/month (food: ~kr 3,200)
+  - Couple: ~kr 18,500/month (food: ~kr 5,600)
+  - Family with 2 children: ~kr 28,000/month (food: ~kr 8,400)
+  Note: These are approximate 2025 figures. Update if newer data available.
+
+  ## Rules
+  - NEVER display amounts without proper NOK formatting
+  - NEVER calculate totals with floating point — use integer øre (1 kr = 100 øre) internally
+  - ALWAYS round display values to 2 decimal places
+  - ALWAYS show budget status color coding on progress bars
+  - Weekly grocery cost automatically feeds into "Mat og drikke" category

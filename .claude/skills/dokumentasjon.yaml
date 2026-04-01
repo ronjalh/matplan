@@ -1,0 +1,147 @@
+name: dokumentasjon
+description: Documentation standards — README structure, inline comments, API docs, component docs, ADRs, and CHANGELOG conventions
+version: 1.0.0
+tags: [documentation, docs, adr, changelog]
+
+instructions: |
+  # Dokumentasjon — Documentation Standards
+
+  ## Documentation Types
+
+  ### 1. README.md (Project Root)
+  Structure:
+  ```markdown
+  # Matplan 🥗
+  One-line description.
+
+  ## Features
+  Bullet list of key features.
+
+  ## Getting Started
+  ### Prerequisites
+  ### Installation
+  ### Running
+  `npm run dev` → http://localhost:3000
+
+  ## Tech Stack
+  Table of technologies.
+
+  ## Project Structure
+  Brief directory overview.
+
+  ## Screenshots
+  (Added after MVP)
+  ```
+
+  ### 2. CLAUDE.md (SDD Project Navigation)
+  The first thing Claude reads. Must contain:
+  - Project overview and purpose
+  - Architecture (brief)
+  - Key conventions and constraints
+  - Test strategy (how to run, what to verify)
+  - Links to skills in `.claude/skills/`
+  - Current state and known issues
+
+  ### 3. LEARNINGS.md (Continuous Learning Log)
+  Format:
+  ```markdown
+  ## yyyy-mm-dd
+  - **Discovery:** What was found
+    **Pattern:** What we do about it going forward
+  - **AI mistake:** What Claude got wrong
+    **Added to:** qa-matplan.yaml
+  ```
+
+  ### 4. CHANGELOG.md (Keep a Changelog format)
+  ```markdown
+  # Changelog
+
+  ## [Unreleased]
+  ### Added
+  - Feature X
+
+  ### Changed
+  - Updated Y
+
+  ### Fixed
+  - Bug in Z
+  ```
+  Follow https://keepachangelog.com/en/1.1.0/
+
+  ### 5. Architecture Decision Records (docs/architecture.md)
+  ADR format per decision:
+  ```markdown
+  ### ADR-001: SQLite over PostgreSQL
+  **Date:** 2026-04-01
+  **Status:** Accepted
+  **Context:** This is a local single-user app. PostgreSQL requires...
+  **Decision:** Use SQLite via Drizzle ORM.
+  **Consequences:** Simple setup, single file. Cannot scale to multi-user without migration.
+  ```
+
+  ### 6. Design System Documentation (docs/design-system.md)
+  - Color swatches with hex values and usage
+  - Typography samples
+  - Component gallery (if generated)
+  - Spacing and layout rules
+
+  ### 7. Data Model Documentation (docs/data-model.md)
+  - Table descriptions with column types
+  - Relationships (foreign keys)
+  - ER diagram (Mermaid syntax for auto-rendering)
+
+  ### 8. knowledge.yaml (KCP Manifest)
+  ```yaml
+  version: "0.5"
+  project:
+    name: matplan
+    description: Norwegian meal planning and budgeting web app
+  knowledge:
+    - path: CLAUDE.md
+      intent: Project overview and conventions
+    - path: .claude/skills/
+      intent: Domain skills for AI-assisted development
+    - path: docs/
+      intent: Architecture decisions and design documentation
+  ```
+
+  ## Inline Code Documentation
+
+  ### When to Comment
+  - **WHY**, not what — code shows what, comments explain decisions
+  - Non-obvious business rules: `// Potatoes don't count for 8-om-dagen (Helsedirektoratet)`
+  - Workarounds: `// Oda's price element is nested inside a shadow DOM; we need to...`
+  - Magic numbers: `// 130g = 1 serving for medium fruit (Helsedirektoratet standard)`
+
+  ### When NOT to Comment
+  - Self-explanatory code: `const total = items.reduce((sum, i) => sum + i.price, 0);`
+  - Type definitions (TypeScript types document themselves)
+  - Standard patterns (React hooks, Drizzle queries)
+
+  ### Component Documentation
+  ```tsx
+  /**
+   * Displays the plate model (tallerkensmodellen) as an SVG donut chart.
+   * Shows the proportion of vegetables, carbohydrates, and protein in a meal.
+   *
+   * @param score - Object with vegetable, carbohydrate, protein ratios (sum = 1.0)
+   * @param size - Diameter in pixels (default: 200)
+   */
+  export function PlateModel({ score, size = 200 }: PlateModelProps) {
+  ```
+
+  ## Language Policy
+  - **Technical docs** (README, architecture, API): English
+  - **User-facing text**: Norwegian (via i18n)
+  - **Code comments**: English
+  - **Commit messages**: English
+  - **LEARNINGS.md**: Norwegian or English (whatever is natural)
+  - **Skill files**: English (for consistency with SDD methodology)
+
+  ## Rules
+  - EVERY non-obvious decision gets an ADR entry
+  - LEARNINGS.md updated after every session where something was learned
+  - CHANGELOG.md updated with every feature/fix
+  - knowledge.yaml updated at each milestone
+  - NEVER write documentation for the sake of documentation — it must serve a reader
+  - Keep CLAUDE.md under 200 lines — it's a navigation guide, not a novel

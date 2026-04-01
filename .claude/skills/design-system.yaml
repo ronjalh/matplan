@@ -1,0 +1,72 @@
+name: design-system
+description: Color palette, typography, spacing, and visual rules for consistent Matplan UI across all sessions
+version: 1.0.0
+tags: [design, ui, tailwind, theming]
+
+instructions: |
+  # Matplan — Design System
+
+  ## Color Palette
+
+  ### Light Mode
+  | Role          | Name       | Hex       | Tailwind var          | Usage                          |
+  |---------------|------------|-----------|-----------------------|--------------------------------|
+  | Primary       | Sage       | #7C9A7E   | --color-primary       | Buttons, links, active states  |
+  | Primary hover | Forest     | #5A7A5C   | --color-primary-dark  | Hover states                   |
+  | Background    | Cream      | #FAF7F2   | --color-bg            | Page background                |
+  | Surface       | White      | #FFFFFF   | --color-surface       | Cards, dialogs                 |
+  | Accent        | Terracotta | #C27B5A   | --color-accent        | Highlights, CTAs               |
+  | Text primary  | Charcoal   | #2D3436   | --color-text          | Body text                      |
+  | Text secondary| Slate      | #636E72   | --color-text-muted    | Labels, captions               |
+  | Success       | Green      | #6ABF69   | --color-success       | Goals met, positive            |
+  | Warning       | Amber      | #E8A838   | --color-warning       | Near limits                    |
+  | Error         | Coral      | #E17055   | --color-error         | Over budget, missing           |
+  | Fish          | Ocean      | #4A90A4   | --color-fish          | Fish meal indicators           |
+  | Border        | Mist       | #E2DDD5   | --color-border        | Card borders, dividers         |
+
+  ### Dark Mode
+  | Role          | Hex       | Notes                              |
+  |---------------|-----------|------------------------------------|
+  | Background    | #1A1D1E   | Warm dark, not pure black          |
+  | Surface       | #2A2D2E   | Cards, elevated surfaces           |
+  | Primary       | #8FB891   | Lighter sage for dark bg contrast  |
+  | Text primary  | #E8E4DE   | Warm off-white                     |
+  | Text secondary| #9CA3A6   | Muted for dark                     |
+  | Border        | #3A3D3E   | Subtle dividers                    |
+
+  All other semantic colors (success, warning, error, accent) stay the same — they already have sufficient contrast on dark backgrounds.
+
+  ## Typography
+  - **Body:** Inter (variable), loaded via `next/font/google`
+  - **Headings (h1, h2 only):** Fraunces (variable), for warmth and personality
+  - **Scale:** 14px caption / 16px body / 18px body-lg / 20px h3 / 24px h2 / 32px h1 / 40px display
+  - **Line height:** 1.5 body, 1.2 headings
+  - **Weight:** 400 body, 500 emphasis, 600 headings
+
+  ## Spacing
+  - Base unit: 4px
+  - Standard paddings: 8px (sm), 12px (md), 16px (lg), 24px (xl), 32px (2xl)
+  - Card padding: 16px
+  - Section gap: 24px
+  - Page margin: 16px mobile, 32px desktop
+
+  ## Component Conventions
+  - **Cards:** `rounded-lg shadow-sm border border-border p-4`
+  - **Buttons (primary):** `bg-primary text-white rounded-md px-4 py-2 hover:bg-primary-dark`
+  - **Buttons (secondary):** `border border-primary text-primary rounded-md px-4 py-2`
+  - **Input fields:** `border border-border rounded-md px-3 py-2 focus:ring-2 focus:ring-primary/30`
+  - **Badges:** `rounded-full px-2 py-0.5 text-xs font-medium`
+  - **Minimum touch target:** 44x44px on all interactive elements
+
+  ## Responsiveness
+  - Mobile-first: write for mobile, add `md:` and `lg:` breakpoints
+  - Breakpoints: 640px (sm), 768px (md), 1024px (lg), 1280px (xl)
+  - Navigation: bottom tab bar on mobile, sidebar on desktop
+  - Calendar: day view on mobile, week view on desktop
+
+  ## Rules
+  - NEVER use colors outside the palette — all colors come from CSS variables
+  - NEVER use arbitrary Tailwind values (e.g., `text-[#abc123]`) — use semantic tokens
+  - ALWAYS ensure 4.5:1 contrast ratio (WCAG AA) for text on backgrounds
+  - ALWAYS use the 4px spacing scale — no odd pixel values
+  - Card content follows a consistent hierarchy: icon/image → title → body → actions

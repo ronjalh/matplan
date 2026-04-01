@@ -1,0 +1,102 @@
+name: oppskrift-domene
+description: Recipe structure, Norwegian measurement units, portion scaling, nutrition calculation per serving, and tagging conventions
+version: 1.0.0
+tags: [recipe, domain, ingredients, nutrition]
+
+instructions: |
+  # Oppskrift — Recipe Domain
+
+  ## Recipe Structure
+  A recipe contains:
+  - **name:** Recipe title in Norwegian (e.g., "Laksemiddag med ovnsbakte grønnsaker")
+  - **description:** Short description (1-2 sentences)
+  - **servings:** Number of portions (default 4 — typical Norwegian family)
+  - **prepTimeMinutes:** Preparation + cooking time
+  - **instructions:** Step-by-step in markdown
+  - **tags:** Array of food tags
+  - **ingredients:** Array of { ingredientId, quantity, unit }
+
+  ## Norwegian Measurement Units
+  | Unit     | Full Name (nb)  | Full Name (en) | Typical Use           |
+  |----------|-----------------|----------------|-----------------------|
+  | ss       | spiseskje       | tablespoon     | Sauces, spices        |
+  | ts       | teskje          | teaspoon       | Spices, baking powder |
+  | dl       | desiliter       | deciliter      | Liquids, flour, rice  |
+  | l        | liter           | liter          | Large quantities      |
+  | g        | gram            | gram           | Precise weights       |
+  | kg       | kilogram        | kilogram       | Large weights         |
+  | stk      | stykk           | piece          | Whole items           |
+  | pk       | pakke           | package        | Pre-packaged items    |
+  | bx       | boks            | can/tin        | Canned goods          |
+  | fedd     | fedd            | clove          | Garlic                |
+  | kvast    | kvast           | sprig          | Herbs                 |
+
+  **Norwegian convention:** Recipes in Norway predominantly use deciliters (dl) for dry ingredients like flour, sugar, oats — NOT cups. This is different from American recipes.
+
+  ## Portion Scaling
+  When user changes serving count from recipe default:
+  ```
+  scaledQuantity = originalQuantity * (desiredServings / recipeServings)
+  ```
+  Round to sensible precision:
+  - Whole items (stk): round to nearest integer
+  - Spoons (ss, ts): round to nearest 0.5
+  - Volume (dl, l): round to nearest 0.25 dl
+  - Weight (g): round to nearest 10g; (kg): round to nearest 0.1 kg
+
+  ## Nutrition Calculation Per Serving
+
+  ### Plate Model Score
+  ```
+  For each ingredient in recipe:
+    classify by plateModelCategory (vegetable, carbohydrate, protein)
+    sum weights per category
+
+  totalWeight = sum of all ingredient weights
+  vegetableRatio = vegetableWeight / totalWeight
+  carbRatio = carbWeight / totalWeight
+  proteinRatio = proteinWeight / totalWeight
+  ```
+
+  ### 8-om-dagen Servings
+  ```
+  For each ingredient where category in (grønnsaker, frukt, bær, fullkorn):
+    servings += ingredient.gramsPerServing / portionSizeGrams
+  eightADayPerServing = totalServings / recipe.servings
+  ```
+
+  ### Fish Meal Detection
+  ```
+  isFishMeal = any ingredient where category == 'fisk'
+  ```
+
+  ## Tagging Conventions
+  | Tag (nb)         | Tag (en)         | Meaning                        |
+  |------------------|------------------|--------------------------------|
+  | fisk             | fish             | Contains fish/seafood          |
+  | vegetar          | vegetarian       | No meat or fish                |
+  | vegan            | vegan            | No animal products             |
+  | rask             | quick            | Under 30 minutes               |
+  | hverdagsmat      | everyday         | Simple weekday meals           |
+  | helgekos         | weekend          | More elaborate, weekend food   |
+  | matpakke         | packed-lunch     | Suitable for lunch boxes       |
+  | barnevennlig     | kid-friendly     | Children typically enjoy this  |
+  | tradisjonsmat    | traditional      | Traditional Norwegian food     |
+  | i-sesong         | in-season        | Uses primarily seasonal items  |
+  | billig           | budget           | Budget-friendly                |
+  | festmat          | celebration      | Special occasions              |
+  | fryservennlig    | freezer-friendly | Can be batch-cooked and frozen |
+
+  ## Recipe Instructions Format
+  - Numbered steps in markdown
+  - Each step is one action (don't combine "chop onions and fry them")
+  - Temperature in Celsius (Norwegian standard): "Sett ovnen på 200°C"
+  - Times in minutes: "Stek i 15 minutter"
+
+  ## Rules
+  - ALWAYS use Norwegian measurement conventions (dl for dry, not cups)
+  - ALWAYS scale ingredients when serving count changes
+  - Round scaled quantities to sensible precision (not "2.6667 stk egg")
+  - Plate model score MUST sum to 1.0
+  - Temperature is ALWAYS Celsius
+  - Tags use Norwegian names in nb locale, English in en locale

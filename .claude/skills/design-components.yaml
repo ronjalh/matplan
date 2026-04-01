@@ -1,0 +1,116 @@
+name: design-components
+description: Reusable component patterns, icons, badges, empty states, and visual building blocks for Matplan
+version: 1.0.0
+tags: [design, components, icons, patterns]
+
+instructions: |
+  # Matplan — Design Components
+
+  ## Icon System
+  Use Lucide React icons as the base set. Custom icons only when Lucide lacks a specific food/nutrition concept.
+
+  ### Standard Icon Mappings
+  | Concept            | Lucide Icon        | Context Color      |
+  |--------------------|--------------------|--------------------|
+  | Frokost (breakfast)| `Sunrise`          | --color-warning    |
+  | Lunsj (lunch)      | `Sun`              | --color-primary    |
+  | Middag (dinner)    | `Sunset`           | --color-accent     |
+  | Kveldsmat (supper) | `Moon`             | --color-text-muted |
+  | Fish meal          | `Fish`             | --color-fish       |
+  | Vegetables         | `Leaf`             | --color-success    |
+  | Fruit              | `Apple`            | --color-error (red)|
+  | Grains/carbs       | `Wheat`            | --color-warning    |
+  | Dairy              | `Milk`             | --color-text-muted |
+  | Meat/protein       | `Drumstick`        | --color-accent     |
+  | Recipe             | `ChefHat`          | --color-primary    |
+  | Calendar           | `Calendar`         | --color-primary    |
+  | Activity/event     | `Activity`         | --color-fish       |
+  | Appointment        | `Clock`            | --color-accent     |
+  | Reminder           | `Bell`             | --color-warning    |
+  | Exercise/training  | `Dumbbell`         | --color-success    |
+  | Budget             | `Wallet`           | --color-primary    |
+  | Shopping list      | `ShoppingCart`     | --color-primary    |
+  | In season          | `Sprout`           | --color-success    |
+  | Out of season      | `Snowflake`        | --color-text-muted |
+  | Settings           | `Settings`         | --color-text-muted |
+  | Language toggle    | `Globe`            | --color-text-muted |
+  | Theme toggle       | `SunMoon`          | --color-text-muted |
+
+  ## Card Patterns
+
+  ### Meal Card
+  ```
+  ┌─────────────────────────────┐
+  │ 🌅 Frokost                  │  ← meal type icon + label
+  │ Havregrøt med blåbær        │  ← recipe name
+  │ ●●●○ 8/dag: 2 porsjoner    │  ← 8-a-day mini indicator
+  │ 🐟 ◻ Tallerken: ✓          │  ← fish badge + plate model badge
+  │                    kr 24,50  │  ← estimated cost (right-aligned)
+  └─────────────────────────────┘
+  ```
+
+  ### Recipe Card
+  ```
+  ┌─────────────────────────────┐
+  │ [optional image]            │
+  │ Laksemiddag med grønnsaker  │  ← title
+  │ 👤 4 porsjoner · ⏱ 30 min  │  ← servings + time
+  │ 🐟 Fisk · 🌿 I sesong      │  ← tags as badges
+  │ 🟢🟡🟠 Tallerkensmodell    │  ← plate model mini (3 dots)
+  │                    kr 89,00  │  ← cost per serving
+  └─────────────────────────────┘
+  ```
+
+  ### Budget Category Card
+  ```
+  ┌─────────────────────────────┐
+  │ 🛒 Matvarer                 │  ← icon + category name
+  │ ████████░░ kr 3 200 / 4 000│  ← progress bar + amounts
+  │ Gjenstår: kr 800            │  ← remaining (green/amber/red)
+  └─────────────────────────────┘
+  ```
+
+  ### Event Card (Calendar)
+  ```
+  ┌─ colored left border ───────┐
+  │ 14:00 - 15:00               │  ← time range
+  │ 🏋️ Trening                  │  ← icon + title
+  │ Styrketrening på SATS       │  ← description (optional)
+  └─────────────────────────────┘
+  ```
+
+  ## Badge Patterns
+  | Badge Type      | Style                                        | Example          |
+  |-----------------|----------------------------------------------|------------------|
+  | Nutrition OK    | `bg-success/10 text-success`                 | ✓ 8/dag          |
+  | Nutrition warn  | `bg-warning/10 text-warning`                 | 5/8 porsjoner    |
+  | Nutrition miss  | `bg-error/10 text-error`                     | ✗ Mangler fisk   |
+  | Fish meal       | `bg-fish/10 text-fish`                       | 🐟 Fiskemåltid   |
+  | In season       | `bg-success/10 text-success`                 | 🌱 I sesong      |
+  | Out of season   | `bg-muted/10 text-muted`                     | ❄ Import         |
+  | Budget OK       | `bg-success/10 text-success`                 | Under budsjett   |
+  | Budget warning  | `bg-warning/10 text-warning`                 | Nærmer seg       |
+  | Budget over     | `bg-error/10 text-error`                     | Over budsjett    |
+
+  ## Empty States
+  Every list/view needs an empty state with:
+  1. A relevant illustration or large icon (muted color)
+  2. A short heading explaining the empty state
+  3. A primary action button to add the first item
+
+  Examples:
+  - Empty meal plan: `Calendar` icon + "Ingen måltider planlagt" + "Legg til måltid"
+  - Empty recipes: `ChefHat` icon + "Ingen oppskrifter ennå" + "Opprett oppskrift"
+  - Empty shopping list: `ShoppingCart` icon + "Handlelisten er tom" + "Generer fra ukesplan"
+
+  ## Loading States
+  - Use skeleton screens (animated `bg-muted rounded` blocks) matching card layouts
+  - Never use spinners for page content — only for small inline actions
+  - Skeleton cards should match the exact dimensions of real cards
+
+  ## Rules
+  - ALWAYS use the icon mapping above — don't pick random Lucide icons
+  - ALWAYS include an empty state for every list view
+  - ALWAYS show loading skeletons during data fetching
+  - NEVER mix icon styles — Lucide only, consistent stroke width
+  - Cards follow the patterns above — same structure, same hierarchy

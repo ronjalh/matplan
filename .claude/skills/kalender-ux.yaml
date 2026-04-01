@@ -1,0 +1,80 @@
+name: kalender-ux
+description: Universal calendar UX — meals + activities + events in day/week/month views with Norwegian conventions
+version: 1.0.0
+tags: [calendar, ux, interaction, planning]
+
+instructions: |
+  # Kalender — Universal Calendar UX
+
+  ## Calendar Scope
+  This is NOT just a meal planner calendar. It is a **universal calendar** that displays:
+  1. **Meals** (from mealPlan table) — frokost, lunsj, middag, kveldsmat
+  2. **Activities** — trening, hobbyer, etc.
+  3. **Appointments** — avtaler, møter
+  4. **Reminders** — påminnelser
+  5. **Custom events** — birthdays, holidays, etc.
+
+  Meals are special: they show nutrition badges (plate model, 8-om-dagen, fish indicator). Other events are generic.
+
+  ## Views
+
+  ### Day View (Dagvisning)
+  - Primary view on mobile
+  - **Timeline layout:** vertical time axis (06:00–23:00)
+  - Meals appear in their standard time slots:
+    - Frokost: 07:00–09:00
+    - Lunsj: 11:00–13:00
+    - Middag: 16:00–18:00
+    - Kveldsmat: 20:00–21:00
+  - Other events appear at their scheduled times
+  - **Daily summary bar** at the top: 8-om-dagen progress, fish indicator, plate model average
+  - Empty meal slots show dashed border with "+" button
+
+  ### Week View (Ukevisning)
+  - Primary view on desktop
+  - 7 columns (Monday through Sunday — **Monday start, Norwegian convention**)
+  - Each day column shows: meal cards stacked + event indicators
+  - **Week number displayed** (e.g., "Uke 14") — ISO 8601
+  - Weekly summary sidebar: 8-om-dagen average, fish count (X/2-3), total grocery cost estimate
+
+  ### Month View (Månedsvisning)
+  - Overview/planning view
+  - Compact grid: each day cell shows dots/indicators (meal count, event count)
+  - Click a day → navigates to day view
+  - Norwegian holidays highlighted (red days / "røde dager")
+
+  ## Interaction Patterns
+  - **Click empty slot** → opens "add meal" or "add event" dialog
+  - **Click existing card** → opens detail/edit view
+  - **Drag meal card** → move to another day/slot
+  - **Long press / right-click** → context menu (copy, move, delete)
+  - **"Copy day" button** → duplicate all meals from one day to another
+  - **"Repeat week" button** → copy this week's meal plan to next week
+
+  ## Norwegian Conventions
+  - Week starts on **Monday** (not Sunday)
+  - **Week numbers** (ISO 8601) are always displayed
+  - Date format: **dd.mm.yyyy** (e.g., 01.04.2026)
+  - Time format: **24-hour** (e.g., 14:30, not 2:30 PM)
+  - Norwegian holidays ("røde dager") are marked in red
+
+  ## Meal Slot Rules
+  - Each day has exactly 4 meal slots: frokost, lunsj, middag, kveldsmat
+  - A slot can hold 0 or 1 recipe (or a free-text entry)
+  - Mellommåltid (snacks) can be added as free-text without occupying a slot
+  - Each meal slot displays: recipe name + mini nutrition indicators
+
+  ## Calendar Event Types
+  | eventType    | Icon        | Default Color     | Description          |
+  |-------------|-------------|-------------------|----------------------|
+  | måltid      | (meal icon) | --color-primary   | Linked to mealPlan   |
+  | aktivitet   | Activity    | --color-fish      | Exercise, hobbies    |
+  | avtale      | Clock       | --color-accent    | Appointments         |
+  | påminnelse  | Bell        | --color-warning   | Reminders            |
+  | hendelse    | Star        | --color-text-muted| General events       |
+
+  ## Mobile Adaptations
+  - Day view: swipe left/right to navigate between days
+  - Week view: horizontal scroll with sticky "today" column
+  - Month view: tap day to navigate, no hover states
+  - Bottom sheet for adding meals/events (not full page navigation)
