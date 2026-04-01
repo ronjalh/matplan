@@ -55,8 +55,11 @@ export async function searchProducts(
   return data.data;
 }
 
+import { refineSearchQuery } from "./search-refinements";
+
 /**
  * Search and return the best match for an ingredient name.
+ * Uses search refinements to improve results (e.g., "melk" → "helmelk 1l").
  * Returns the cheapest product matching the query.
  */
 export async function findBestPrice(ingredientName: string): Promise<{
@@ -64,7 +67,10 @@ export async function findBestPrice(ingredientName: string): Promise<{
   priceOre: number;
 } | null> {
   try {
-    const products = await searchProducts(ingredientName, 5);
+    const query = refineSearchQuery(ingredientName);
+    if (!query) return null; // Skip items like "vann" (water)
+
+    const products = await searchProducts(query, 5);
     if (products.length === 0) return null;
 
     // Sort by price, return cheapest
