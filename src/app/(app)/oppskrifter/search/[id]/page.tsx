@@ -1,5 +1,4 @@
 import { getRecipeDetails } from "@/recipe-api/spoonacular";
-import { translateIngredient } from "@/data/ingredient-translations";
 import { convertToNorwegian, formatMeasurement } from "@/lib/unit-conversion/convert";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,12 +29,10 @@ export default async function SpoonacularPreviewPage({
     const amount = metric?.amount ?? ing.amount;
     const unit = metric?.unitShort ?? ing.unit;
     const converted = convertToNorwegian(amount, unit);
-    const { norwegian, wasTranslated } = translateIngredient(ing.name);
     const display = formatMeasurement(converted.quantity, converted.unit, converted.approximate);
     return {
-      display: `${display} ${norwegian}`,
+      display: `${display} ${ing.name}`,
       original: ing.original,
-      wasTranslated,
     };
   }) ?? [];
 
@@ -85,16 +82,13 @@ export default async function SpoonacularPreviewPage({
       {convertedIngredients.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Ingredienser (norske mål)</CardTitle>
+            <CardTitle className="text-base">Ingredients</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-1">
               {convertedIngredients.map((ing, i) => (
-                <li key={i} className="text-sm py-1 border-b border-border last:border-0 flex justify-between">
-                  <span>{ing.display}</span>
-                  {!ing.wasTranslated && (
-                    <span className="text-xs text-muted-foreground italic">ikke oversatt</span>
-                  )}
+                <li key={i} className="text-sm py-1 border-b border-border last:border-0">
+                  {ing.display}
                 </li>
               ))}
             </ul>
