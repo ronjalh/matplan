@@ -19,20 +19,22 @@ export default async function DashboardPage() {
       </div>
 
       {/* Explore recipes */}
-      <Link href="/oppskrifter?tab=utforsk">
-        <Card className="hover:border-primary/50 hover:shadow-md transition-all cursor-pointer bg-primary/5">
-          <CardContent className="flex items-center gap-4 py-4">
-            <div className="rounded-full bg-primary/10 p-3">
-              <Compass className="w-6 h-6 text-primary" />
+      <Link href="/oppskrifter?tab=utforsk" className="block group">
+        <div className="relative overflow-hidden rounded-xl border-2 border-primary/20 bg-gradient-to-r from-primary/10 to-primary/5 p-5 transition-all group-hover:border-primary/50 group-hover:shadow-lg group-hover:scale-[1.01]">
+          <div className="flex items-center gap-4">
+            <div className="rounded-full bg-primary/15 p-3 transition-colors group-hover:bg-primary/25">
+              <Compass className="w-7 h-7 text-primary transition-transform group-hover:rotate-45" />
             </div>
             <div>
-              <p className="font-medium">Utforsk oppskrifter</p>
+              <p className="text-lg font-semibold group-hover:text-primary transition-colors">
+                Utforsk oppskrifter
+              </p>
               <p className="text-sm text-muted-foreground">
-                Søk blant 685 000+ internasjonale oppskrifter
+                Søk blant 685 000+ internasjonale oppskrifter — vegetar, indisk, italiensk og mer
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </Link>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
