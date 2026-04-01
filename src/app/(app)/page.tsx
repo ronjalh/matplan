@@ -38,11 +38,13 @@ export default async function DashboardPage() {
       </Link>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Link href="/kalender">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
+        <Link href="/kalender" className="block group">
+          <Card className="h-full transition-all group-hover:border-primary/50 group-hover:shadow-lg group-hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
-              <Calendar className="w-5 h-5 text-primary" />
-              <CardTitle className="text-base">Kalender</CardTitle>
+              <div className="rounded-full bg-primary/10 p-2 transition-colors group-hover:bg-primary/20">
+                <Calendar className="w-5 h-5 text-primary" />
+              </div>
+              <CardTitle className="text-base group-hover:text-primary transition-colors">Kalender</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
@@ -52,11 +54,13 @@ export default async function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/oppskrifter">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
+        <Link href="/oppskrifter" className="block group">
+          <Card className="h-full transition-all group-hover:border-primary/50 group-hover:shadow-lg group-hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
-              <ChefHat className="w-5 h-5 text-primary" />
-              <CardTitle className="text-base">Oppskrifter</CardTitle>
+              <div className="rounded-full bg-primary/10 p-2 transition-colors group-hover:bg-primary/20">
+                <ChefHat className="w-5 h-5 text-primary" />
+              </div>
+              <CardTitle className="text-base group-hover:text-primary transition-colors">Oppskrifter</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
@@ -66,11 +70,13 @@ export default async function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/handleliste">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
+        <Link href="/handleliste" className="block group">
+          <Card className="h-full transition-all group-hover:border-primary/50 group-hover:shadow-lg group-hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
-              <ShoppingCart className="w-5 h-5 text-primary" />
-              <CardTitle className="text-base">Handleliste</CardTitle>
+              <div className="rounded-full bg-primary/10 p-2 transition-colors group-hover:bg-primary/20">
+                <ShoppingCart className="w-5 h-5 text-primary" />
+              </div>
+              <CardTitle className="text-base group-hover:text-primary transition-colors">Handleliste</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
@@ -80,11 +86,13 @@ export default async function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/budsjett">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
+        <Link href="/budsjett" className="block group">
+          <Card className="h-full transition-all group-hover:border-[var(--color-warning)]/50 group-hover:shadow-lg group-hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
-              <Wallet className="w-5 h-5 text-primary" />
-              <CardTitle className="text-base">Budsjett</CardTitle>
+              <div className="rounded-full bg-[var(--color-warning)]/10 p-2 transition-colors group-hover:bg-[var(--color-warning)]/20">
+                <Wallet className="w-5 h-5 text-[var(--color-warning)]" />
+              </div>
+              <CardTitle className="text-base group-hover:text-[var(--color-warning)] transition-colors">Budsjett</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
@@ -94,11 +102,13 @@ export default async function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/sesong">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
+        <Link href="/sesong" className="block group">
+          <Card className="h-full transition-all group-hover:border-[var(--color-success)]/50 group-hover:shadow-lg group-hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
-              <Sprout className="w-5 h-5 text-[var(--color-success)]" />
-              <CardTitle className="text-base">I sesong</CardTitle>
+              <div className="rounded-full bg-[var(--color-success)]/10 p-2 transition-colors group-hover:bg-[var(--color-success)]/20">
+                <Sprout className="w-5 h-5 text-[var(--color-success)]" />
+              </div>
+              <CardTitle className="text-base group-hover:text-[var(--color-success)] transition-colors">I sesong</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
