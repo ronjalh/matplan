@@ -1,0 +1,118 @@
+"use client";
+
+import { useState } from "react";
+import { updateSettings } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ShoppingCart, Leaf, Save, Loader2 } from "lucide-react";
+
+interface Settings {
+  priceProvider: string;
+  dietaryPreference: string;
+  theme: string;
+}
+
+export function SettingsForm({ settings }: { settings: Settings | null | undefined }) {
+  const [pending, setPending] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function handleSubmit(formData: FormData) {
+    if (pending) return;
+    setPending(true);
+    setSaved(false);
+    await updateSettings(formData);
+    setPending(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <form action={handleSubmit} className="space-y-4">
+      {/* Price provider */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ShoppingCart className="w-4 h-4" />
+            Priskilde
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Velg hvor prisene i handlelisten hentes fra.
+          </p>
+          <div className="space-y-2">
+            <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-muted/50 transition-colors">
+              <input
+                type="radio"
+                name="priceProvider"
+                value="kassalapp"
+                defaultChecked={settings?.priceProvider !== "oda"}
+                className="mt-1"
+              />
+              <div>
+                <p className="font-medium text-sm">Kassalapp (anbefalt)</p>
+                <p className="text-xs text-muted-foreground">
+                  Priser fra alle butikker — Rema, Kiwi, Coop, Meny, Oda og flere. Prissammenligning inkludert.
+                </p>
+              </div>
+            </label>
+            <label className="flex items-start gap-3 rounded-md border border-border p-3 cursor-pointer hover:bg-muted/50 transition-colors">
+              <input
+                type="radio"
+                name="priceProvider"
+                value="oda"
+                defaultChecked={settings?.priceProvider === "oda"}
+                className="mt-1"
+              />
+              <div>
+                <p className="font-medium text-sm">Oda</p>
+                <p className="text-xs text-muted-foreground">
+                  Kun priser fra Oda netthandel.
+                </p>
+              </div>
+            </label>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dietary preference */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Leaf className="w-4 h-4" />
+            Kosthold
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Filtrerer oppskriftsøk og tilpasser ernæringstracking.
+          </p>
+          <select
+            name="dietaryPreference"
+            defaultValue={settings?.dietaryPreference ?? "all"}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
+            <option value="all">Ingen restriksjoner</option>
+            <option value="vegetarian">Vegetarianer</option>
+            <option value="vegan">Veganer</option>
+            <option value="pescetarian">Pescetarianer</option>
+          </select>
+        </CardContent>
+      </Card>
+
+      {/* Hidden theme field — keep current value */}
+      <input type="hidden" name="theme" value={settings?.theme ?? "system"} />
+
+      <Button type="submit" disabled={pending} className="w-full gap-2">
+        {pending ? (
+          <><Loader2 className="w-4 h-4 animate-spin" /> Lagrer...</>
+        ) : saved ? (
+          "Lagret ✓"
+        ) : (
+          <><Save className="w-4 h-4" /> Lagre innstillinger</>
+        )}
+      </Button>
+    </form>
+  );
+}

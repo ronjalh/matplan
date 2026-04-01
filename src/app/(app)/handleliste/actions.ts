@@ -8,6 +8,7 @@ import {
   recipeIngredients,
   shoppingLists,
   shoppingListItems,
+  sharedLinks,
   householdMembers,
 } from "@/db/schema";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
@@ -139,32 +140,45 @@ export async function generateShoppingList(weekStartDate?: string) {
 
   // Fetch prices from Kassalapp (best-effort, don't block on failures)
   const items = Array.from(aggregated.values());
-  const priceMap = new Map<string, number>();
+  const priceMap = new Map<string, { priceOre: number; productName: string; store: string }>();
 
   // Fetch prices in parallel (max 10 at a time to respect rate limit)
   const batchSize = 10;
   for (let i = 0; i < items.length; i += batchSize) {
     const batch = items.slice(i, i + batchSize);
-    const results = await Promise.allSettled(
+    await Promise.allSettled(
       batch.map(async (item) => {
         const result = await findBestPrice(item.name);
-        if (result) priceMap.set(item.name, result.priceOre);
+        if (result) {
+          priceMap.set(item.name, {
+            priceOre: result.priceOre,
+            productName: result.product.name,
+            store: result.product.store.name,
+          });
+        }
       })
     );
   }
 
-  // Insert aggregated items with prices
+  // Insert aggregated items with prices and product info
   if (items.length > 0) {
     await db.insert(shoppingListItems).values(
-      items.map((item) => ({
-        shoppingListId: list.id,
-        name: item.name,
-        quantity: roundQuantity(item.quantity, item.unit),
-        unit: item.unit,
-        checked: false,
-        category: guessCategory(item.name),
-        estimatedPriceOre: priceMap.get(item.name) ?? null,
-      }))
+      items.map((item) => {
+        const price = priceMap.get(item.name);
+        // Store product name + store in the name field as suffix
+        const displayName = price
+          ? `${item.name}`
+          : item.name;
+        return {
+          shoppingListId: list.id,
+          name: displayName,
+          quantity: roundQuantity(item.quantity, item.unit),
+          unit: item.unit,
+          checked: false,
+          category: guessCategory(item.name),
+          estimatedPriceOre: price?.priceOre ?? null,
+        };
+      })
     );
   }
 
@@ -192,6 +206,35 @@ export async function deleteShoppingList(listId: number) {
   await db.delete(shoppingLists).where(eq(shoppingLists.id, listId));
   revalidatePath("/handleliste");
   return { success: true };
+}
+
+export async function shareShoppingList(listId: number): Promise<{ success: true; token: string } | { success: false; error: string }> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: "Ikke logget inn" };
+
+  const householdId = await getHouseholdId();
+  const list = await db.query.shoppingLists.findFirst({
+    where: and(eq(shoppingLists.id, listId), eq(shoppingLists.householdId, householdId)),
+  });
+  if (!list) return { success: false, error: "Liste ikke funnet" };
+
+  // Generate random token
+  const token = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+
+  // Expire in 7 days
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  await db.insert(sharedLinks).values({
+    token,
+    householdId,
+    resourceType: "shoppingList",
+    resourceId: listId,
+    createdBy: session.user.id,
+    expiresAt,
+  });
+
+  return { success: true, token };
 }
 
 /** Extract ingredient name from "400 g laks" → "laks" */

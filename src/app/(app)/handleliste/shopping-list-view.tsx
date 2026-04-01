@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { generateShoppingList, toggleItem, deleteShoppingList } from "./actions";
+import { generateShoppingList, toggleItem, deleteShoppingList, shareShoppingList } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingCart, Loader2, Trash2, Check, Square, CheckSquare } from "lucide-react";
+import { ShoppingCart, Loader2, Trash2, Share2, Square, CheckSquare, Link2 } from "lucide-react";
 
 interface ShoppingListItem {
   id: number;
@@ -25,6 +25,7 @@ interface ShoppingList {
 export function ShoppingListView({ list }: { list: ShoppingList | null }) {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   async function handleGenerate() {
     if (generating) return;
@@ -122,6 +123,22 @@ export function ShoppingListView({ list }: { list: ShoppingList | null }) {
           )}
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              const result = await shareShoppingList(list.id);
+              if (result.success) {
+                const url = `${window.location.origin}/shared/${result.token}`;
+                setShareUrl(url);
+                navigator.clipboard.writeText(url);
+              }
+            }}
+            className="gap-1"
+          >
+            <Share2 className="w-4 h-4" />
+            {shareUrl ? "Kopiert!" : "Del"}
+          </Button>
           <Button variant="outline" size="sm" onClick={handleGenerate} disabled={generating}>
             {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Oppdater"}
           </Button>

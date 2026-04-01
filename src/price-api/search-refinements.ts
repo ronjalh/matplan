@@ -60,6 +60,10 @@ export const searchRefinements: Record<string, string> = {
   "sennep": "sennep idun",
   "majones": "majones mills",
 
+  // Small quantities — these are often searched with unit prefix
+  "klype salt": "jodsalt",
+  "fedd hvitløk": "hvitløk fersk",
+
   // Generic
   "vann": "", // skip — free
   "is": "", // skip — too vague
