@@ -49,6 +49,19 @@ export async function createRecipe(formData: FormData) {
   const householdId = await getHouseholdId();
 
   const name = formData.get("name") as string;
+
+  // Check for duplicate recipe name in this household
+  if (name) {
+    const existing = await db.query.recipes.findFirst({
+      where: and(
+        eq(recipes.householdId, householdId),
+        eq(recipes.name, name.trim())
+      ),
+    });
+    if (existing) {
+      throw new Error(`Du har allerede en oppskrift som heter "${name}"`);
+    }
+  }
   const description = formData.get("description") as string;
   const servings = parseInt(formData.get("servings") as string) || 4;
   const prepTimeMinutes =

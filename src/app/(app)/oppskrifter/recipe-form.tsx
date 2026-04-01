@@ -12,16 +12,18 @@ import { ChefHat } from "lucide-react";
 
 export function RecipeForm() {
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(formData: FormData) {
     if (pending) return;
     setPending(true);
+    setError(null);
     try {
       await createRecipe(formData);
       formRef.current?.reset();
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      setError(e?.message ?? "Noe gikk galt");
     } finally {
       setPending(false);
     }
@@ -114,6 +116,12 @@ export function RecipeForm() {
               rows={6}
             />
           </div>
+
+          {error && (
+            <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
+              {error}
+            </p>
+          )}
 
           <Button type="submit" disabled={pending} className="w-full">
             {pending ? "Lagrer..." : "Lagre oppskrift"}
