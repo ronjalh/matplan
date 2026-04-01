@@ -3,9 +3,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Trash2, ChevronRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Clock, Users, Trash2, ChevronRight, Search, X } from "lucide-react";
 import { deleteRecipe } from "./actions";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 
 const PAGE_SIZE = 6;
@@ -26,28 +27,119 @@ interface Recipe {
   source: string;
 }
 
+const dietFilters = [
+  { key: "all", label: "Alle" },
+  { key: "vegetarian", label: "Vegetar" },
+  { key: "vegan", label: "Vegan" },
+  { key: "glutenFree", label: "Glutenfri" },
+  { key: "dairyFree", label: "Melkefri" },
+  { key: "fish", label: "Fisk" },
+] as const;
+
 export function RecipeList({ recipes }: { recipes: Recipe[] }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const visible = recipes.slice(0, visibleCount);
-  const hasMore = visibleCount < recipes.length;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dietFilter, setDietFilter] = useState<string>("all");
+
+  const filtered = useMemo(() => {
+    let result = recipes;
+
+    // Text search
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (r) =>
+          r.name.toLowerCase().includes(q) ||
+          r.description?.toLowerCase().includes(q) ||
+          r.cuisine?.toLowerCase().includes(q)
+      );
+    }
+
+    // Diet filter
+    if (dietFilter !== "all") {
+      result = result.filter((r) => {
+        switch (dietFilter) {
+          case "vegetarian": return r.isVegetarian;
+          case "vegan": return r.isVegan;
+          case "glutenFree": return r.isGlutenFree;
+          case "dairyFree": return r.isDairyFree;
+          case "fish": return r.isFishMeal;
+          default: return true;
+        }
+      });
+    }
+
+    return result;
+  }, [recipes, searchQuery, dietFilter]);
+
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold mb-3">
-        Dine oppskrifter ({recipes.length})
-      </h2>
+    <div className="space-y-3">
+      {/* Search and filters */}
+      <div className="space-y-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(PAGE_SIZE); }}
+            placeholder="Søk i mine oppskrifter..."
+            className="pl-9 pr-8"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {dietFilters.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => { setDietFilter(f.key); setVisibleCount(PAGE_SIZE); }}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                dietFilter === f.key
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Results count */}
+      <p className="text-sm text-muted-foreground">
+        {filtered.length === recipes.length
+          ? `${recipes.length} oppskrifter`
+          : `${filtered.length} av ${recipes.length} oppskrifter`}
+      </p>
+
+      {/* Recipe cards */}
       <div className="flex flex-col gap-3">
         {visible.map((recipe) => (
           <RecipeCard key={recipe.id} recipe={recipe} />
         ))}
       </div>
+
+      {filtered.length === 0 && (
+        <p className="text-center text-muted-foreground py-8">
+          Ingen oppskrifter matcher filteret.
+        </p>
+      )}
+
       {hasMore && (
         <Button
           variant="outline"
-          className="w-full mt-4"
+          className="w-full"
           onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
         >
-          Vis flere ({recipes.length - visibleCount} gjenstår)
+          Vis flere ({filtered.length - visibleCount} gjenstår)
         </Button>
       )}
     </div>
@@ -66,7 +158,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
   }
 
   return (
-    <Link href={`/oppskrifter/${recipe.id}`} className="block">
+    <Link href={`/oppskrifter/${recipe.id}`} className="block group">
       <Card className="group hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
@@ -122,14 +214,11 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
                 Fisk
               </Badge>
             )}
-            {recipe.isGlutenFree && (
-              <Badge variant="outline">Glutenfri</Badge>
-            )}
-            {recipe.isDairyFree && (
-              <Badge variant="outline">Melkefri</Badge>
-            )}
-            {recipe.isNutFree && (
-              <Badge variant="outline">Nøttefri</Badge>
+            {recipe.isGlutenFree && <Badge variant="outline">Glutenfri</Badge>}
+            {recipe.isDairyFree && <Badge variant="outline">Melkefri</Badge>}
+            {recipe.isNutFree && <Badge variant="outline">Nøttefri</Badge>}
+            {recipe.source === "spoonacular" && (
+              <Badge variant="outline" className="text-xs">Importert</Badge>
             )}
           </div>
         </CardContent>
