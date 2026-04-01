@@ -6,16 +6,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ChefHat } from "lucide-react";
 
 export function RecipeForm({ onSuccess }: { onSuccess?: () => void }) {
   const [pending, setPending] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(formData: FormData) {
+    if (pending) return; // Prevent double-submit
     setPending(true);
     try {
       await createRecipe(formData);
+      formRef.current?.reset();
       onSuccess?.();
     } catch (e) {
       console.error(e);
@@ -33,7 +36,7 @@ export function RecipeForm({ onSuccess }: { onSuccess?: () => void }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form action={handleSubmit} className="space-y-4">
+        <form ref={formRef} action={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Navn *</Label>
             <Input

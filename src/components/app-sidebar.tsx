@@ -21,7 +21,6 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { ThemeToggle } from "./theme-toggle";
 
 const navItems = [
   { title: "Hjem", url: "/", icon: Home },
@@ -68,16 +67,13 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4">
-        <div className="flex items-center justify-between">
-          <Link
-            href="/innstillinger"
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            <span>Innstillinger</span>
-          </Link>
-          <ThemeToggle />
-        </div>
+        <Link
+          href="/innstillinger"
+          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+        >
+          <Settings className="w-4 h-4" />
+          <span>Innstillinger</span>
+        </Link>
       </SidebarFooter>
     </Sidebar>
   );
