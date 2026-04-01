@@ -1,0 +1,38 @@
+version: "0.5"
+project:
+  name: matplan
+  description: Norwegian meal planning and budgeting web app
+  language: TypeScript
+  framework: Next.js 15
+
+knowledge:
+  - path: CLAUDE.md
+    intent: Project overview, conventions, constraints, and current state
+    audience: [agent]
+    freshness: updated regularly
+
+  - path: LEARNINGS.md
+    intent: Codebase-specific discoveries, gotchas, and AI mistakes to avoid
+    audience: [agent]
+    freshness: updated after each session
+
+  - path: .claude/skills/
+    intent: 34 domain skills covering architecture, design, nutrition, calendar, budget, APIs, auth, testing
+    audience: [agent]
+    freshness: stable
+
+  - path: src/db/schema.ts
+    intent: Complete database schema — 16 tables with householdId architecture
+    audience: [agent, developer]
+
+  - path: src/lib/auth/auth-config.ts
+    intent: NextAuth.js config with Google OAuth and auto household creation
+    audience: [agent, developer]
+
+  - path: src/app/globals.css
+    intent: Matplan design system — CSS variables for light and dark mode
+    audience: [agent, developer]
+
+  - path: src/components/app-sidebar.tsx
+    intent: Main navigation sidebar with all app routes
+    audience: [agent, developer]

@@ -48,73 +48,94 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Matplan Design System — Light Mode */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #FAF7F2;
+  --foreground: #2D3436;
+  --card: #FFFFFF;
+  --card-foreground: #2D3436;
+  --popover: #FFFFFF;
+  --popover-foreground: #2D3436;
+  --primary: #7C9A7E;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F0EDE8;
+  --secondary-foreground: #2D3436;
+  --muted: #F0EDE8;
+  --muted-foreground: #636E72;
+  --accent: #C27B5A;
+  --accent-foreground: #FFFFFF;
+  --destructive: #E17055;
+  --border: #E2DDD5;
+  --input: #E2DDD5;
+  --ring: #7C9A7E;
+  --chart-1: #7C9A7E;
+  --chart-2: #C27B5A;
+  --chart-3: #4A90A4;
+  --chart-4: #6ABF69;
+  --chart-5: #E8A838;
+  --radius: 0.5rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #2D3436;
+  --sidebar-primary: #7C9A7E;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F0EDE8;
+  --sidebar-accent-foreground: #2D3436;
+  --sidebar-border: #E2DDD5;
+  --sidebar-ring: #7C9A7E;
+
+  /* Matplan custom tokens */
+  --color-success: #6ABF69;
+  --color-warning: #E8A838;
+  --color-error: #E17055;
+  --color-fish: #4A90A4;
+  --color-sage: #7C9A7E;
+  --color-sage-dark: #5A7A5C;
+  --color-terracotta: #C27B5A;
+  --color-cream: #FAF7F2;
 }
 
+/* Matplan Design System — Dark Mode */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #1A1D1E;
+  --foreground: #E8E4DE;
+  --card: #2A2D2E;
+  --card-foreground: #E8E4DE;
+  --popover: #2A2D2E;
+  --popover-foreground: #E8E4DE;
+  --primary: #8FB891;
+  --primary-foreground: #1A1D1E;
+  --secondary: #333637;
+  --secondary-foreground: #E8E4DE;
+  --muted: #333637;
+  --muted-foreground: #9CA3A6;
+  --accent: #D4926E;
+  --accent-foreground: #1A1D1E;
+  --destructive: #E88577;
+  --border: #3A3D3E;
+  --input: #3A3D3E;
+  --ring: #8FB891;
+  --chart-1: #8FB891;
+  --chart-2: #D4926E;
+  --chart-3: #5AA8BC;
+  --chart-4: #7CCF7B;
+  --chart-5: #F0B84A;
+  --sidebar: #2A2D2E;
+  --sidebar-foreground: #E8E4DE;
+  --sidebar-primary: #8FB891;
+  --sidebar-primary-foreground: #1A1D1E;
+  --sidebar-accent: #333637;
+  --sidebar-accent-foreground: #E8E4DE;
+  --sidebar-border: #3A3D3E;
+  --sidebar-ring: #8FB891;
+
+  --color-success: #7CCF7B;
+  --color-warning: #F0B84A;
+  --color-error: #E88577;
+  --color-fish: #5AA8BC;
+  --color-sage: #8FB891;
+  --color-sage-dark: #7C9A7E;
+  --color-terracotta: #D4926E;
+  --color-cream: #1A1D1E;
 }
 
 @layer base {

@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, Fraunces, Geist } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,9 +24,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="nb" className={cn(inter.variable, fraunces.variable, "font-sans", geist.variable)}>
-      <body className="min-h-screen bg-[#FAF7F2] text-[#2D3436] font-[family-name:var(--font-inter)]">
-        {children}
+    <html
+      lang="nb"
+      className={`${inter.variable} ${fraunces.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-screen font-[family-name:var(--font-inter)]">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
