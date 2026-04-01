@@ -8,6 +8,8 @@ import { deleteRecipe } from "./actions";
 import { useState } from "react";
 import Link from "next/link";
 
+const PAGE_SIZE = 6;
+
 interface Recipe {
   id: number;
   name: string;
@@ -22,16 +24,29 @@ interface Recipe {
 }
 
 export function RecipeList({ recipes }: { recipes: Recipe[] }) {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const visible = recipes.slice(0, visibleCount);
+  const hasMore = visibleCount < recipes.length;
+
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-semibold">
+    <div>
+      <h2 className="text-lg font-semibold mb-3">
         Dine oppskrifter ({recipes.length})
       </h2>
-      <div className="space-y-3">
-        {recipes.map((recipe) => (
+      <div className="flex flex-col gap-3">
+        {visible.map((recipe) => (
           <RecipeCard key={recipe.id} recipe={recipe} />
         ))}
       </div>
+      {hasMore && (
+        <Button
+          variant="outline"
+          className="w-full mt-4"
+          onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+        >
+          Vis flere ({recipes.length - visibleCount} gjenstår)
+        </Button>
+      )}
     </div>
   );
 }
@@ -40,7 +55,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
   const [deleting, setDeleting] = useState(false);
 
   async function handleDelete(e: React.MouseEvent) {
-    e.preventDefault(); // Don't navigate to detail page
+    e.preventDefault();
     e.stopPropagation();
     if (!confirm(`Slette "${recipe.name}"?`)) return;
     setDeleting(true);
@@ -48,7 +63,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
   }
 
   return (
-    <Link href={`/oppskrifter/${recipe.id}`}>
+    <Link href={`/oppskrifter/${recipe.id}`} className="block">
       <Card className="group hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
