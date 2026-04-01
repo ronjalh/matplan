@@ -69,25 +69,46 @@ export const searchRefinements: Record<string, string> = {
   "is": "", // skip — too vague
 };
 
+/** Units to strip from ingredient names before searching */
+const UNITS_TO_STRIP = /^(g|kg|dl|l|ml|ss|ts|stk|pk|fedd|klype|bunt|kvast|dæsj)\s+/i;
+const UNITS_ANYWHERE = /\b(g|kg|dl|l|ml|ss|ts|stk|pk|fedd|klype|bunt|kvast|dæsj)\b/gi;
+
+/**
+ * Clean ingredient name for price search:
+ * Remove units, numbers, and common noise words.
+ */
+function cleanForSearch(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/^[\d.,]+\s*/g, "") // remove leading numbers
+    .replace(UNITS_TO_STRIP, "") // remove leading unit
+    .replace(UNITS_ANYWHERE, "") // remove any remaining units
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /**
  * Refine an ingredient name for better Kassalapp search results.
+ * Strips units first, then checks refinements, then returns cleaned name.
  * Returns empty string if the ingredient should be skipped (e.g., water).
  */
 export function refineSearchQuery(ingredientName: string): string {
-  const lower = ingredientName.toLowerCase().trim();
+  const cleaned = cleanForSearch(ingredientName);
+  if (!cleaned) return "";
 
-  // Check exact match
-  if (lower in searchRefinements) {
-    return searchRefinements[lower];
+  // Check exact match in refinements
+  if (cleaned in searchRefinements) {
+    return searchRefinements[cleaned];
   }
 
-  // Check if any refinement key is contained in the name
+  // Check if any refinement key is contained in the cleaned name
   for (const [key, value] of Object.entries(searchRefinements)) {
-    if (lower.includes(key) && value) {
+    if (cleaned.includes(key) && value) {
       return value;
     }
   }
 
-  // Return original name — hopefully specific enough
-  return ingredientName;
+  // Return cleaned name — no units, just the ingredient
+  return cleaned;
 }
