@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlateModelVisual } from "@/components/nutrition/plate-model-visual";
+import { EightADayTracker } from "@/components/nutrition/eight-a-day-tracker";
 import { Badge } from "@/components/ui/badge";
 import { IngredientEditor, type IngredientInput } from "@/components/recipe/ingredient-editor";
 import { ArrowLeft, Pencil, Trash2, Clock, Users, X } from "lucide-react";
@@ -20,8 +22,13 @@ interface RecipeWithIngredients {
   servings: number;
   prepTimeMinutes: number | null;
   instructions: string | null;
+  plateModelScore: { vegetable: number; carbohydrate: number; protein: number } | null;
+  eightADayServings: number | null;
   isVegetarian: boolean;
   isVegan: boolean;
+  isGlutenFree: boolean;
+  isDairyFree: boolean;
+  isNutFree: boolean;
   isFishMeal: boolean;
   cuisine: string | null;
   source: string;
@@ -205,6 +212,41 @@ export function RecipeDetail({ recipe }: { recipe: RecipeWithIngredients }) {
                 </li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Nutrition visualizations */}
+      {recipe.plateModelScore && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Ernæring</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <PlateModelVisual score={{
+                vegetable: recipe.plateModelScore.vegetable,
+                carbohydrate: recipe.plateModelScore.carbohydrate,
+                protein: recipe.plateModelScore.protein,
+                assessment:
+                  recipe.plateModelScore.vegetable >= 0.25 && recipe.plateModelScore.vegetable <= 0.40 &&
+                  recipe.plateModelScore.carbohydrate >= 0.25 && recipe.plateModelScore.carbohydrate <= 0.40 &&
+                  recipe.plateModelScore.protein >= 0.25 && recipe.plateModelScore.protein <= 0.40
+                    ? "balanced"
+                    : recipe.plateModelScore.vegetable >= 0.15 && recipe.plateModelScore.protein >= 0.15
+                    ? "slightly-off"
+                    : "unbalanced",
+              }} />
+              {recipe.eightADayServings != null && (
+                <EightADayTracker result={{
+                  fruitVegServings: recipe.eightADayServings,
+                  wholeGrainServings: 0,
+                  totalServings: recipe.eightADayServings,
+                  target: 8,
+                  percentage: Math.round((recipe.eightADayServings / 8) * 100),
+                }} />
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
