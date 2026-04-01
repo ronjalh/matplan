@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,8 +14,10 @@ import {
   Sunset,
   Moon,
   Fish,
+  CalendarPlus,
 } from "lucide-react";
-import { addMeal, removeMeal } from "./actions";
+import { addMeal, removeMeal, removeEvent } from "./actions";
+import { AddEventDialog } from "./add-event-dialog";
 import {
   formatShortDate,
   getISOWeekNumber,
@@ -74,10 +75,8 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
   const dates = days.map((d) => new Date(d));
   const weekNum = getISOWeekNumber(dates[0]);
 
-  const [addingMeal, setAddingMeal] = useState<{
-    date: string;
-    mealType: string;
-  } | null>(null);
+  const [addingMeal, setAddingMeal] = useState<{ date: string; mealType: string } | null>(null);
+  const [addingEvent, setAddingEvent] = useState<string | null>(null); // date string
 
   function navigateWeek(offset: number) {
     const d = new Date(dates[0]);
@@ -85,19 +84,19 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
     router.push(`/kalender?week=${toISODate(d)}`);
   }
 
-  function goToday() {
-    router.push("/kalender");
-  }
-
   function getMeal(date: string, mealType: string) {
     return meals.find((m) => m.date === date && m.mealType === mealType);
+  }
+
+  function getMealsForDate(date: string) {
+    return meals.filter((m) => m.date === date);
   }
 
   function getEventsForDate(date: string) {
     return events.filter((e) => e.date === date);
   }
 
-  // Count fish meals this week
+  // Weekly stats
   const fishCount = meals.filter((m) => m.recipeIsFishMeal).length;
 
   async function handleAddMeal(recipeId: number) {
@@ -110,35 +109,50 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
     await removeMeal(mealId);
   }
 
+  async function handleRemoveEvent(eventId: number) {
+    await removeEvent(eventId);
+  }
+
+  // Count daily meals for mini 8-om-dagen indicator
+  function getDayMealCount(date: string) {
+    return meals.filter((m) => m.date === date).length;
+  }
+
   return (
     <div className="space-y-4">
-      {/* Week navigation */}
-      <div className="flex items-center justify-between">
+      {/* Week navigation + stats */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => navigateWeek(-1)}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={goToday}>
+          <Button variant="outline" size="sm" onClick={() => router.push("/kalender")}>
             I dag
           </Button>
           <Button variant="outline" size="sm" onClick={() => navigateWeek(1)}>
             <ChevronRight className="w-4 h-4" />
           </Button>
+          <span className="text-lg font-semibold ml-2">Uke {weekNum}</span>
         </div>
-        <span className="text-lg font-semibold">Uke {weekNum}</span>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Fish className="w-4 h-4" />
-          <span>
+        <div className="flex items-center gap-4 text-sm">
+          <span className={`flex items-center gap-1.5 ${fishCount >= 2 ? "text-[var(--color-fish)]" : "text-muted-foreground"}`}>
+            <Fish className="w-4 h-4" />
             {fishCount}/2–3 fisk
+            {fishCount >= 2 && " ✓"}
+          </span>
+          <span className="text-muted-foreground">
+            {meals.length} måltider planlagt
           </span>
         </div>
       </div>
 
-      {/* Meal picker dialog */}
+      {/* Meal picker */}
       {addingMeal && (
         <Card className="p-4 border-primary">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-medium">Velg oppskrift</h3>
+            <h3 className="font-medium">
+              Velg oppskrift — {mealTypes.find((m) => m.key === addingMeal.mealType)?.label}
+            </h3>
             <Button variant="ghost" size="sm" onClick={() => setAddingMeal(null)}>
               <X className="w-4 h-4" />
             </Button>
@@ -148,14 +162,18 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
               Du har ingen oppskrifter ennå. Lag en under Oppskrifter-fanen.
             </p>
           ) : (
-            <div className="grid gap-2 max-h-60 overflow-y-auto">
+            <div className="grid gap-1 max-h-60 overflow-y-auto">
               {allRecipes.map((r) => (
                 <button
                   key={r.id}
                   onClick={() => handleAddMeal(r.id)}
                   className="flex items-center justify-between rounded-md px-3 py-2 text-sm text-left hover:bg-muted transition-colors cursor-pointer"
                 >
-                  <span>{r.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span>{r.name}</span>
+                    {r.isFishMeal && <Fish className="w-3 h-3 text-[var(--color-fish)]" />}
+                    {r.isVegetarian && <span className="text-[var(--color-success)] text-xs">V</span>}
+                  </div>
                   <span className="text-xs text-muted-foreground">
                     {r.prepTimeMinutes && `${r.prepTimeMinutes} min`}
                   </span>
@@ -166,27 +184,38 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
         </Card>
       )}
 
+      {/* Event dialog */}
+      {addingEvent && (
+        <AddEventDialog date={addingEvent} onClose={() => setAddingEvent(null)} />
+      )}
+
       {/* Week grid */}
       <div className="grid grid-cols-7 gap-2">
         {dates.map((date) => {
           const dateStr = toISODate(date);
           const today = isToday(date);
           const dayEvents = getEventsForDate(dateStr);
+          const dayMealCount = getDayMealCount(dateStr);
 
           return (
             <div
               key={dateStr}
-              className={`min-h-[280px] rounded-lg border p-2 space-y-1.5 ${
-                today
-                  ? "border-primary bg-primary/5"
-                  : "border-border"
+              className={`min-h-[300px] rounded-lg border p-2 space-y-1 ${
+                today ? "border-primary bg-primary/5" : "border-border"
               }`}
             >
               {/* Day header */}
-              <div className={`text-center text-xs font-medium pb-1 border-b border-border ${
-                today ? "text-primary" : "text-muted-foreground"
-              }`}>
-                {formatShortDate(date)}
+              <div className={`flex items-center justify-between pb-1 border-b border-border`}>
+                <span className={`text-xs font-medium ${today ? "text-primary" : "text-muted-foreground"}`}>
+                  {formatShortDate(date)}
+                </span>
+                {dayMealCount > 0 && (
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: Math.min(dayMealCount, 4) }, (_, i) => (
+                      <div key={i} className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Meal slots */}
@@ -234,7 +263,7 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
               {dayEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="rounded-md px-2 py-1 text-xs border-l-2"
+                  className="group relative rounded-md px-2 py-1 text-xs border-l-2"
                   style={{
                     borderLeftColor:
                       event.eventType === "aktivitet" ? "var(--color-fish)" :
@@ -245,10 +274,25 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
                 >
                   <span className="truncate block">{event.title}</span>
                   {event.startTime && (
-                    <span className="text-muted-foreground">{event.startTime}</span>
+                    <span className="text-muted-foreground">{event.startTime}{event.endTime && `–${event.endTime}`}</span>
                   )}
+                  <button
+                    onClick={() => handleRemoveEvent(event.id)}
+                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
               ))}
+
+              {/* Add event button */}
+              <button
+                onClick={() => setAddingEvent(dateStr)}
+                className="w-full flex items-center justify-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:text-primary hover:bg-muted/50 transition-colors cursor-pointer"
+              >
+                <CalendarPlus className="w-3 h-3" />
+                <span>Hendelse</span>
+              </button>
             </div>
           );
         })}
