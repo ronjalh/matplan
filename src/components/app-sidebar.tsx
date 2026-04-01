@@ -17,7 +17,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
@@ -51,15 +50,17 @@ export function AppSidebar() {
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
+                  <Link
+                    href={item.url}
+                    className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+                      pathname === item.url
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    }`}
                   >
-                    <Link href={item.url}>
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
+                    <item.icon className="w-4 h-4" />
+                    <span>{item.title}</span>
+                  </Link>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -68,12 +69,13 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="p-4">
         <div className="flex items-center justify-between">
-          <SidebarMenuButton asChild>
-            <Link href="/innstillinger">
-              <Settings className="w-4 h-4" />
-              <span>Innstillinger</span>
-            </Link>
-          </SidebarMenuButton>
+          <Link
+            href="/innstillinger"
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+            <span>Innstillinger</span>
+          </Link>
           <ThemeToggle />
         </div>
       </SidebarFooter>
