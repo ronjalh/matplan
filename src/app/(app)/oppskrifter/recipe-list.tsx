@@ -3,9 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Trash2 } from "lucide-react";
-import { deleteRecipe } from "./actions";
-import { useState } from "react";
+import { Clock, Users } from "lucide-react";
+import Link from "next/link";
 
 interface Recipe {
   id: number;
@@ -34,30 +33,12 @@ export function RecipeList({ recipes }: { recipes: Recipe[] }) {
 }
 
 function RecipeCard({ recipe }: { recipe: Recipe }) {
-  const [deleting, setDeleting] = useState(false);
-
-  async function handleDelete() {
-    if (!confirm(`Slette "${recipe.name}"?`)) return;
-    setDeleting(true);
-    await deleteRecipe(recipe.id);
-  }
-
   return (
-    <Card className="relative">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
+    <Link href={`/oppskrifter/${recipe.id}`}>
+      <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+        <CardHeader className="pb-2">
           <CardTitle className="text-base">{recipe.name}</CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDelete}
-            disabled={deleting}
-            className="text-muted-foreground hover:text-destructive -mr-2 -mt-1"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardHeader>
+        </CardHeader>
       <CardContent>
         {recipe.description && (
           <p className="text-sm text-muted-foreground mb-3">
@@ -95,6 +76,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
           )}
         </div>
       </CardContent>
-    </Card>
+      </Card>
+    </Link>
   );
 }

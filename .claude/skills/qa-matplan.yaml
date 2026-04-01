@@ -63,6 +63,12 @@ instructions: |
   - Using `new Date().getDay()` which returns 0 for Sunday (Norwegian week starts Monday)
   - Calculating with floats instead of integer øre
   - Forgetting to add both nb.json and en.json keys for new text
+  - **Shipping Create without Read/Update** — NEVER build a create form without also building the detail view and edit form. Users expect to click on what they just created.
+  - **Missing essential fields** — A recipe form MUST include ingredients from day 1. Don't ship a recipe form without it. Ingredients are the foundation for nutrition tracking, shopping lists, and price calculation.
+  - **No double-submit protection** — EVERY form needs: `disabled={pending}` on button, `if (pending) return` guard, and form reset after success.
+  - **Using `asChild` on shadcn components** — Causes TypeScript errors in this Next.js 16 / React 19 setup. Use plain `<Link>` elements instead.
+  - **Using server-side `signIn()` for OAuth** — Doesn't redirect properly. Use client-side `signIn()` from `next-auth/react` instead.
+  - **Placing UI elements in sidebar footer** — Users don't find them. Put important toggles (theme, language) in the header next to the user avatar.
 
   ## After Every Session
   Ask: "What mistakes did we fix today that aren't in this QA skill yet?"

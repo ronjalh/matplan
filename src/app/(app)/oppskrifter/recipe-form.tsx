@@ -6,20 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { IngredientEditor } from "@/components/recipe/ingredient-editor";
 import { useState, useRef } from "react";
 import { ChefHat } from "lucide-react";
 
-export function RecipeForm({ onSuccess }: { onSuccess?: () => void }) {
+export function RecipeForm() {
   const [pending, setPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(formData: FormData) {
-    if (pending) return; // Prevent double-submit
+    if (pending) return;
     setPending(true);
     try {
       await createRecipe(formData);
       formRef.current?.reset();
-      onSuccess?.();
     } catch (e) {
       console.error(e);
     } finally {
@@ -90,14 +90,19 @@ export function RecipeForm({ onSuccess }: { onSuccess?: () => void }) {
           </div>
 
           <div className="flex gap-6">
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" name="isVegetarian" className="rounded" />
               Vegetar
             </label>
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" name="isVegan" className="rounded" />
               Vegan
             </label>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Ingredienser</Label>
+            <IngredientEditor />
           </div>
 
           <div className="space-y-2">
