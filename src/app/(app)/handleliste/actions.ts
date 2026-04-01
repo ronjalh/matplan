@@ -13,6 +13,7 @@ import {
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getMonday, getWeekDays, toISODate } from "@/lib/date-utils";
+import { findBestPrice } from "@/price-api/kassalapp";
 
 async function getHouseholdId() {
   const session = await auth();
@@ -136,8 +137,23 @@ export async function generateShoppingList(weekStartDate?: string) {
     })
     .returning();
 
-  // Insert aggregated items
+  // Fetch prices from Kassalapp (best-effort, don't block on failures)
   const items = Array.from(aggregated.values());
+  const priceMap = new Map<string, number>();
+
+  // Fetch prices in parallel (max 10 at a time to respect rate limit)
+  const batchSize = 10;
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const results = await Promise.allSettled(
+      batch.map(async (item) => {
+        const result = await findBestPrice(item.name);
+        if (result) priceMap.set(item.name, result.priceOre);
+      })
+    );
+  }
+
+  // Insert aggregated items with prices
   if (items.length > 0) {
     await db.insert(shoppingListItems).values(
       items.map((item) => ({
@@ -147,6 +163,7 @@ export async function generateShoppingList(weekStartDate?: string) {
         unit: item.unit,
         checked: false,
         category: guessCategory(item.name),
+        estimatedPriceOre: priceMap.get(item.name) ?? null,
       }))
     );
   }

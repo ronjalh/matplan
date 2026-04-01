@@ -92,12 +92,34 @@ export function ShoppingListView({ list }: { list: ShoppingList | null }) {
   const totalItems = list.items.length;
   const checkedItems = list.items.filter((i) => i.checked).length;
 
+  // Price calculations
+  const uncheckedItems = list.items.filter((i) => !i.checked);
+  const totalPriceOre = uncheckedItems
+    .filter((i) => i.estimatedPriceOre)
+    .reduce((sum, i) => sum + i.estimatedPriceOre!, 0);
+  const itemsWithoutPrice = uncheckedItems.filter((i) => !i.estimatedPriceOre).length;
+
+  function formatKr(ore: number) {
+    return `kr ${(ore / 100).toFixed(2).replace(".", ",")}`;
+  }
+
   return (
     <div className="space-y-4">
       {/* Header stats */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">{checkedItems}</span> av {totalItems} varer huket av
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="space-y-0.5">
+          <div className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{checkedItems}</span> av {totalItems} varer huket av
+          </div>
+          {totalPriceOre > 0 && (
+            <div className="text-sm">
+              <span className="font-semibold text-foreground">{formatKr(totalPriceOre)}</span>
+              <span className="text-muted-foreground"> estimert</span>
+              {itemsWithoutPrice > 0 && (
+                <span className="text-muted-foreground"> ({itemsWithoutPrice} uten pris)</span>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleGenerate} disabled={generating}>
@@ -140,9 +162,14 @@ export function ShoppingListView({ list }: { list: ShoppingList | null }) {
                     ) : (
                       <Square className="w-4 h-4 text-muted-foreground shrink-0" />
                     )}
-                    <span className={item.checked ? "line-through" : ""}>
+                    <span className={`flex-1 ${item.checked ? "line-through" : ""}`}>
                       {item.quantity} {item.unit} {item.name}
                     </span>
+                    {item.estimatedPriceOre && !item.checked && (
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {formatKr(item.estimatedPriceOre)}
+                      </span>
+                    )}
                   </button>
                 </li>
               ))}
