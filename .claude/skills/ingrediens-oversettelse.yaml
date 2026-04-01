@@ -1,0 +1,217 @@
+name: ingrediens-oversettelse
+description: English-to-Norwegian ingredient translation — static mapping table, fuzzy search fallback, and user-learned links
+version: 1.0.0
+tags: [ingredients, translation, matching, english, norwegian]
+
+instructions: |
+  # Ingrediens-oversettelse — EN→NO Matching
+
+  ## Problem
+  Spoonacular returns English ingredient names ("chicken breast").
+  Kassalapp/Oda have Norwegian products ("Kyllingfilet Prior 550g").
+  We need to bridge this gap.
+
+  ## Three-Layer Strategy
+
+  ### Layer 1: Static Translation Table (~200 entries, covers ~80%)
+  File: `src/data/ingredient-translations.ts`
+
+  ```typescript
+  export const ingredientTranslations: Record<string, string> = {
+    // Protein
+    "chicken breast": "kyllingfilet",
+    "chicken thigh": "kyllinglår",
+    "ground beef": "kjøttdeig",
+    "beef": "storfe",
+    "pork": "svinekjøtt",
+    "salmon": "laks",
+    "cod": "torsk",
+    "shrimp": "reker",
+    "egg": "egg",
+    "eggs": "egg",
+    "tofu": "tofu",
+    "lentils": "linser",
+    "chickpeas": "kikerter",
+    "black beans": "svarte bønner",
+    "kidney beans": "kidneyb�nner",
+
+    // Vegetables
+    "onion": "løk",
+    "garlic": "hvitløk",
+    "potato": "potet",
+    "potatoes": "poteter",
+    "carrot": "gulrot",
+    "broccoli": "brokkoli",
+    "bell pepper": "paprika",
+    "tomato": "tomat",
+    "cucumber": "agurk",
+    "spinach": "spinat",
+    "lettuce": "salat",
+    "mushroom": "sopp",
+    "mushrooms": "sopp",
+    "corn": "mais",
+    "peas": "erter",
+    "green beans": "grønne bønner",
+    "zucchini": "squash",
+    "cauliflower": "blomkål",
+    "cabbage": "hodekål",
+    "kale": "grønnkål",
+    "leek": "purre",
+    "celery": "selleri",
+    "avocado": "avokado",
+    "sweet potato": "søtpotet",
+    "beetroot": "rødbeter",
+    "asparagus": "asparges",
+    "eggplant": "aubergine",
+
+    // Fruit
+    "apple": "eple",
+    "banana": "banan",
+    "orange": "appelsin",
+    "lemon": "sitron",
+    "lime": "lime",
+    "strawberry": "jordbær",
+    "blueberry": "blåbær",
+    "raspberry": "bringebær",
+    "mango": "mango",
+    "pineapple": "ananas",
+    "grape": "drue",
+    "pear": "pære",
+    "peach": "fersken",
+
+    // Dairy
+    "milk": "melk",
+    "butter": "smør",
+    "cream": "fløte",
+    "heavy cream": "kremfløte",
+    "sour cream": "rømme",
+    "cheese": "ost",
+    "parmesan": "parmesan",
+    "mozzarella": "mozzarella",
+    "cream cheese": "kremost",
+    "yogurt": "yoghurt",
+    "cheddar": "cheddar",
+
+    // Grains & Carbs
+    "rice": "ris",
+    "pasta": "pasta",
+    "spaghetti": "spagetti",
+    "bread": "brød",
+    "flour": "hvetemel",
+    "oats": "havregryn",
+    "noodles": "nudler",
+    "tortilla": "tortilla",
+    "couscous": "couscous",
+    "quinoa": "quinoa",
+
+    // Fats & Oils
+    "olive oil": "olivenolje",
+    "vegetable oil": "rapsolje",
+    "coconut oil": "kokosolje",
+    "sesame oil": "sesamolje",
+
+    // Herbs & Spices
+    "salt": "salt",
+    "pepper": "pepper",
+    "black pepper": "sort pepper",
+    "basil": "basilikum",
+    "oregano": "oregano",
+    "thyme": "timian",
+    "rosemary": "rosmarin",
+    "parsley": "persille",
+    "cilantro": "koriander",
+    "dill": "dill",
+    "cinnamon": "kanel",
+    "cumin": "spisskummen",
+    "paprika": "paprikapulver",
+    "chili powder": "chilipulver",
+    "ginger": "ingefær",
+    "turmeric": "gurkemeie",
+    "nutmeg": "muskatnøtt",
+    "bay leaf": "laubærblad",
+    "mint": "mynte",
+    "chives": "gressløk",
+
+    // Sauces & Condiments
+    "soy sauce": "soyasaus",
+    "tomato paste": "tomatpuré",
+    "tomato sauce": "tomatsaus",
+    "ketchup": "ketchup",
+    "mustard": "sennep",
+    "vinegar": "eddik",
+    "honey": "honning",
+    "sugar": "sukker",
+    "brown sugar": "brunt sukker",
+    "maple syrup": "lønnesirup",
+    "worcestershire sauce": "worcestershiresaus",
+    "fish sauce": "fiskesaus",
+    "hot sauce": "chilisaus",
+    "pesto": "pesto",
+
+    // Other
+    "water": "vann",
+    "chicken broth": "kyllingbuljong",
+    "vegetable broth": "grønnsaksbuljong",
+    "beef broth": "oksekraftbuljong",
+    "coconut milk": "kokosmelk",
+    "baking powder": "bakepulver",
+    "baking soda": "natron",
+    "vanilla extract": "vaniljeekstrakt",
+    "cocoa powder": "kakaopulver",
+    "chocolate": "sjokolade",
+    "peanut butter": "peanøttsmør",
+    "almonds": "mandler",
+    "walnuts": "valnøtter",
+    "cashews": "cashewnøtter",
+    "pine nuts": "pinjekjerner",
+  };
+  ```
+
+  ### Layer 2: Fuzzy Search Fallback (Fase 2, covers ~15% more)
+  If not in translation table:
+  1. Try searching Kassalapp with the English name directly (works for: "parmesan", "mozzarella", "basil", "mango", etc.)
+  2. Try partial match: "chicken" → search "kylling" (common root)
+  3. Try removing adjectives: "fresh basil" → "basil" → "basilikum"
+
+  ### Layer 3: User-Learned Links (grows over time)
+  ```
+  ingredientProductLinks:
+    id, userId, ingredientNameEN, ingredientNameNO, storeProductId, provider, lastUsed
+  ```
+  When a user manually links an ingredient → save it. Next time → use saved link.
+  Over time the system learns from all users' choices.
+
+  ## Translation Flow
+  ```typescript
+  function translateIngredient(englishName: string, userId: string): string {
+    // 1. Check user's saved links first
+    const userLink = await db.query.ingredientProductLinks.findFirst({
+      where: eq(ingredientProductLinks.ingredientNameEN, normalize(englishName))
+    });
+    if (userLink) return userLink.ingredientNameNO;
+
+    // 2. Check static translation table
+    const translated = ingredientTranslations[normalize(englishName)];
+    if (translated) return translated;
+
+    // 3. Try direct search (some words are same/similar)
+    // This is attempted during the Kassalapp search itself
+
+    // 4. Return original (user will need to link manually)
+    return englishName;
+  }
+
+  function normalize(name: string): string {
+    return name.toLowerCase().trim()
+      .replace(/\s+/g, ' ')
+      .replace(/s$/, '');  // basic depluralize
+  }
+  ```
+
+  ## Rules
+  - ALWAYS try translation table before API search
+  - ALWAYS normalize ingredient names (lowercase, trim, depluralize)
+  - NEVER silently skip untranslated ingredients — show them to the user
+  - The translation table is a STARTING POINT — it grows through user interactions
+  - Handle plurals: "tomatoes" → "tomatoes" → strip "s" → "tomato" → "tomat"
+  - Some words are identical: "mango", "pasta", "quinoa" — these work without translation

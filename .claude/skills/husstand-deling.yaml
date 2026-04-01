@@ -1,0 +1,147 @@
+name: husstand-deling
+description: Household sharing — shared meal plans, shopping lists, and budgets. MVP via share link, Fase 2 via household invitations
+version: 1.0.0
+tags: [household, sharing, multi-user, family]
+
+instructions: |
+  # Husstand og Deling
+
+  ## Architecture Decision: householdId from Day 1
+  Even in MVP (single-member households), use `householdId` on all shared data.
+  This avoids a painful migration when adding multi-member households in Fase 2.
+
+  ## Data Model
+
+  ### Core Tables (always present)
+  ```sql
+  households:
+    id          serial PK
+    name        text          -- "Eriks husstand", auto-generated from first user
+    createdAt   timestamp
+
+  householdMembers:
+    householdId integer FK → households
+    userId      integer FK → users
+    role        text          -- "owner" | "member"
+    joinedAt    timestamp
+    UNIQUE(householdId, userId)
+  ```
+
+  ### On Google OAuth first login:
+  ```
+  1. Create user record (NextAuth)
+  2. Create household with name = "{user.name}s husstand"
+  3. Add user as householdMember with role = "owner"
+  4. All subsequent data creation uses this householdId
+  ```
+
+  ### Shared Data (keyed by householdId, NOT userId)
+  ```
+  recipes:           householdId FK
+  mealPlan:          householdId FK
+  shoppingLists:     householdId FK
+  budgetCategories:  householdId FK
+  budgetEntries:     householdId FK
+  calendarEvents:    householdId FK
+  ingredients:       (global, no household key)
+  storeProducts:     (global cache, no household key)
+  ```
+
+  ### Personal Data (keyed by userId)
+  ```
+  userSettings:      userId FK  (priceProvider, dietaryPreference, locale, theme)
+  accounts:          userId FK  (NextAuth Google OAuth)
+  sessions:          userId FK  (NextAuth sessions)
+  ```
+
+  ## MVP: Share Shopping List via Link
+
+  ### How It Works
+  ```
+  Erik opens shopping list → clicks "Del handleliste" →
+  generates unique link: https://matplan.vercel.app/shared/abc123 →
+  sends link to Mona via SMS/chat →
+  Mona opens link → sees shopping list → can check off items →
+  No login required for Mona
+  ```
+
+  ### Data Model Addition
+  ```sql
+  sharedLinks:
+    id          serial PK
+    token       text UNIQUE     -- random 12-char string
+    householdId integer FK
+    resourceType text           -- "shoppingList"
+    resourceId   integer        -- the specific shopping list
+    expiresAt   timestamp       -- auto-expire after 7 days
+    createdBy   integer FK → users
+    createdAt   timestamp
+  ```
+
+  ### Shared View Features
+  - Read-only view of shopping list (items, prices, categories)
+  - CAN check off items (syncs back to database)
+  - CANNOT edit items, change products, or modify meal plan
+  - Shows "Delt av Erik" at the top
+  - No login required (accessible to anyone with the link)
+  - Link expires after 7 days
+
+  ### Security
+  - Token is cryptographically random (12+ chars)
+  - Link only gives access to ONE specific shopping list
+  - No access to recipes, meal plans, budgets, or other data
+  - Owner can revoke link anytime
+  - Auto-expires after 7 days
+
+  ## Fase 2: Household Invitations
+
+  ### Flow
+  ```
+  Erik → Innstillinger → Husstand → "Inviter medlem" →
+  skriver Monas e-post → Mona får e-post med invitasjonslenke →
+  Mona klikker → logger inn med Google → blir medlem av Eriks husstand →
+  Nå ser begge samme ukesplan, handleliste, budsjett
+  ```
+
+  ### Data Model Addition
+  ```sql
+  householdInvitations:
+    id          serial PK
+    householdId integer FK
+    email       text            -- invited person's email
+    token       text UNIQUE
+    invitedBy   integer FK → users
+    status      text            -- "pending" | "accepted" | "declined" | "expired"
+    createdAt   timestamp
+    expiresAt   timestamp       -- 7 days
+  ```
+
+  ### When Mona Accepts
+  1. Mona logs in with Google
+  2. System checks if her email matches a pending invitation
+  3. If yes: add her as householdMember to Erik's household
+  4. Her previous solo household is either:
+     a) Deleted (if empty — no recipes, no plans)
+     b) Kept (she can switch between households)
+
+  ### Multi-Household (Fase 2+)
+  A user CAN belong to multiple households (e.g., Amina in a kollektiv + her own planning).
+  Active household is selectable in the UI header.
+
+  ## Query Pattern
+  EVERY query for shared data must filter by householdId:
+  ```typescript
+  async function getRecipes(userId: string) {
+    const household = await getUserHousehold(userId);
+    return db.select().from(recipes)
+      .where(eq(recipes.householdId, household.id));
+  }
+  ```
+
+  ## Rules
+  - ALWAYS use householdId (not userId) for shared data from Day 1
+  - EVERY new user gets a household automatically on first login
+  - MVP shared links: read + check-off only, no login required, auto-expire
+  - NEVER expose data from other households
+  - Personal settings (theme, locale, diet) stay on userId — not shared
+  - When querying: get user's householdId first, then filter all data by it

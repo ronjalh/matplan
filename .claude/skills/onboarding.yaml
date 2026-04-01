@@ -1,0 +1,118 @@
+name: onboarding
+description: First-time user onboarding wizard — language, price provider, dietary preference, budget setup, and household
+version: 1.0.0
+tags: [onboarding, ux, first-run, setup]
+
+instructions: |
+  # Onboarding — Førstegangsoppsett
+
+  ## When to Show
+  After first Google OAuth login, if user has no `userSettings` record.
+  Only shown once. User can change all settings later in Innstillinger.
+
+  ## 4-Step Wizard
+
+  ### Step 1: Velkommen
+  ```
+  ┌─────────────────────────────────────┐
+  │  🥗 Velkommen til Matplan, {name}!  │
+  │                                     │
+  │  La oss sette opp appen for deg.    │
+  │  Det tar under ett minutt.          │
+  │                                     │
+  │              [Kom i gang →]         │
+  └─────────────────────────────────────┘
+  ```
+  - Uses Google profile name
+  - Warm, friendly tone
+  - Single button, no choices
+
+  ### Step 2: Kosthold
+  ```
+  ┌─────────────────────────────────────┐
+  │  Hva spiser du?                     │
+  │                                     │
+  │  ○ Alt (ingen restriksjoner)        │
+  │  ○ Vegetarianer                     │
+  │  ○ Veganer                          │
+  │  ○ Pescetarianer (fisk, ikke kjøtt) │
+  │                                     │
+  │  Dette filtrerer oppskriftsøk       │
+  │  og tilpasser ernæringstracking.    │
+  │                                     │
+  │         [← Tilbake]  [Neste →]     │
+  └─────────────────────────────────────┘
+  ```
+  - Saves to `userSettings.dietaryPreference`
+  - Affects: recipe search default filter, fish tracker visibility
+  - Vegetarian/vegan → hide fish tracker, show protein variety tracker instead
+
+  ### Step 3: Priskilde
+  ```
+  ┌─────────────────────────────────────┐
+  │  Hvor handler du?                   │
+  │                                     │
+  │  ○ Flere butikker (Kassalapp)       │
+  │    Priser fra Rema, Kiwi, Coop,     │
+  │    Meny, Oda og flere.              │
+  │    Prissammenligning inkludert.     │
+  │                                     │
+  │  ○ Oda (netthandel)                │
+  │    Kun priser fra Oda.              │
+  │                                     │
+  │         [← Tilbake]  [Neste →]     │
+  └─────────────────────────────────────┘
+  ```
+  - Saves to `userSettings.priceProvider`
+  - Default: Kassalapp (more data)
+
+  ### Step 4: Matbudsjett (valgfritt)
+  ```
+  ┌─────────────────────────────────────┐
+  │  Vil du sette et matbudsjett?       │
+  │                                     │
+  │  SIFO anbefaler ca. kr {sifoRef}    │
+  │  per måned for din husholdning.     │
+  │                                     │
+  │  Mitt matbudsjett: [kr ____] /mnd   │
+  │                                     │
+  │  ○ Hopp over — jeg setter opp      │
+  │    budsjett senere                  │
+  │                                     │
+  │         [← Tilbake]  [Ferdig ✓]    │
+  └─────────────────────────────────────┘
+  ```
+  - Shows SIFO reference for single adult (default)
+  - Pre-fills with SIFO value, user can adjust
+  - Skip option — budget is not required
+  - Creates initial "Mat og drikke" budget category
+
+  ## After Onboarding
+  - Redirect to dashboard (home page)
+  - Dashboard shows a "Kom i gang"-section:
+    1. "Søk din første oppskrift" → link to recipe search
+    2. "Planlegg en middag" → link to calendar
+    3. "Utforsk sesongens råvarer" → link to seasonal page
+  - This section disappears after user has added their first recipe
+
+  ## Technical Implementation
+  ```typescript
+  // middleware.ts — check if onboarding complete
+  const settings = await getUserSettings(session.user.id);
+  if (!settings && !pathname.includes('/onboarding')) {
+    return redirect('/onboarding');
+  }
+  ```
+
+  ## i18n
+  All onboarding text in both nb.json and en.json.
+  Language auto-detected from browser on first visit.
+  Language selector available in onboarding header (small, non-intrusive).
+
+  ## Rules
+  - Onboarding MUST be completable in under 60 seconds
+  - EVERY step is optional except Step 1 (welcome) — user can skip ahead
+  - Budget step must be skippable — not everyone wants to track spending
+  - NEVER ask for information we can infer (language from browser, name from Google)
+  - Show onboarding ONCE — never re-show unless user resets settings
+  - "Kom i gang" section on dashboard guides next actions after onboarding

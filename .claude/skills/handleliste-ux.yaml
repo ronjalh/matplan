@@ -1,0 +1,142 @@
+name: handleliste-ux
+description: Shopping list UX — generate from meal plan, check off items you have, add extras, price per store, and smart totals
+version: 1.0.0
+tags: [shopping, ux, handleliste, prices, checklist]
+
+instructions: |
+  # Handleliste UX — Shopping List Experience
+
+  ## Generation Flow
+  ```
+  Kalender (ukens måltider)
+       │
+       ▼
+  "Generer handleliste" knapp
+       │
+       ▼
+  Aggreger ingredienser (merge duplikater)
+       │
+       ▼
+  Match mot butikkprodukter (ingrediens-matching skill)
+       │
+       ▼
+  Vis handleliste med priser + "har allerede"
+  ```
+
+  ## Handleliste Layout
+
+  ### Hovedvisning
+  ```
+  ┌─────────────────────────────────────────────────────┐
+  │ Handleliste — Uke 14                    [Priskilde: Kassalapp ▾] │
+  │                                                     │
+  │ Sammendrag:                                         │
+  │   Totalt: kr 437,60  │  Har allerede: kr 42,75     │
+  │   Å handle: kr 394,85 │  Varer: 12 (3 huket av)    │
+  │                                                     │
+  │ ── Frukt og grønt ──────────────────────────────── │
+  │ ☐ Brokkoli 350g           Rema 1000    kr 29,90     │
+  │ ☐ Gulrot 500g             Kiwi         kr 14,90     │
+  │ ☑ Sitron 3 stk (har)      ——           kr  0,00  ✓ │
+  │                                                     │
+  │ ── Fisk og kjøtt ───────────────────────────────── │
+  │ ☐ Laksefilet 400g         Oda          kr 89,90     │
+  │ ☐ Kyllingfilet 600g       Rema 1000    kr 79,90     │
+  │                                                     │
+  │ ── Tørrvarer ────────────────────────────────────── │
+  │ ☐ Jasminris 1kg           Kiwi         kr 34,90     │
+  │   └ bruker ~450g av 1kg pakke                       │
+  │ ☑ Olivenolje (har)        ——           kr  0,00  ✓ │
+  │                                                     │
+  │ ── Ekstra (lagt til manuelt) ───────────────────── │
+  │ ☐ Melk 1l                 Rema 1000    kr 21,90     │
+  │                                                     │
+  │ [+ Legg til vare]                                   │
+  │                                                     │
+  │ ── Prissammenligning ───────────────────────────── │
+  │ 🏪 Kun Rema 1000:  kr 378,40                        │
+  │ 🏪 Kun Oda:        kr 412,30                        │
+  │ 🏪 Kun Kiwi:       kr 395,90                        │
+  │ 🏪 Billigst mix:   kr 352,10 ← 3 butikker          │
+  └─────────────────────────────────────────────────────┘
+  ```
+
+  ## Item States
+  | State | Visning | Effekt på pris |
+  |-------|---------|----------------|
+  | Å handle | Normal tekst, checkbox tom | Inkludert i total |
+  | Har allerede | Gjennomstreket, grå, ✓ | Fjernet fra total, vist som "spart" |
+  | Lagt til manuelt | Normal, merket "Ekstra" | Inkludert i total |
+  | Kjøpt (i butikken) | Flyttes til bunn, grå | Beholdes for historikk |
+
+  ## User Actions
+  | Handling | Effekt |
+  |----------|--------|
+  | ☑ Huk av "har allerede" | Fjern fra pris, vis som spart |
+  | ☐ Fjern hake | Legg tilbake i prisen |
+  | ✏️ Endre mengde | Oppdater pris proporsjonalt |
+  | 🔄 Bytt produkt | Åpne produktsøk, velg alternativ |
+  | 🗑️ Fjern helt | Fjern fra listen (med "angre"-mulighet) |
+  | ➕ Legg til vare | Søk eller skriv inn manuelt |
+  | 📋 Kopier liste | Ren tekstversjon til utklippstavle |
+
+  ## Prissammenligning (kun med Kassalapp)
+  Når Kassalapp er aktiv priskilde:
+  - Beregn totalpris per butikk-kjede (alle varer fra én butikk)
+  - Beregn "billigst mix" (billigste produkt uansett butikk)
+  - Vis besparelse: "Spar kr 60,20 ved å handle hos Rema i stedet for Oda"
+  - Vis antall butikker for mix-alternativet
+
+  Når Oda er aktiv: kun Oda-priser, ingen sammenligning.
+
+  ## Grouping
+  Grupper varer etter dagligvarekategori (slik butikken er organisert):
+  1. Frukt og grønt
+  2. Fisk og sjømat
+  3. Kjøtt og kylling
+  4. Meieriprodukter
+  5. Brød og bakervarer
+  6. Tørrvarer (ris, pasta, mel, krydder)
+  7. Drikke
+  8. Frys
+  9. Ekstra (manuelt lagt til)
+
+  ## Smart Features (Fase 2-3)
+
+  ### Lagrede produktvalg (Fase 2)
+  - Når bruker kobler "laks" → "Lerøy Laksefilet", lagre valget
+  - Neste gang "laks" dukker opp → bruk samme produkt automatisk
+  - Bruker kan endre når som helst
+
+  ### Matskap / Beholdning (Fase 3)
+  ```
+  Mitt matskap:
+    Ris (jasmin) — ca. 750g igjen (kjøpt 22.03)
+    Olivenolje — ca. 0.5l igjen
+    Hvitløk — 1 hel (kjøpt 28.03)
+  ```
+  - Brukeren registrerer hva de har hjemme
+  - Handleliste trekker automatisk fra beholdning
+  - "Du har 750g ris, oppskriften trenger 450g → trenger ikke kjøpe"
+  - Etter handletur: oppdater beholdning automatisk
+
+  ### Kjøpshistorikk (Fase 3)
+  - Spor hva bruker kjøper hver uke
+  - "Du kjøpte melk 3 av de siste 4 ukene — legge til?"
+  - Trendanalyse: "Du bruker ~1.5l melk per uke"
+
+  ## Mobile UX
+  - Handlelisten er **den viktigste mobile skjermen** (brukes i butikken!)
+  - Store checkboxer (44px+)
+  - Swipe left → "har allerede"
+  - Swipe right → fjern
+  - Sticky header med totalpris
+  - Offline-støtte (Fase 3): listen funker uten nett i butikken
+
+  ## Rules
+  - "Har allerede" er en KJERNEFUNKSJON — alltid synlig og enkel å bruke
+  - Totalpris oppdateres UMIDDELBART når bruker huker av/på
+  - ALLTID vis "X varer uten pris" hvis noen mangler prisdata
+  - Handlelisten er den viktigste mobile skjermen — optimaliser for tommelbruk
+  - Gruppering følger butikklayout — brukeren handler i rekkefølge
+  - "Legg til vare" skal være like enkel som å skrive en tekstmelding

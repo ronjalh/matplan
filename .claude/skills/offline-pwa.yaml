@@ -1,0 +1,161 @@
+name: offline-pwa
+description: PWA setup, offline-first shopping list with IndexedDB, service worker caching, and background sync
+version: 1.0.0
+tags: [pwa, offline, service-worker, indexeddb, sync]
+
+instructions: |
+  # Offline & PWA
+
+  ## Why
+  The shopping list is used IN THE STORE where mobile connectivity is unreliable.
+  If the app doesn't work offline, users will switch to a notes app.
+
+  ## PWA Setup
+
+  ### manifest.json
+  ```json
+  {
+    "name": "Matplan",
+    "short_name": "Matplan",
+    "description": "Norsk matplanlegger og budsjett",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FAF7F2",
+    "theme_color": "#7C9A7E",
+    "icons": [
+      { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+      { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    ]
+  }
+  ```
+
+  ### next-pwa integration
+  ```typescript
+  // next.config.ts
+  import withPWA from 'next-pwa';
+
+  export default withPWA({
+    dest: 'public',
+    disable: process.env.NODE_ENV === 'development',
+    runtimeCaching: [
+      {
+        urlPattern: /^\/(?:nb|en)\/handleliste/,
+        handler: 'NetworkFirst',
+        options: { cacheName: 'shopping-list-pages' }
+      }
+    ]
+  })({ /* next config */ });
+  ```
+
+  ## Offline-First Shopping List
+
+  ### Architecture
+  ```
+  ┌─────────────┐     ┌──────────────┐     ┌─────────┐
+  │  React UI   │ ←→  │  IndexedDB   │ ←→  │  Server │
+  │ (component) │     │ (local store)│     │ (Neon)  │
+  └─────────────┘     └──────────────┘     └─────────┘
+       │                     │                    │
+       │  always reads from  │  syncs when online │
+       │  local store        │                    │
+  ```
+
+  ### Data Flow
+
+  **Online:**
+  1. Open shopping list page → fetch from server → save to IndexedDB → render from IndexedDB
+  2. User checks off item → update IndexedDB immediately → sync to server in background
+  3. UI always reads from IndexedDB (instant, no loading)
+
+  **Offline:**
+  1. Open shopping list → read from IndexedDB → render (already cached from last online visit)
+  2. User checks off item → update IndexedDB → queue sync operation
+  3. Show subtle offline indicator: "Du er frakoblet — endringer lagres lokalt"
+
+  **Back online:**
+  1. Background Sync API fires → process sync queue → send updates to server
+  2. Pull latest from server → merge with local changes → update IndexedDB
+  3. Remove offline indicator
+
+  ### IndexedDB Schema (via `idb` library)
+  ```typescript
+  interface MatplanDB {
+    shoppingLists: {
+      key: number;         // list ID
+      value: {
+        id: number;
+        weekStartDate: string;
+        items: ShoppingListItem[];
+        lastSyncedAt: string;
+      };
+    };
+    syncQueue: {
+      key: number;         // auto-increment
+      value: {
+        action: 'checkItem' | 'uncheckItem' | 'updateQuantity';
+        itemId: number;
+        data: any;
+        timestamp: string;
+      };
+    };
+  }
+  ```
+
+  ### Conflict Resolution
+  Strategy: **Last-Write-Wins** with timestamp.
+
+  Scenario: Erik checks "laks" online at 14:00, Mona unchecks it offline at 14:01.
+  - Mona's change has a later timestamp → Mona's version wins
+  - For a shopping list, this is acceptable. Worst case: re-check an item.
+
+  More sophisticated conflict resolution is not needed for a checklist.
+
+  ### Service Worker Caching Strategy
+  | Resource | Strategy | Cache Name |
+  |----------|----------|------------|
+  | Shopping list page HTML | NetworkFirst | `pages` |
+  | Shopping list API data | StaleWhileRevalidate | `api-data` |
+  | Static assets (JS, CSS) | CacheFirst | `static` |
+  | Fonts (Inter, Fraunces) | CacheFirst | `fonts` |
+  | Product images | CacheFirst (expire 7d) | `images` |
+  | Other pages | NetworkFirst | `pages` |
+
+  ## MVP vs Fase 2
+
+  ### MVP
+  - PWA manifest + service worker (app installable on home screen)
+  - Shopping list cached on page load (works offline for reading)
+  - Check-off saved to IndexedDB → synced when online
+  - Offline indicator in UI
+  - Basic: if page was never loaded online, show "Last ned handlelisten mens du har nett"
+
+  ### Fase 2
+  - Full offline CRUD on shopping list (add items, change quantities)
+  - Background sync with retry logic
+  - Pre-cache next week's shopping list automatically
+  - Offline support for recipe viewing (cache active week's recipes)
+
+  ## Offline Indicator Component
+  ```tsx
+  'use client';
+  import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+
+  export function OfflineIndicator() {
+    const isOnline = useOnlineStatus();
+    if (isOnline) return null;
+    return (
+      <div className="fixed bottom-16 left-0 right-0 bg-warning/90 text-center py-2 text-sm">
+        Du er frakoblet — endringer lagres lokalt
+      </div>
+    );
+  }
+  ```
+
+  ## Rules
+  - Shopping list MUST work offline — it's the #1 mobile use case
+  - ALWAYS read from IndexedDB, not server (IndexedDB is the source of truth for UI)
+  - ALWAYS show offline indicator when disconnected
+  - NEVER block the UI while syncing — sync is background-only
+  - Pre-load shopping list data when user is on WiFi (before going to store)
+  - "Installer app" prompt should appear after 2nd visit (not immediately)
+  - Test offline by toggling airplane mode in Chrome DevTools

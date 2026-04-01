@@ -1,0 +1,94 @@
+name: vercel-neon-deploy
+description: Vercel Hobby + Neon Free hosting setup, deploy flow, environment variables, Vercel Cron, and scaling path
+version: 1.0.0
+tags: [hosting, vercel, neon, deploy, postgresql]
+
+instructions: |
+  # Vercel + Neon Deploy
+
+  ## Architecture
+  ```
+  Developer PC → git push → GitHub → Vercel (auto-deploy) → Neon PostgreSQL (Frankfurt)
+  ```
+  - Every push to `main` triggers automatic deploy (~30-60s)
+  - Preview deploys for every branch/PR (unique URL)
+  - HTTPS automatic (Vercel manages SSL)
+
+  ## Vercel Hobby Tier Limits
+  - 100 GB bandwidth/month
+  - 100 GB-hrs serverless compute
+  - **10 second function timeout** (critical — no long-running tasks)
+  - 2 cron jobs (daily minimum interval)
+  - 1 team member
+  - Free subdomain: `matplan.vercel.app`
+  - Custom domain: supported (add later, no code change)
+
+  ## Neon Free Tier Limits
+  - 512 MB storage (plenty for 10 users with recipes, meals, budgets)
+  - 190 compute-hours/month
+  - Scales to zero after 5 min inactivity → **~1-2s cold start on first query**
+  - Region: Frankfurt (eu-central-1) for GDPR/EU compliance
+  - Serverless driver: `@neondatabase/serverless` (HTTP-based, no persistent connection needed)
+
+  ## Environment Variables (set in Vercel Dashboard)
+  ```
+  # Database (from Neon dashboard)
+  DATABASE_URL=postgresql://user:pass@ep-xxx.eu-central-1.aws.neon.tech/matplan?sslmode=require
+
+  # Auth (generate with: openssl rand -base64 32)
+  AUTH_SECRET=random-64-char-string
+  AUTH_GOOGLE_ID=from-google-cloud-console
+  AUTH_GOOGLE_SECRET=from-google-cloud-console
+
+  # APIs
+  KASSALAPP_API_KEY=from-kassal.app-account
+  SPOONACULAR_API_KEY=from-spoonacular.com-account
+  ```
+  NEVER commit these to git. Always set via Vercel Dashboard → Settings → Environment Variables.
+
+  ## Drizzle + Neon Setup
+  ```typescript
+  // src/db/index.ts
+  import { neon } from '@neondatabase/serverless';
+  import { drizzle } from 'drizzle-orm/neon-http';
+  import * as schema from './schema';
+
+  const sql = neon(process.env.DATABASE_URL!);
+  export const db = drizzle(sql, { schema });
+  ```
+
+  ## Vercel Cron (vercel.json)
+  ```json
+  {
+    "crons": [
+      {
+        "path": "/api/cron/update-prices",
+        "schedule": "0 6 * * *"
+      }
+    ]
+  }
+  ```
+  The cron hits an API route which fetches prices from Kassalapp API.
+  Must complete within 10s timeout — fine for API calls, NOT for scraping.
+
+  ## Deploy Commands
+  ```bash
+  npx vercel              # preview deploy
+  npx vercel --prod       # production deploy
+  # Or just: git push origin main (auto-deploys)
+  ```
+
+  ## Scaling Path (no code change needed)
+  | Users   | Action              | Cost      |
+  |---------|---------------------|-----------|
+  | 1-50    | Keep free tier      | $0        |
+  | 50-100  | Vercel Pro          | $20/month |
+  | 100+    | + Neon Pro          | ~$39/month|
+  | Custom domain | Add anytime  | ~100 kr/year (domain only) |
+
+  ## Rules
+  - NEVER put secrets in code or .env files committed to git
+  - NEVER run tasks longer than 10s in serverless functions
+  - ALWAYS use `@neondatabase/serverless` driver (not pg or postgres.js with TCP)
+  - ALWAYS set Neon region to Frankfurt (eu-central-1)
+  - Database schema changes: `npx drizzle-kit push` (pushes to Neon directly)

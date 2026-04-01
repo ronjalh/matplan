@@ -1,0 +1,101 @@
+name: spoonacular-api
+description: Spoonacular recipe API integration — 685k+ international recipes with vegetarian/vegan filters and nutrition data
+version: 1.0.0
+tags: [api, recipes, spoonacular, vegetarian, international]
+
+instructions: |
+  # Spoonacular Recipe API
+
+  ## Overview
+  685,000+ international recipes with dietary filters, nutrition data, and ingredient lists.
+  English-language source — we convert units and display in user's locale (nb/en).
+
+  ### Base URL
+  `https://api.spoonacular.com/`
+
+  ### Authentication
+  Query parameter: `?apiKey={SPOONACULAR_API_KEY}`
+  Free key from spoonacular.com. Store in Vercel env var.
+
+  ### Free Tier Limits
+  - **150 requests/day** (resets at midnight UTC)
+  - ~1 "point" per simple request, ~1.5 for complex searches
+  - For 10 users: aggressive caching is essential
+
+  ### Key Endpoints
+
+  | Endpoint | Use | Points |
+  |----------|-----|--------|
+  | `GET /recipes/complexSearch` | Search with filters (diet, cuisine, type) | 1 |
+  | `GET /recipes/{id}/information` | Full recipe details + nutrition | 1 |
+  | `GET /recipes/{id}/ingredientWidget.json` | Ingredient list with amounts | 1 |
+  | `GET /recipes/findByIngredients` | Find recipes using specific ingredients | 1 |
+  | `GET /recipes/random` | Random recipes (with tags filter) | 1 |
+
+  ### Dietary Filters (complexSearch)
+  ```
+  GET /recipes/complexSearch?diet=vegetarian&number=10
+  ```
+  | Filter | Values |
+  |--------|--------|
+  | `diet` | vegetarian, vegan, pescetarian, lacto-vegetarian, ovo-vegetarian |
+  | `type` | main course, breakfast, lunch, dinner, snack, dessert |
+  | `cuisine` | norwegian, italian, indian, mexican, thai, japanese, mediterranean, etc. |
+  | `intolerances` | gluten, dairy, egg, peanut, sesame, soy, etc. |
+  | `maxReadyTime` | minutes (e.g., 30 for quick meals) |
+  | `sort` | popularity, time, price, healthiness |
+
+  ### Response Data (recipe information)
+  - title, image, servings, readyInMinutes, sourceUrl
+  - extendedIngredients: [{name, amount, unit, original}]
+  - analyzedInstructions: [{steps: [{number, step}]}]
+  - nutrition: {nutrients: [{name, amount, unit, percentOfDailyNeeds}]}
+  - vegetarian, vegan, glutenFree, dairyFree (booleans)
+  - cuisines, dishTypes, diets (arrays)
+
+  ### Caching Strategy (CRITICAL — only 150 req/day)
+  - Cache ALL recipe search results and details in PostgreSQL
+  - Search results: cache for 7 days (recipes don't change often)
+  - Recipe details: cache indefinitely (recipe content is static)
+  - Popular searches: pre-cache "vegetar middag", "rask lunsj", "fisk", etc.
+  - Show cached results first, refresh in background if stale
+
+  ### Unit Conversion (at import time)
+  When storing a Spoonacular recipe, convert all units:
+  | From (US) | To (Norwegian) | Factor |
+  |-----------|----------------|--------|
+  | 1 cup (liquid) | 2.37 dl | × 2.37 |
+  | 1 cup (flour) | 1.3 dl | × 1.3 |
+  | 1 tbsp | 1 ss | 1:1 (≈15ml) |
+  | 1 tsp | 1 ts | 1:1 (≈5ml) |
+  | 1 oz (weight) | 28 g | × 28 |
+  | 1 lb | 454 g | × 454 |
+  | 1 fl oz | 0.3 dl | × 0.3 |
+  | °F | °C | (F-32) × 5/9 |
+
+  Note: "1 cup" varies by ingredient (flour vs liquid). Spoonacular provides
+  metric amounts alongside US amounts — prefer the metric values when available.
+
+  ### Vegetarian First-Class Support
+  - Vegetar/vegan filter is prominently placed in recipe search UI
+  - Users can set dietary preference in profile → auto-applied to all searches
+  - Badges: 🌿 Vegetar, 🌱 Vegan (always visible on recipe cards)
+  - When planning meals: warn if week has no protein variety (legumes, eggs, dairy)
+
+  ### Mapping to Our Domain
+  When importing a Spoonacular recipe into our database:
+  1. Create `recipe` record with Norwegian-converted data
+  2. Map ingredients to our `ingredients` table (fuzzy name match)
+  3. Calculate `plateModelScore` from ingredient categories
+  4. Calculate `eightADayServings` from fruit/veg amounts
+  5. Set `isFishMeal` from ingredient analysis
+  6. Apply tags: translate cuisines/diets to our tag system
+  7. Source field: `spoonacular:{id}` for attribution
+
+  ## Rules
+  - ALWAYS cache aggressively — 150 requests/day is tight for 10 users
+  - ALWAYS convert units to Norwegian (dl, ss, ts, g, kg) at import time
+  - ALWAYS show dietary badges (vegetar/vegan) on recipe cards
+  - NEVER display raw US measurements to the user
+  - NEVER exceed 150 requests/day — implement a request counter
+  - Spoonacular recipes are NOT ours — always link back to original source

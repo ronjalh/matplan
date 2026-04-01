@@ -1,0 +1,58 @@
+name: matskap-beholdning
+description: Pantry/inventory tracking — what the user has at home, auto-deduct from shopping lists, expiry awareness (Fase 3)
+version: 1.0.0
+tags: [pantry, inventory, shopping, fase-3]
+
+instructions: |
+  # Matskap — Pantry/Inventory (Fase 3)
+
+  NOTE: This is a FUTURE FEATURE (Fase 3). Do not implement until Fase 1-2 are complete.
+  This skill documents the design so it's ready when we get there.
+
+  ## Concept
+  Users register what they have at home. The shopping list automatically
+  deducts existing stock, so they only buy what they need.
+
+  ## Data Model
+  ```
+  pantryItems:
+    id: serial PK
+    userId: integer FK
+    ingredientId: integer FK (nullable — for linked items)
+    name: text                    -- display name
+    quantity: real                -- estimated remaining
+    unit: text                   -- g, dl, stk, etc.
+    purchasedAt: date (nullable)
+    expiresAt: date (nullable)   -- best before
+    category: text               -- same as shopping list categories
+    notes: text (nullable)
+  ```
+
+  ## UX Flow
+  ```
+  1. User finishes shopping → app asks "Oppdater matskap?"
+  2. Purchased items auto-added to pantry with full quantity
+  3. When generating shopping list:
+     - Check pantry for each ingredient
+     - If pantry has enough → auto-check "har allerede"
+     - If pantry has partial → reduce needed quantity
+     - Show: "Du har 750g ris, trenger 450g → har nok ✓"
+  4. After cooking a meal → optionally deduct ingredients used
+  ```
+
+  ## Smart Suggestions
+  - "Du kjøper melk hver uke — legge til fast på handlelisten?"
+  - "Hvitløken du kjøpte 14 dager siden — kanskje på tide å sjekke?"
+  - "Du har 3 items som utgår denne uken" (if expiry tracked)
+
+  ## Integration Points
+  - Shopping list: auto-deduct pantry stock
+  - Meal planning: "Du har alt du trenger for denne oppskriften ✓"
+  - Budget: track actual spend vs. what was needed (avoid overbuying)
+
+  ## Rules (for when this is implemented)
+  - Pantry is APPROXIMATE — users won't weigh flour every time
+  - Use "ca." prefix for estimated quantities
+  - Never block shopping list generation if pantry data is incomplete
+  - Expiry tracking is OPTIONAL — not everyone wants to enter dates
+  - Keep input friction LOW — this should feel like a quick checklist, not data entry

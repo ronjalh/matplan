@@ -1,0 +1,157 @@
+name: prisdata-api
+description: Dual price API system — Kassalapp and Oda as equal providers, user-selectable, with shared interface and caching
+version: 1.0.0
+tags: [api, prices, kassalapp, oda, grocery, provider]
+
+instructions: |
+  # Prisdata API — Dual Provider System
+
+  ## Architecture
+  Two **equal** price data providers. The user chooses which one to use in settings.
+  Both are always available — if one goes down, the user switches to the other.
+
+  ```
+  User settings: "Priskilde: [Kassalapp] [Oda]"
+           │
+           ▼
+  PriceProvider interface
+       ┌────────┴────────┐
+       ▼                 ▼
+  KassalappProvider   OdaProvider
+       │                 │
+       ▼                 ▼
+  kassal.app API    oda.com internal API
+  (alle butikker)   (kun Oda-priser)
+  ```
+
+  ## Shared Interface
+  ```typescript
+  interface PriceProvider {
+    name: string;                    // "kassalapp" | "oda"
+    displayName: string;             // "Kassalapp (alle butikker)" | "Oda"
+    search(query: string): Promise<StoreProduct[]>;
+    getProduct(id: string): Promise<StoreProduct | null>;
+    getPriceHistory(id: string): Promise<PricePoint[]>;
+    isAvailable(): Promise<boolean>; // health check
+  }
+
+  interface StoreProduct {
+    providerId: string;       // provider-specific ID
+    provider: "kassalapp" | "oda";
+    name: string;
+    brand: string | null;
+    store: string;            // "Rema 1000", "Oda", etc.
+    priceOre: number;         // integer øre (4990 = kr 49,90)
+    pricePerUnitOre: number;  // kr per kg/l
+    unit: string;             // "kg", "stk", "l", "pk"
+    weight: string | null;    // "400g", "1l", etc.
+    imageUrl: string | null;
+    category: string | null;
+  }
+  ```
+
+  ## Provider 1: Kassalapp (kassal.app)
+
+  ### Base URL: `https://kassal.app/api/v1/`
+  ### Auth: `Authorization: Bearer {KASSALAPP_API_KEY}`
+  ### Rate limit: 60 requests/min (free tier)
+
+  ### Endpoints
+  | Endpoint | Method | Use |
+  |----------|--------|-----|
+  | `/products?search={query}` | GET | Search products |
+  | `/products/id/{id}` | GET | Product details |
+  | `/products/ean/{ean}` | GET | Lookup by barcode |
+  | `/products/find-by-url/compare` | GET | Price comparison |
+  | `POST /products/prices-bulk` | POST | Bulk price history (100 EANs) |
+
+  ### Advantages
+  - **All Norwegian chains:** Oda, Rema, Kiwi, Coop, Meny, Joker, Bunnpris
+  - Documented, stable API
+  - Price comparison across stores
+  - Nutrition data, allergens, ingredients on products
+
+  ### Disadvantages
+  - 60 req/min limit
+  - Third-party service (could shut down)
+
+  ## Provider 2: Oda (oda.com internal API)
+
+  ### Search: `GET https://oda.com/no/search/products/?q={query}&page={page}`
+  ### Auth: None required for read operations
+
+  ### Data extraction
+  - Fetch page HTML via `fetch()` (server-side)
+  - Parse `<script id="__NEXT_DATA__">` JSON blob
+  - Navigate: `props.pageProps.dehydratedState.queries[0].state.data`
+  - Fields (camelCase): id, fullName, brand, grossPrice, grossUnitPrice, currency, availability
+  - 42 results per page, paginated via `?page=N`
+
+  ### Advantages
+  - Direct from Oda — freshest prices
+  - No API key needed
+  - No rate limit (but be respectful — add 1s delay between pages)
+
+  ### Disadvantages
+  - **Undocumented** — can break anytime Oda changes frontend
+  - Only Oda prices (no comparison)
+  - No nutrition data on products
+  - Fragile parsing (HTML/JSON structure may change)
+
+  ## User Settings
+  ```
+  Innstillinger → Priskilde:
+    ○ Kassalapp (anbefalt — priser fra alle butikker)
+    ○ Oda (kun Oda-priser)
+
+  Status: ● Kassalapp: Tilgjengelig  ● Oda: Tilgjengelig
+  ```
+
+  - Default: Kassalapp (covers more stores)
+  - User can switch anytime in settings
+  - Show availability status for both providers
+  - If active provider fails during use → show error + suggest switching
+
+  ## Caching (shared for both providers)
+  - All fetched products cached in `storeProducts` table
+  - Cache key: `{provider}:{providerId}`
+  - Cache TTL: 24 hours (re-fetch if older)
+  - Vercel Cron (daily 06:00): refresh prices for products in active meal plans
+  - On-demand: user searches → check cache → call API if stale/missing
+
+  ## Database: storeProducts table
+  ```
+  storeProducts:
+    id: serial PK
+    provider: text             -- "kassalapp" | "oda"
+    providerId: text           -- provider-specific product ID
+    name: text
+    brand: text (nullable)
+    store: text                -- "Rema 1000", "Oda", etc.
+    priceOre: integer
+    pricePerUnitOre: integer
+    unit: text
+    weight: text (nullable)
+    imageUrl: text (nullable)
+    category: text (nullable)
+    ingredientId: integer (FK, nullable)  -- linked to our ingredient
+    priceHistory: jsonb        -- [{date, priceOre}]
+    lastUpdatedAt: timestamp
+    UNIQUE(provider, providerId)
+  ```
+
+  ## Price Display
+  When showing prices to the user:
+  - **Kassalapp active:** Show price + store name for cheapest, with "Se alle butikker" expandable
+  - **Oda active:** Show Oda price only
+  - **No price found:** Show "Pris ukjent" with manual entry option
+  - **Stale price (>7 days):** Show price with "Sist oppdatert: 5 dager siden" warning
+
+  ## Rules
+  - BOTH providers are always available — user chooses, not the system
+  - NEVER silently switch provider — always inform the user
+  - ALWAYS cache API responses (both providers use same cache table)
+  - ALWAYS provide manual price entry as ultimate fallback
+  - API keys stored in Vercel env vars, never in code
+  - Oda provider must be wrapped in robust try/catch — it WILL break eventually
+  - When Oda provider breaks: log error, show user-friendly message, suggest Kassalapp

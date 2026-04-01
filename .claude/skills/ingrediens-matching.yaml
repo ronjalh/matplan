@@ -1,0 +1,108 @@
+name: ingrediens-matching
+description: Automatic and user-assisted matching of recipe ingredients to store products, price calculation, and learned preferences
+version: 1.0.0
+tags: [ingredients, matching, prices, products]
+
+instructions: |
+  # Ingrediens-Matching — Recipe to Store Product Linking
+
+  ## Overview
+  When a recipe has "400g laks", we need to find the right store product
+  ("Lerøy Laksefilet 400g, kr 89,90") and calculate the cost.
+
+  ## Matching Strategy (MVP — Half-Automatic)
+
+  ### Step 1: Search active provider
+  ```typescript
+  async function matchIngredient(ingredientName: string, quantity: number, unit: string): Promise<ProductMatch[]> {
+    const provider = getUserPriceProvider(userId); // "kassalapp" | "oda"
+    const results = await provider.search(ingredientName);
+    return rankMatches(results, ingredientName, quantity, unit);
+  }
+  ```
+
+  ### Step 2: Rank matches
+  Scoring criteria (0-100):
+  | Factor | Weight | Example |
+  |--------|--------|---------|
+  | Name similarity | 40% | "laks" vs "Laksefilet" = high, vs "Laksesaus" = low |
+  | Weight/size fit | 30% | Recipe needs 400g, product is 400g = perfect, 1kg = OK |
+  | Category match | 20% | Both "fisk" = good |
+  | Price per unit | 10% | Cheapest per kg ranks higher |
+
+  Name similarity: normalize both strings (lowercase, remove brand), then Levenshtein
+  or check if ingredient name is a substring of product name.
+
+  ### Step 3: Present to user
+  - Show top match as "foreslått" with price
+  - "Endre produkt" button opens search with alternatives
+  - "Manuell pris" if no match found
+  - "Ikke nødvendig" to skip ingredient entirely
+
+  ### Step 4: Save the choice (Fase 2)
+  ```
+  ingredientProductLinks:
+    userId, ingredientName (normalized), provider, productId, lastUsed
+  ```
+  Next time same ingredient appears → use saved link instead of searching.
+
+  ## Price Calculation
+
+  ### Per ingredient
+  ```
+  If product is weight-based (e.g., "Laksefilet 400g" = 8990 øre):
+    If recipe needs exactly 400g → cost = 8990 øre
+    If recipe needs 200g → cost = 8990 × (200/400) = 4495 øre
+
+  If product is per-unit (e.g., "Sitron" = 590 øre/stk):
+    If recipe needs 2 stk → cost = 1180 øre
+
+  If product is volume-based (e.g., "Melk 1l" = 2190 øre):
+    If recipe needs 2 dl → cost = 2190 × (0.2/1.0) = 438 øre
+  ```
+
+  ### Per recipe
+  ```
+  recipeCost = sum of all ingredient costs
+  costPerServing = recipeCost / recipe.servings
+  ```
+
+  ### Per week (meal plan)
+  ```
+  weeklyCost = sum of recipeCost for all planned meals
+  ```
+  Note: ingredients shared across meals are counted once on shopping list
+  but cost is split proportionally.
+
+  ## Display Format
+  ```
+  Oppskrift: Laksemiddag (4 porsjoner)
+
+  Ingrediens    Mengde   Produkt               Butikk    Pris
+  ─────────────────────────────────────────────────────────────
+  Laks          400g     🔗 Lerøy Laksefilet   Oda       89,90
+                         [Endre]
+  Brokkoli      300g     🔗 Brokkoli 350g       Rema      29,90
+  Ris           3 dl     🔗 Jasminris 1kg       Kiwi       7,85*
+  Sitron        1 stk    ⚠ Ikke funnet          —           —
+                         [Søk] [Manuell pris]
+  ─────────────────────────────────────────────────────────────
+  Estimert totalt:                                      127,65
+  Per porsjon:                                           31,91
+
+  * Delvis bruk: 1kg koster 34,90, du bruker ~225g
+  ```
+
+  ## Edge Cases
+  - **Ingredient not found:** Show "⚠ Ikke funnet" + manual entry option
+  - **Multiple sizes:** Prefer size closest to needed quantity
+  - **Spices/small amounts:** "Salt og pepper" → skip pricing (negligible cost)
+  - **Partial package:** Show full package price + note "du bruker X av Y"
+  - **Price unknown:** Show "—" in price column, exclude from total, show count of unpriced
+
+  ## Rules
+  - ALWAYS show the match as a suggestion, not a fait accompli — user confirms
+  - ALWAYS calculate in øre (integers), display in kr
+  - NEVER hide the "Manuell pris" option — it's the ultimate fallback
+  - Show "Delvis bruk" note when buying a larger package than needed
+  - Unpriced items: "Estimert totalt: kr 127,65 (2 varer uten pris)"

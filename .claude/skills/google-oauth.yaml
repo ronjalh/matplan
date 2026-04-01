@@ -1,0 +1,146 @@
+name: google-oauth
+description: NextAuth.js v5 with Google OAuth provider — setup, session handling, and user management
+version: 1.0.0
+tags: [auth, google, oauth, nextauth, security]
+
+instructions: |
+  # Google OAuth — Authentication
+
+  ## Stack
+  - **NextAuth.js v5** (Auth.js) with Google provider
+  - **Drizzle adapter** for storing sessions/users in Neon PostgreSQL
+  - No passwords — Google handles all authentication
+
+  ## Setup Steps (one-time)
+
+  ### 1. Google Cloud Console
+  1. Go to console.cloud.google.com → create project "Matplan"
+  2. APIs & Services → Credentials → Create OAuth 2.0 Client ID
+  3. Application type: Web application
+  4. Authorized redirect URIs:
+     - `http://localhost:3000/api/auth/callback/google` (dev)
+     - `https://matplan.vercel.app/api/auth/callback/google` (prod)
+  5. Copy Client ID and Client Secret → set as Vercel env vars
+
+  ### 2. NextAuth Configuration
+  ```typescript
+  // src/lib/auth/auth-config.ts
+  import NextAuth from 'next-auth';
+  import Google from 'next-auth/providers/google';
+  import { DrizzleAdapter } from '@auth/drizzle-adapter';
+  import { db } from '@/db';
+
+  export const { handlers, signIn, signOut, auth } = NextAuth({
+    adapter: DrizzleAdapter(db),
+    providers: [
+      Google({
+        clientId: process.env.AUTH_GOOGLE_ID!,
+        clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      }),
+    ],
+    pages: {
+      signIn: '/login',  // custom login page
+    },
+  });
+  ```
+
+  ### 3. Auth Route Handler
+  ```typescript
+  // src/app/api/auth/[...nextauth]/route.ts
+  import { handlers } from '@/lib/auth/auth-config';
+  export const { GET, POST } = handlers;
+  ```
+
+  ### 4. Middleware (protect routes)
+  ```typescript
+  // src/middleware.ts
+  export { auth as middleware } from '@/lib/auth/auth-config';
+
+  export const config = {
+    matcher: ['/((?!api/auth|login|_next/static|_next/image|favicon.ico).*)'],
+  };
+  ```
+
+  ## Database Tables (Drizzle adapter creates these)
+  - `users` — id, name, email, emailVerified, image (from Google profile)
+  - `accounts` — userId, provider, providerAccountId, access_token, etc.
+  - `sessions` — sessionToken, userId, expires
+  - `verification_tokens` — for email verification (not used with Google OAuth)
+
+  ## Session Access
+
+  ### Server Components
+  ```typescript
+  import { auth } from '@/lib/auth/auth-config';
+
+  export default async function Page() {
+    const session = await auth();
+    if (!session) redirect('/login');
+    const user = session.user; // { name, email, image }
+  }
+  ```
+
+  ### Client Components
+  ```typescript
+  'use client';
+  import { useSession } from 'next-auth/react';
+
+  export function UserMenu() {
+    const { data: session } = useSession();
+    // session?.user.name, session?.user.image
+  }
+  ```
+
+  ### Server Actions
+  ```typescript
+  'use server';
+  import { auth } from '@/lib/auth/auth-config';
+
+  export async function createRecipe(data: RecipeData) {
+    const session = await auth();
+    if (!session) throw new Error('Unauthorized');
+    // ... create recipe with session.user.id as owner
+  }
+  ```
+
+  ## Login Page
+  Simple page with "Logg inn med Google" button:
+  ```typescript
+  import { signIn } from '@/lib/auth/auth-config';
+
+  export default function LoginPage() {
+    return (
+      <form action={async () => {
+        'use server';
+        await signIn('google');
+      }}>
+        <button type="submit">
+          <GoogleIcon /> Logg inn med Google
+        </button>
+      </form>
+    );
+  }
+  ```
+
+  ## User Data from Google
+  On first login, NextAuth creates a user record with:
+  - `name`: Google display name
+  - `email`: Google email
+  - `image`: Google profile picture URL
+  No additional registration form needed.
+
+  ## Data Ownership
+  All user-created data (recipes, meal plans, budgets) must have a `userId` foreign key.
+  Users can only see and modify their own data. Enforce in EVERY query:
+  ```typescript
+  const recipes = await db.select().from(recipesTable)
+    .where(eq(recipesTable.userId, session.user.id));
+  ```
+
+  ## Rules
+  - EVERY Server Action must verify `auth()` before proceeding
+  - EVERY database query must filter by userId (data isolation between users)
+  - NEVER expose other users' data
+  - NEVER store Google access tokens longer than NextAuth's session
+  - Login page must work in both nb and en locales
+  - Show Google profile picture in the navigation/user menu

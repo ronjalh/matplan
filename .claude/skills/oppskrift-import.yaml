@@ -1,0 +1,114 @@
+name: oppskrift-import
+description: Recipe URL import via schema.org/Recipe JSON-LD parsing, international unit conversion, and source attribution
+version: 1.0.0
+tags: [recipes, import, schema-org, parsing, conversion]
+
+instructions: |
+  # Oppskrift Import — Recipe URL Import
+
+  ## How It Works
+  User pastes a URL from any recipe website → we fetch the page → extract
+  schema.org/Recipe structured data → convert units → save to database.
+
+  ## schema.org/Recipe JSON-LD
+  Most recipe websites embed structured data for SEO. It looks like:
+  ```html
+  <script type="application/ld+json">
+  {
+    "@type": "Recipe",
+    "name": "Laksemiddag med grønnsaker",
+    "recipeIngredient": ["400g laks", "2 dl ris", "300g brokkoli"],
+    "recipeInstructions": [{"@type": "HowToStep", "text": "..."}],
+    "prepTime": "PT15M",
+    "cookTime": "PT25M",
+    "recipeYield": "4 servings",
+    "recipeCuisine": "Norwegian",
+    "recipeCategory": "Dinner",
+    "nutrition": {"calories": "450 kcal"},
+    "image": "https://..."
+  }
+  </script>
+  ```
+
+  ## Supported Norwegian Sites (confirmed schema.org support)
+  - matprat.no
+  - tine.no
+  - godt.no
+  - nrk.no (NRK Mat)
+  - vegetarbloggen.no
+
+  ## International Sites (most use schema.org)
+  - allrecipes.com
+  - bbcgoodfood.com
+  - delish.com
+  - budgetbytes.com
+  - minimalistbaker.com (vegetar/vegan fokus)
+  - cookieandkate.com (vegetar)
+  - And thousands more
+
+  ## Import Flow
+  ```
+  1. User pastes URL
+  2. Server Action fetches page HTML (via fetch, not Playwright)
+  3. Parse <script type="application/ld+json"> tags
+  4. Find the object with "@type": "Recipe"
+  5. Extract: name, ingredients, instructions, times, yield, image
+  6. Detect language (nb/en/other)
+  7. Parse ingredient strings into {name, quantity, unit}
+  8. Convert units if needed (US → Norwegian)
+  9. Calculate plate model score + 8-om-dagen
+  10. Save to database with source URL attribution
+  ```
+
+  ## Ingredient String Parsing
+  Recipe ingredients come as free-text strings. Examples:
+  - "400g laks" → {name: "laks", quantity: 400, unit: "g"}
+  - "2 cups flour" → {name: "flour", quantity: 2.6, unit: "dl"} (converted)
+  - "1 medium onion, diced" → {name: "onion", quantity: 1, unit: "stk"}
+  - "Salt and pepper to taste" → {name: "salt og pepper", quantity: null, unit: "etter smak"}
+
+  This is the hardest part. Strategy:
+  1. Try regex patterns for common formats: `(\d+\.?\d*)\s*(g|kg|dl|ml|cup|tbsp|tsp|stk|oz|lb)\s+(.+)`
+  2. Handle fractions: "1/2 cup" → 0.5, "1 1/2" → 1.5
+  3. For unstructured strings: keep original text, let user edit
+
+  ## Unit Conversion (automatic at import)
+  | From | To | Factor | Notes |
+  |------|----|--------|-------|
+  | cup (liquid) | dl | × 2.37 | |
+  | cup (flour) | dl | × 1.3 | Less dense |
+  | cup (sugar) | dl | × 2.0 | |
+  | tbsp | ss | 1:1 | Both ≈15ml |
+  | tsp | ts | 1:1 | Both ≈5ml |
+  | oz (weight) | g | × 28.35 | |
+  | lb | g | × 453.6 | |
+  | fl oz | dl | × 0.296 | |
+  | °F | °C | (F-32)×5/9 | In instructions text |
+
+  When Spoonacular provides metric AND US, prefer metric.
+  For ambiguous "cup" conversions, default to liquid measure and add "ca." prefix.
+
+  ## Time Parsing (ISO 8601 duration)
+  - "PT15M" → 15 minutes
+  - "PT1H30M" → 90 minutes
+  - "PT45M" → 45 minutes
+
+  ## Source Attribution
+  - Always store and display the source URL
+  - Show "Importert fra matprat.no" or similar
+  - Link back to original recipe
+  - Respect copyright: we store structured data, not full article text
+
+  ## Error Handling
+  - No JSON-LD found → show "Kunne ikke finne oppskrift på denne siden"
+  - Partial data → import what we have, mark missing fields for user to fill in
+  - Fetch fails (CORS, 403) → show "Denne siden blokkerer import, prøv en annen"
+  - Note: some sites block server-side fetching. This is a known limitation.
+
+  ## Rules
+  - ALWAYS fetch via Server Action (server-side, not client-side — avoids CORS)
+  - ALWAYS convert US units to Norwegian at import time
+  - ALWAYS preserve source URL for attribution
+  - NEVER store full HTML or article text — only structured recipe data
+  - NEVER claim imported recipes as our own
+  - Ingredient parsing will be imperfect — always let user edit the result
