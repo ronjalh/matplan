@@ -36,16 +36,22 @@ interface RecipeWithIngredients {
 export function RecipeDetail({ recipe }: { recipe: RecipeWithIngredients }) {
   const [editing, setEditing] = useState(false);
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   async function handleUpdate(formData: FormData) {
     if (pending) return;
     setPending(true);
+    setError(null);
     try {
-      await updateRecipe(recipe.id, formData);
+      const result = await updateRecipe(recipe.id, formData);
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
       setEditing(false);
-    } catch (e) {
-      console.error(e);
+    } catch {
+      setError("Noe gikk galt. Prøv igjen.");
     } finally {
       setPending(false);
     }
@@ -127,6 +133,12 @@ export function RecipeDetail({ recipe }: { recipe: RecipeWithIngredients }) {
                 <Label htmlFor="instructions">Fremgangsmåte</Label>
                 <Textarea id="instructions" name="instructions" defaultValue={recipe.instructions ?? ""} rows={6} />
               </div>
+
+              {error && (
+                <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
+                  {error}
+                </p>
+              )}
 
               <Button type="submit" disabled={pending} className="w-full">
                 {pending ? "Lagrer..." : "Lagre endringer"}

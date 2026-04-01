@@ -20,10 +20,14 @@ export function RecipeForm() {
     setPending(true);
     setError(null);
     try {
-      await createRecipe(formData);
-      formRef.current?.reset();
-    } catch (e: any) {
-      setError(e?.message ?? "Noe gikk galt");
+      const result = await createRecipe(formData);
+      if (!result.success) {
+        setError(result.error);
+      } else {
+        formRef.current?.reset();
+      }
+    } catch {
+      setError("Noe gikk galt. Prøv igjen.");
     } finally {
       setPending(false);
     }
