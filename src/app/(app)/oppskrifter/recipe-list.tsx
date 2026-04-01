@@ -25,9 +25,11 @@ export function RecipeList({ recipes }: { recipes: Recipe[] }) {
       <h2 className="text-lg font-semibold">
         Dine oppskrifter ({recipes.length})
       </h2>
-      {recipes.map((recipe) => (
-        <RecipeCard key={recipe.id} recipe={recipe} />
-      ))}
+      <div className="space-y-3">
+        {recipes.map((recipe) => (
+          <RecipeCard key={recipe.id} recipe={recipe} />
+        ))}
+      </div>
     </div>
   );
 }

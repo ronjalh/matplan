@@ -28,11 +28,26 @@ export function IngredientEditor({
   const [currentUnit, setCurrentUnit] = useState("g");
 
   function addIngredient() {
-    const trimmed = currentName.trim();
+    const trimmed = currentName.trim().toLowerCase();
     const qty = parseFloat(currentQty);
     if (!trimmed || isNaN(qty) || qty <= 0) return;
 
-    setIngredients([...ingredients, { name: trimmed, quantity: qty, unit: currentUnit }]);
+    // Check for duplicate: same name and unit → merge quantities
+    const existingIndex = ingredients.findIndex(
+      (ing) => ing.name.toLowerCase() === trimmed && ing.unit === currentUnit
+    );
+
+    if (existingIndex >= 0) {
+      const updated = [...ingredients];
+      updated[existingIndex] = {
+        ...updated[existingIndex],
+        quantity: updated[existingIndex].quantity + qty,
+      };
+      setIngredients(updated);
+    } else {
+      setIngredients([...ingredients, { name: currentName.trim(), quantity: qty, unit: currentUnit }]);
+    }
+
     setCurrentName("");
     setCurrentQty("");
   }
