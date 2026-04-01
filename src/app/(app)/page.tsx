@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth/auth-config";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, ChefHat, ShoppingCart, Wallet, Sprout, Compass } from "lucide-react";
+import { DashboardCard } from "@/components/dashboard-card";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -38,85 +39,41 @@ export default async function DashboardPage() {
       </Link>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Link href="/kalender" className="block group">
-          <Card className="h-full transition-all group-hover:border-primary/50 group-hover:shadow-lg group-hover:scale-[1.02]">
-            <CardHeader className="flex flex-row items-center gap-3 pb-2">
-              <div className="rounded-full bg-primary/10 p-2 transition-colors group-hover:bg-primary/20">
-                <Calendar className="w-5 h-5 text-primary" />
-              </div>
-              <CardTitle className="text-base group-hover:text-primary transition-colors">Kalender</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Planlegg ukens måltider og aktiviteter
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/oppskrifter" className="block group">
-          <Card className="h-full transition-all group-hover:border-primary/50 group-hover:shadow-lg group-hover:scale-[1.02]">
-            <CardHeader className="flex flex-row items-center gap-3 pb-2">
-              <div className="rounded-full bg-primary/10 p-2 transition-colors group-hover:bg-primary/20">
-                <ChefHat className="w-5 h-5 text-primary" />
-              </div>
-              <CardTitle className="text-base group-hover:text-primary transition-colors">Oppskrifter</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Dine oppskrifter og utforsk nye
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/handleliste" className="block group">
-          <Card className="h-full transition-all group-hover:border-primary/50 group-hover:shadow-lg group-hover:scale-[1.02]">
-            <CardHeader className="flex flex-row items-center gap-3 pb-2">
-              <div className="rounded-full bg-primary/10 p-2 transition-colors group-hover:bg-primary/20">
-                <ShoppingCart className="w-5 h-5 text-primary" />
-              </div>
-              <CardTitle className="text-base group-hover:text-primary transition-colors">Handleliste</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Generer handleliste fra ukeplanen
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/budsjett" className="block group">
-          <Card className="h-full transition-all group-hover:border-[var(--color-warning)]/50 group-hover:shadow-lg group-hover:scale-[1.02]">
-            <CardHeader className="flex flex-row items-center gap-3 pb-2">
-              <div className="rounded-full bg-[var(--color-warning)]/10 p-2 transition-colors group-hover:bg-[var(--color-warning)]/20">
-                <Wallet className="w-5 h-5 text-[var(--color-warning)]" />
-              </div>
-              <CardTitle className="text-base group-hover:text-[var(--color-warning)] transition-colors">Budsjett</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Hold styr på matbudsjettet og andre utgifter
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/sesong" className="block group">
-          <Card className="h-full transition-all group-hover:border-[var(--color-success)]/50 group-hover:shadow-lg group-hover:scale-[1.02]">
-            <CardHeader className="flex flex-row items-center gap-3 pb-2">
-              <div className="rounded-full bg-[var(--color-success)]/10 p-2 transition-colors group-hover:bg-[var(--color-success)]/20">
-                <Sprout className="w-5 h-5 text-[var(--color-success)]" />
-              </div>
-              <CardTitle className="text-base group-hover:text-[var(--color-success)] transition-colors">I sesong</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Se hva som er i sesong i Norge akkurat nå
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+        <DashboardCard
+          href="/kalender"
+          icon={Calendar}
+          title="Kalender"
+          description="Planlegg ukens måltider og aktiviteter"
+          color="#4A90A4"
+        />
+        <DashboardCard
+          href="/oppskrifter"
+          icon={ChefHat}
+          title="Oppskrifter"
+          description="Dine oppskrifter og utforsk nye"
+          color="#C27B5A"
+        />
+        <DashboardCard
+          href="/handleliste"
+          icon={ShoppingCart}
+          title="Handleliste"
+          description="Generer handleliste fra ukeplanen"
+          color="#E06090"
+        />
+        <DashboardCard
+          href="/budsjett"
+          icon={Wallet}
+          title="Budsjett"
+          description="Hold styr på matbudsjettet og andre utgifter"
+          color="#9B7ED8"
+        />
+        <DashboardCard
+          href="/sesong"
+          icon={Sprout}
+          title="I sesong"
+          description="Se hva som er i sesong i Norge akkurat nå"
+          color="#6ABF69"
+        />
       </div>
     </div>
   );
