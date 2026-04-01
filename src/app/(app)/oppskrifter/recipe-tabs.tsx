@@ -5,6 +5,7 @@ import { RecipeForm } from "./recipe-form";
 import { RecipeList } from "./recipe-list";
 import { ExploreSearch } from "./explore-search";
 import { ChefHat, BookOpen, Compass } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 interface Recipe {
   id: number;
@@ -23,8 +24,11 @@ interface Recipe {
 }
 
 export function RecipeTabs({ recipes }: { recipes: Recipe[] }) {
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get("tab") === "utforsk" ? "utforsk" : "mine";
+
   return (
-    <Tabs defaultValue="mine">
+    <Tabs defaultValue={defaultTab}>
       <TabsList className="w-full justify-start">
         <TabsTrigger value="mine" className="gap-2">
           <BookOpen className="w-4 h-4" />

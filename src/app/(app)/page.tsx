@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/auth-config";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, ChefHat, ShoppingCart, Wallet, Sprout, Search } from "lucide-react";
+import { Calendar, ChefHat, ShoppingCart, Wallet, Sprout, Compass } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -18,12 +18,21 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Quick search */}
+      {/* Explore recipes */}
       <Link href="/oppskrifter?tab=utforsk">
-        <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors cursor-pointer">
-          <Search className="w-5 h-5" />
-          <span>Søk blant 685 000+ oppskrifter...</span>
-        </div>
+        <Card className="hover:border-primary/50 hover:shadow-md transition-all cursor-pointer bg-primary/5">
+          <CardContent className="flex items-center gap-4 py-4">
+            <div className="rounded-full bg-primary/10 p-3">
+              <Compass className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <p className="font-medium">Utforsk oppskrifter</p>
+              <p className="text-sm text-muted-foreground">
+                Søk blant 685 000+ internasjonale oppskrifter
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </Link>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
