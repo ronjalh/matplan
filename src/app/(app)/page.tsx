@@ -1,6 +1,5 @@
 import { auth } from "@/lib/auth/auth-config";
-import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, ChefHat, ShoppingCart, Wallet, Sprout, Compass } from "lucide-react";
+import { Compass } from "lucide-react";
 import { DashboardCard } from "@/components/dashboard-card";
 import Link from "next/link";
 
@@ -41,35 +40,35 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <DashboardCard
           href="/kalender"
-          icon={Calendar}
+          icon="calendar"
           title="Kalender"
           description="Planlegg ukens måltider og aktiviteter"
           color="#4A90A4"
         />
         <DashboardCard
           href="/oppskrifter"
-          icon={ChefHat}
+          icon="chefhat"
           title="Oppskrifter"
           description="Dine oppskrifter og utforsk nye"
           color="#C27B5A"
         />
         <DashboardCard
           href="/handleliste"
-          icon={ShoppingCart}
+          icon="shoppingcart"
           title="Handleliste"
           description="Generer handleliste fra ukeplanen"
           color="#E06090"
         />
         <DashboardCard
           href="/budsjett"
-          icon={Wallet}
+          icon="wallet"
           title="Budsjett"
           description="Hold styr på matbudsjettet og andre utgifter"
           color="#9B7ED8"
         />
         <DashboardCard
           href="/sesong"
-          icon={Sprout}
+          icon="sprout"
           title="I sesong"
           description="Se hva som er i sesong i Norge akkurat nå"
           color="#6ABF69"

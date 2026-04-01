@@ -1,13 +1,23 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { LucideIcon } from "lucide-react";
+import { Calendar, ChefHat, ShoppingCart, Wallet, Sprout } from "lucide-react";
 import Link from "next/link";
 import { useRef } from "react";
 
+const iconMap = {
+  calendar: Calendar,
+  chefhat: ChefHat,
+  shoppingcart: ShoppingCart,
+  wallet: Wallet,
+  sprout: Sprout,
+} as const;
+
+type IconName = keyof typeof iconMap;
+
 interface DashboardCardProps {
   href: string;
-  icon: LucideIcon;
+  icon: IconName;
   title: string;
   description: string;
   color: string;
@@ -15,12 +25,13 @@ interface DashboardCardProps {
 
 export function DashboardCard({
   href,
-  icon: Icon,
+  icon,
   title,
   description,
   color,
 }: DashboardCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const Icon = iconMap[icon];
 
   return (
     <Link

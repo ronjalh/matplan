@@ -69,6 +69,11 @@ instructions: |
   - **Using `asChild` on shadcn components** — Causes TypeScript errors in this Next.js 16 / React 19 setup. Use plain `<Link>` elements instead.
   - **Using server-side `signIn()` for OAuth** — Doesn't redirect properly. Use client-side `signIn()` from `next-auth/react` instead.
   - **Placing UI elements in sidebar footer** — Users don't find them. Put important toggles (theme, language) in the header next to the user avatar.
+  - **Passing React components (icons) from Server to Client Components** — Lucide icons are objects with methods and cannot be serialized. Use a string-based icon map in the client component and pass string keys as props.
+  - **Throwing errors in Server Actions** — NEVER `throw` in Server Actions. Use `return { success: false, error: "..." }`. Thrown errors become opaque "Server error" in production.
+  - **CSS spacing with Link wrappers** — `space-y` and `gap` don't work when `<Link>` is inline. Always add `className="block"` on Link elements that wrap cards/blocks.
+  - **Fritekst-felt for kategoriske data** — Use dropdowns for cuisine, dietary labels etc. Fritekst leads to inconsistent data ("norsk" vs "Norsk") that can't be filtered.
+  - **Hiding search/explore behind small buttons** — Use tabs (Mine / Utforsk / Ny) to give equal prominence. Standard pattern from major apps.
 
   ## After Every Session
   Ask: "What mistakes did we fix today that aren't in this QA skill yet?"
