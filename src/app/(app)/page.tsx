@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/auth-config";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, ChefHat, ShoppingCart, Wallet, Sprout } from "lucide-react";
+import { Calendar, ChefHat, ShoppingCart, Wallet, Sprout, Search } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -18,9 +18,17 @@ export default async function DashboardPage() {
         </p>
       </div>
 
+      {/* Quick search */}
+      <Link href="/oppskrifter?tab=utforsk">
+        <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors cursor-pointer">
+          <Search className="w-5 h-5" />
+          <span>Søk blant 685 000+ oppskrifter...</span>
+        </div>
+      </Link>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/kalender">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
               <Calendar className="w-5 h-5 text-primary" />
               <CardTitle className="text-base">Kalender</CardTitle>
@@ -34,21 +42,21 @@ export default async function DashboardPage() {
         </Link>
 
         <Link href="/oppskrifter">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
               <ChefHat className="w-5 h-5 text-primary" />
               <CardTitle className="text-base">Oppskrifter</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Søk blant 685 000+ oppskrifter eller lag egne
+                Dine oppskrifter og utforsk nye
               </p>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/handleliste">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
               <ShoppingCart className="w-5 h-5 text-primary" />
               <CardTitle className="text-base">Handleliste</CardTitle>
@@ -62,7 +70,7 @@ export default async function DashboardPage() {
         </Link>
 
         <Link href="/budsjett">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
               <Wallet className="w-5 h-5 text-primary" />
               <CardTitle className="text-base">Budsjett</CardTitle>
@@ -76,7 +84,7 @@ export default async function DashboardPage() {
         </Link>
 
         <Link href="/sesong">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
               <Sprout className="w-5 h-5 text-[var(--color-success)]" />
               <CardTitle className="text-base">I sesong</CardTitle>
