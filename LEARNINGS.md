@@ -24,6 +24,8 @@
 
 - **Oppskrifter trenger ingredienser fra dag 1:** En oppskrift uten ingrediens-felt er ikke en oppskrift. Ingredienser er kjernedata som alt annet bygger på (tallerkensmodell, handleliste, prisberegning). Aldri ship oppskrift-CRUD uten ingredienser.
 
+- **Server Actions: ALDRI throw i produksjon.** `throw new Error()` i Server Actions gir en generisk "An error occurred in the Server Components render" i produksjon — feilmeldingen stripes bort. Bruk alltid `return { success: false, error: "melding" }` og sjekk resultatet i klienten.
+
 ### Prosess-lærdommer
 
 - **Bygg minimalt men komplett:** Ikke ship halvferdige features. En oppskrift som kan opprettes men ikke sees eller redigeres gir dårlig brukeropplevelse. Bedre å ha færre features som er fullstendige.

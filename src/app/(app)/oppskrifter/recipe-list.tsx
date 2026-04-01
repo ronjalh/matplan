@@ -18,6 +18,9 @@ interface Recipe {
   prepTimeMinutes: number | null;
   isVegetarian: boolean;
   isVegan: boolean;
+  isGlutenFree: boolean;
+  isDairyFree: boolean;
+  isNutFree: boolean;
   isFishMeal: boolean;
   cuisine: string | null;
   source: string;
@@ -118,6 +121,15 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
               <Badge className="bg-[var(--color-fish)]/10 text-[var(--color-fish)] hover:bg-[var(--color-fish)]/20">
                 Fisk
               </Badge>
+            )}
+            {recipe.isGlutenFree && (
+              <Badge variant="outline">Glutenfri</Badge>
+            )}
+            {recipe.isDairyFree && (
+              <Badge variant="outline">Melkefri</Badge>
+            )}
+            {recipe.isNutFree && (
+              <Badge variant="outline">Nøttefri</Badge>
             )}
           </div>
         </CardContent>

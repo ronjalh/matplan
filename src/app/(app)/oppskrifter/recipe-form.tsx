@@ -10,6 +10,24 @@ import { IngredientEditor } from "@/components/recipe/ingredient-editor";
 import { useState, useRef } from "react";
 import { ChefHat } from "lucide-react";
 
+const cuisines = [
+  "Norsk",
+  "Italiensk",
+  "Meksikansk",
+  "Indisk",
+  "Thai",
+  "Japansk",
+  "Kinesisk",
+  "Gresk",
+  "Fransk",
+  "Amerikansk",
+  "Midtøsten",
+  "Koreansk",
+  "Vietnamesisk",
+  "Etiopisk",
+  "Annet",
+];
+
 export function RecipeForm() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +98,7 @@ export function RecipeForm() {
                 id="prepTimeMinutes"
                 name="prepTimeMinutes"
                 type="number"
-                placeholder="30"
+                defaultValue={60}
                 min={1}
               />
             </div>
@@ -88,22 +106,43 @@ export function RecipeForm() {
 
           <div className="space-y-2">
             <Label htmlFor="cuisine">Kjøkken</Label>
-            <Input
+            <select
               id="cuisine"
               name="cuisine"
-              placeholder="F.eks. Norsk, Italiensk, Indisk"
-            />
+              defaultValue=""
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Velg kjøkken...</option>
+              {cuisines.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
 
-          <div className="flex gap-6">
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" name="isVegetarian" className="rounded" />
-              Vegetar
-            </label>
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" name="isVegan" className="rounded" />
-              Vegan
-            </label>
+          <div className="space-y-2">
+            <Label>Merking</Label>
+            <div className="flex flex-wrap gap-4">
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" name="isVegetarian" className="rounded" />
+                Vegetar
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" name="isVegan" className="rounded" />
+                Vegan
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" name="isGlutenFree" className="rounded" />
+                Glutenfri
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" name="isDairyFree" className="rounded" />
+                Melkefri
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" name="isNutFree" className="rounded" />
+                Nøttefri
+              </label>
+            </div>
           </div>
 
           <div className="space-y-2">

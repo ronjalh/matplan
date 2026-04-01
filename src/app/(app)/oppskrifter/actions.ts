@@ -71,6 +71,9 @@ export async function createRecipe(formData: FormData): Promise<ActionResult> {
   const instructions = formData.get("instructions") as string;
   const isVegetarian = formData.get("isVegetarian") === "on";
   const isVegan = formData.get("isVegan") === "on";
+  const isGlutenFree = formData.get("isGlutenFree") === "on";
+  const isDairyFree = formData.get("isDairyFree") === "on";
+  const isNutFree = formData.get("isNutFree") === "on";
   const cuisine = (formData.get("cuisine") as string) || null;
   const ingredientsJson = formData.get("ingredients") as string;
 
@@ -85,6 +88,9 @@ export async function createRecipe(formData: FormData): Promise<ActionResult> {
       instructions: instructions || null,
       isVegetarian,
       isVegan,
+      isGlutenFree,
+      isDairyFree,
+      isNutFree,
       isFishMeal: false,
       cuisine,
       source: "manual",
@@ -127,6 +133,9 @@ export async function updateRecipe(recipeId: number, formData: FormData): Promis
   const instructions = formData.get("instructions") as string;
   const isVegetarian = formData.get("isVegetarian") === "on";
   const isVegan = formData.get("isVegan") === "on";
+  const isGlutenFree = formData.get("isGlutenFree") === "on";
+  const isDairyFree = formData.get("isDairyFree") === "on";
+  const isNutFree = formData.get("isNutFree") === "on";
   const cuisine = (formData.get("cuisine") as string) || null;
   const ingredientsJson = formData.get("ingredients") as string;
 
@@ -140,6 +149,9 @@ export async function updateRecipe(recipeId: number, formData: FormData): Promis
       instructions: instructions || null,
       isVegetarian,
       isVegan,
+      isGlutenFree,
+      isDairyFree,
+      isNutFree,
       cuisine,
     })
     .where(eq(recipes.id, recipeId));

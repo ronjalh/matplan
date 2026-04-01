@@ -167,6 +167,9 @@ export const recipes = pgTable("recipes", {
   isFishMeal: boolean("is_fish_meal").notNull().default(false),
   isVegetarian: boolean("is_vegetarian").notNull().default(false),
   isVegan: boolean("is_vegan").notNull().default(false),
+  isGlutenFree: boolean("is_gluten_free").notNull().default(false),
+  isDairyFree: boolean("is_dairy_free").notNull().default(false),
+  isNutFree: boolean("is_nut_free").notNull().default(false),
   cuisine: text("cuisine"),
   source: text("source")
     .$type<"manual" | "spoonacular" | "url-import">()
