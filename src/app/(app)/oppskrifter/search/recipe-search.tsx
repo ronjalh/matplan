@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Loader2, ArrowLeft } from "lucide-react";
+import { Search, Download, Loader2, ArrowLeft, Eye } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 const diets = [
   { value: "", label: "Alle" },
@@ -49,7 +48,6 @@ export function RecipeSearch() {
   const [imported, setImported] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [totalResults, setTotalResults] = useState(0);
-  const router = useRouter();
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -143,34 +141,44 @@ export function RecipeSearch() {
           const isImporting = importing === recipe.id;
 
           return (
-            <Card key={recipe.id} className="overflow-hidden">
+            <Card key={recipe.id} className="overflow-hidden p-0">
               {recipe.image && (
                 <img
                   src={recipe.image}
                   alt={recipe.title}
-                  className="w-full h-36 object-cover"
+                  className="w-full h-40 object-cover"
                 />
               )}
-              <CardContent className="p-3">
-                <h3 className="text-sm font-medium mb-2 line-clamp-2">
+              <div className="p-3 space-y-2">
+                <h3 className="text-sm font-medium line-clamp-2">
                   {recipe.title}
                 </h3>
-                <Button
-                  size="sm"
-                  variant={isImported ? "secondary" : "default"}
-                  disabled={isImporting || isImported}
-                  onClick={() => handleImport(recipe.id)}
-                  className="w-full"
-                >
-                  {isImporting ? (
-                    <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> Importerer...</>
-                  ) : isImported ? (
-                    "Importert ✓"
-                  ) : (
-                    <><Download className="w-3.5 h-3.5 mr-1" /> Importer oppskrift</>
-                  )}
-                </Button>
-              </CardContent>
+                <div className="flex gap-2">
+                  <Link
+                    href={`/oppskrifter/search/${recipe.id}`}
+                    className="flex-1"
+                  >
+                    <Button size="sm" variant="outline" className="w-full gap-1">
+                      <Eye className="w-3.5 h-3.5" /> Vis
+                    </Button>
+                  </Link>
+                  <Button
+                    size="sm"
+                    variant={isImported ? "secondary" : "default"}
+                    disabled={isImporting || isImported}
+                    onClick={() => handleImport(recipe.id)}
+                    className="flex-1 gap-1"
+                  >
+                    {isImporting ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> ...</>
+                    ) : isImported ? (
+                      "Importert ✓"
+                    ) : (
+                      <><Download className="w-3.5 h-3.5" /> Importer</>
+                    )}
+                  </Button>
+                </div>
+              </div>
             </Card>
           );
         })}
