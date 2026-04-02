@@ -291,6 +291,7 @@ const refinements: Record<string, string> = {
   "rødt eple": "epler røde",
   "store reker": "reker pillede",
   "hvit saus": "hvit saus toro",
+  "salsa": "salsa dip santa maria",
 
   // === SKIP (gratis/ubetydelig) ===
   "vann": "",

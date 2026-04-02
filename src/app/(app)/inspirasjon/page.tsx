@@ -179,20 +179,20 @@ export default async function InspirasjonPage() {
             </svg>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center text-sm">
-            <div className="rounded-lg bg-[var(--color-success)]/10 p-3">
+            <div className="rounded-lg bg-[var(--color-terracotta)]/15 p-3 border border-[var(--color-terracotta)]/20">
+              <p className="text-2xl mb-1">🍗</p>
+              <p className="font-medium">Protein</p>
+              <p className="text-xs text-muted-foreground">Fisk, kjøtt, egg, bønner</p>
+            </div>
+            <div className="rounded-lg bg-[var(--color-success)]/15 p-3 border border-[var(--color-success)]/20">
               <p className="text-2xl mb-1">🥬</p>
               <p className="font-medium">Grønnsaker</p>
               <p className="text-xs text-muted-foreground">Salat, brokkoli, gulrot, paprika</p>
             </div>
-            <div className="rounded-lg bg-[var(--color-warning)]/10 p-3">
+            <div className="rounded-lg bg-[var(--color-warning)]/15 p-3 border border-[var(--color-warning)]/20">
               <p className="text-2xl mb-1">🍚</p>
               <p className="font-medium">Karbohydrater</p>
               <p className="text-xs text-muted-foreground">Potet, ris, pasta, brød</p>
-            </div>
-            <div className="rounded-lg bg-[var(--color-terracotta)]/10 p-3">
-              <p className="text-2xl mb-1">🍗</p>
-              <p className="font-medium">Protein</p>
-              <p className="text-xs text-muted-foreground">Fisk, kjøtt, egg, bønner</p>
             </div>
           </div>
         </CardContent>

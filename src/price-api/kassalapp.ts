@@ -60,7 +60,7 @@ import { refineSearchQuery } from "./search-refinements";
 
 /** Categories to exclude — baby food, snacks, etc. */
 const EXCLUDE_CATEGORIES = new Set([
-  "Barnemat", "Barneprodukter", "Is", "Iskrem", "Snacks", "Godteri", "Dessert",
+  "Barnemat", "Barneprodukter", "Is", "Iskrem", "Snacks", "Godteri",
 ]);
 
 /** Name patterns to exclude */
@@ -79,13 +79,24 @@ function scoreMatch(product: KassalappProduct, searchTerms: string[]): number {
   const name = product.name.toLowerCase();
   let score = 0;
 
-  // Each search term found in product name
   for (const term of searchTerms) {
-    if (term.length >= 2 && name.includes(term.toLowerCase())) score += 10;
+    const t = term.toLowerCase();
+    if (t.length < 2) continue;
+    if (name.startsWith(t)) {
+      score += 20; // Strong: product name STARTS with search term
+    } else if (name.includes(t)) {
+      const idx = name.indexOf(t);
+      const before = name.slice(Math.max(0, idx - 3), idx);
+      if (/\bi\s|&|med\s|\//.test(before)) {
+        score += 2; // Weak: sub-ingredient ("Makrell i Salsa")
+      } else {
+        score += 10;
+      }
+    }
   }
 
-  // Penalize wrong product types that sneak through filters
-  const PENALTY_WORDS = ["sylte", "syltet", "pulver", "tørket", "konsentr", "granulat", "dressing"];
+  // Penalize wrong product types
+  const PENALTY_WORDS = ["sylte", "syltet", "pulver", "tørket", "konsentr", "granulat", "dressing", "pålegg", "smudi", "smoothie"];
   for (const pw of PENALTY_WORDS) {
     if (name.includes(pw) && !searchTerms.some(t => t.includes(pw))) score -= 15;
   }

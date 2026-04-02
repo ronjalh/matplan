@@ -6,11 +6,24 @@ function scoreMatch(productName: string, searchTerms: string[]): number {
   let score = 0;
 
   for (const term of searchTerms) {
-    if (name.includes(term.toLowerCase())) score += 10;
+    const t = term.toLowerCase();
+    if (t.length < 2) continue;
+    if (name.startsWith(t)) {
+      score += 20; // Strong: product name STARTS with search term
+    } else if (name.includes(t)) {
+      // Check if it's after "i " or "&" (ingredient, not main product)
+      const idx = name.indexOf(t);
+      const before = name.slice(Math.max(0, idx - 3), idx);
+      if (/\bi\s|&|med\s|\//.test(before)) {
+        score += 2; // Weak: it's a sub-ingredient ("Makrell i Salsa")
+      } else {
+        score += 10;
+      }
+    }
   }
 
   // Penalize wrong product types
-  const PENALTY_WORDS = ["sylte", "syltet", "hermetisk", "pulver", "tørket", "konsentr", "granulat", "saus", "dressing", "iskrem", "gele", "drops", "pastill"];
+  const PENALTY_WORDS = ["sylte", "syltet", "hermetisk", "pulver", "tørket", "konsentr", "granulat", "dressing", "iskrem", "gele", "drops", "pastill", "pålegg", "smudi", "smoothie"];
   for (const pw of PENALTY_WORDS) {
     if (name.includes(pw) && !searchTerms.some(t => t.includes(pw))) score -= 15;
   }
@@ -61,6 +74,24 @@ describe("scoreMatch — product relevance scoring", () => {
     const bothMatch = scoreMatch("Helmelk Tine 1l", ["helmelk", "tine"]);
     const oneMatch = scoreMatch("Melk Lett 1l Q", ["helmelk", "tine"]);
     expect(bothMatch).toBeGreaterThan(oneMatch);
+  });
+
+  it("prefers 'Salsa Dip' over 'Makrell i Salsa'", () => {
+    const dip = scoreMatch("Salsa Dip Medium 300g Santa Maria", ["salsa"]);
+    const makrell = scoreMatch("Stabbur-Makrell Hakket i Salsa 110g Stabburet", ["salsa"]);
+    expect(dip).toBeGreaterThan(makrell);
+  });
+
+  it("prefers 'Mango 1stk' over 'Smudi Pålegg Mango'", () => {
+    const fresh = scoreMatch("Mango 1stk", ["mango", "fersk"]);
+    const spread = scoreMatch("Smudi Pålegg Mango&Fersken 265g Lerum", ["mango", "fersk"]);
+    expect(fresh).toBeGreaterThan(spread);
+  });
+
+  it("prefers product name starting with search term", () => {
+    const starts = scoreMatch("Sesamfrø 100g", ["sesamfrø"]);
+    const contains = scoreMatch("Granforno Grissini med Sesamfrø 125g", ["sesamfrø"]);
+    expect(starts).toBeGreaterThan(contains);
   });
 });
 

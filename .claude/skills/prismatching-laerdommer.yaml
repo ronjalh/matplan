@@ -1,0 +1,55 @@
+name: prismatching-laerdommer
+description: Lessons learned from Kassalapp price matching — what works, what fails, and why
+version: 1.0.0
+tags: [pricing, kassalapp, matching, lessons]
+
+instructions: |
+  # Prismatching Lærdommer
+
+  ## Hva som feiler og hvorfor
+
+  ### Problem 1: Generiske søkeord
+  "salsa" → Makrell i Salsa (hermetikk) i stedet for salsa-saus
+  "mango" → Smudi Pålegg Mango (pålegg) i stedet for fersk mango
+  "sesamfrø" → Grissini med Sesamfrø (brødstenger) i stedet for frø
+
+  **Årsak:** Kassalapp returnerer produkter der søkeordet er EN del av navnet,
+  ikke hovedproduktet. "Salsa" matcher "Makrell i Salsa" fordi ordet finnes.
+
+  **Løsning:** Scoring-algoritmen bør sjekke om søkeordet er HOVEDPRODUKTET
+  (starter med eller er hoveddelen av navnet), ikke bare at det finnes i navnet.
+
+  ### Problem 2: Sammensatte produktnavn
+  Kassalapp-produkter har formatet: "Produktnavn Variant Størrelse Merke"
+  F.eks. "Stabbur-Makrell Hakket i Salsa 110g Stabburet"
+
+  Når vi søker "salsa" matcher dette fordi "Salsa" er i navnet.
+  Men hovedproduktet er "Makrell", ikke "Salsa".
+
+  **Løsning:** Sjekk om søkeordet matcher STARTEN av produktnavnet,
+  eller er det eneste ordet (ikke bare substring).
+
+  ### Problem 3: Word position matters
+  "Mango" i "Smudi Pålegg Mango&Fersken" er et tilleggsord.
+  "Mango" i "Mango 1stk løsvekt" er hovedproduktet.
+
+  **Løsning:** Gi høyere score til matcher i starten av produktnavnet.
+
+  ## Hva som fungerer
+  - Spesifikke søkeord med merkenavn: "helmelk tine", "kjøttdeig gilde"
+  - "fersk" og "løsvekt" kvalifikatorer for frukt/grønt
+  - Filtrering av barnemat-kategorier
+  - Bulk-filtrering (>2.5kg, storkjøkken)
+  - Pris-sanity-cap (kr 250)
+
+  ## Forbedringer å implementere
+  1. **Position-score:** +20 hvis søkeord starter produktnavnet, +5 hvis det er midt i
+  2. **Main-product detection:** Første ord(ene) i produktnavn er hovedproduktet
+  3. **Negative scoring for "i X" mønster:** "Makrell i Salsa" → "Salsa" er tilbehør, ikke hovedprodukt
+  4. **Mer aggressive refinements:** "salsa" → "salsa dip", "mango" → "mango fersk løsvekt"
+
+  ## Rules
+  - ALLTID test med `npm test` etter endringer i prismatching
+  - Nye ingredienser som feiler → legg til i refinements OG accuracy-tester
+  - Kassalapp API returnerer max 100 resultater — bruk 10-15 og score dem
+  - Norske tegn (ø, å, æ) fungerer IKKE med \b regex — bruk space/start/end

@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, ChefHat, ShoppingCart, Wallet, Sprout } from "lucide-react";
+import { Calendar, ChefHat, ShoppingCart, Wallet, Sprout, Heart } from "lucide-react";
 import Link from "next/link";
 import { useRef } from "react";
 
@@ -11,6 +11,7 @@ const iconMap = {
   shoppingcart: ShoppingCart,
   wallet: Wallet,
   sprout: Sprout,
+  heart: Heart,
 } as const;
 
 type IconName = keyof typeof iconMap;
