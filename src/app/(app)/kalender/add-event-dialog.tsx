@@ -82,7 +82,18 @@ export function AddEventDialog({ date, onClose }: AddEventDialogProps) {
               id="start-time"
               type="time"
               value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
+              onChange={(e) => {
+                const newStart = e.target.value;
+                setStartTime(newStart);
+                // Auto-fill end time to +1 hour if empty or before new start
+                if (newStart) {
+                  const [h, m] = newStart.split(":").map(Number);
+                  const autoEnd = `${String(Math.min(h + 1, 23)).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+                  if (!endTime || endTime <= newStart) {
+                    setEndTime(autoEnd);
+                  }
+                }
+              }}
             />
           </div>
           <div className="space-y-1">
@@ -91,6 +102,7 @@ export function AddEventDialog({ date, onClose }: AddEventDialogProps) {
               id="end-time"
               type="time"
               value={endTime}
+              min={startTime || undefined}
               onChange={(e) => setEndTime(e.target.value)}
             />
           </div>

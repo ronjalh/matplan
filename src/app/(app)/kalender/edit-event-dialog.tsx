@@ -93,11 +93,22 @@ export function EditEventDialog({ event, onClose }: EditEventDialogProps) {
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
             <Label className="text-xs">Fra</Label>
-            <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+            <Input
+              type="time"
+              value={startTime}
+              onChange={(e) => {
+                const newStart = e.target.value;
+                setStartTime(newStart);
+                if (newStart && (!endTime || endTime <= newStart)) {
+                  const [h, m] = newStart.split(":").map(Number);
+                  setEndTime(`${String(Math.min(h + 1, 23)).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+                }
+              }}
+            />
           </div>
           <div className="space-y-1">
             <Label className="text-xs">Til</Label>
-            <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+            <Input type="time" value={endTime} min={startTime || undefined} onChange={(e) => setEndTime(e.target.value)} />
           </div>
         </div>
         <div className="flex gap-2">
