@@ -5,6 +5,7 @@ import { completeOnboarding } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight, ChevronLeft, Leaf, ShoppingCart, Wallet } from "lucide-react";
+import { PandaMascot } from "@/components/panda-mascot";
 
 const steps = ["Velkommen", "Kosthold", "Priskilde", "Budsjett"];
 
@@ -30,7 +31,7 @@ export function OnboardingWizard({ userName }: { userName: string }) {
         {/* Step 1: Welcome */}
         {step === 0 && (
           <div className="text-center space-y-4 py-4">
-            <div className="text-5xl">🐼</div>
+            <PandaMascot size={80} />
             <h2 className="text-2xl font-[family-name:var(--font-fraunces)] font-semibold">
               Velkommen, {userName.split(" ")[0]}!
             </h2>

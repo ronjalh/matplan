@@ -19,18 +19,13 @@ export default async function DashboardPage() {
   });
   const householdId = membership?.householdId;
 
-  // Check onboarding
-  const settingsCheck = await db.query.userSettings.findFirst({
-    where: eq(userSettings.userId, session!.user!.id!),
-  });
-  if (settingsCheck && !settingsCheck.onboardingComplete) {
-    redirect("/onboarding");
-  }
-
-  // Get user dietary preference
+  // Get user settings + check onboarding
   const settings = await db.query.userSettings.findFirst({
     where: eq(userSettings.userId, session!.user!.id!),
   });
+  if (settings && !settings.onboardingComplete) {
+    redirect("/onboarding");
+  }
   const diet = settings?.dietaryPreference ?? "all";
   const showFish = diet !== "vegetarian" && diet !== "vegan";
 
