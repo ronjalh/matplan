@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { generateShoppingList, toggleItem, deleteShoppingList, shareShoppingList, updateItemPrice } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,22 @@ interface ShoppingList {
   items: ShoppingListItem[];
 }
 
-export function ShoppingListView({ list }: { list: ShoppingList | null }) {
+interface ListSummary {
+  id: number;
+  weekStartDate: string;
+  createdAt: string;
+}
+
+export function ShoppingListView({
+  list,
+  allLists,
+  activeListId,
+}: {
+  list: ShoppingList | null;
+  allLists: ListSummary[];
+  activeListId?: number;
+}) {
+  const router = useRouter();
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -48,6 +64,8 @@ export function ShoppingListView({ list }: { list: ShoppingList | null }) {
   async function handleDelete() {
     if (!list || !confirm("Slette handlelisten?")) return;
     await deleteShoppingList(list.id);
+    router.push("/handleliste");
+    router.refresh();
   }
 
   async function handleToggle(itemId: number, checked: boolean) {
@@ -108,6 +126,38 @@ export function ShoppingListView({ list }: { list: ShoppingList | null }) {
 
   return (
     <div className="space-y-4">
+      {/* List selector */}
+      {allLists.length > 1 && (
+        <div className="flex flex-wrap gap-1.5">
+          {allLists.map((l) => (
+            <button
+              key={l.id}
+              onClick={() => router.push(`/handleliste?id=${l.id}`)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                l.id === activeListId
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              Uke {l.weekStartDate}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Generate new */}
+      <Button variant="outline" size="sm" onClick={handleGenerate} disabled={generating} className="gap-2">
+        {generating ? (
+          <><Loader2 className="w-4 h-4 animate-spin" /> Genererer...</>
+        ) : (
+          <><ShoppingCart className="w-4 h-4" /> Ny handleliste fra ukesplan</>
+        )}
+      </Button>
+
+      {error && (
+        <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">{error}</p>
+      )}
+
       {/* Header stats */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="space-y-0.5">

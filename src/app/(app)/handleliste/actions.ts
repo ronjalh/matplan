@@ -26,14 +26,26 @@ async function getHouseholdId() {
   return membership.householdId;
 }
 
-export async function getShoppingList() {
+export async function getAllShoppingLists() {
   const householdId = await getHouseholdId();
 
-  // Get the most recent shopping list
-  const list = await db.query.shoppingLists.findFirst({
+  return db.query.shoppingLists.findMany({
     where: eq(shoppingLists.householdId, householdId),
     orderBy: [desc(shoppingLists.createdAt)],
   });
+}
+
+export async function getShoppingList(listId?: number) {
+  const householdId = await getHouseholdId();
+
+  const list = listId
+    ? await db.query.shoppingLists.findFirst({
+        where: and(eq(shoppingLists.id, listId), eq(shoppingLists.householdId, householdId)),
+      })
+    : await db.query.shoppingLists.findFirst({
+        where: eq(shoppingLists.householdId, householdId),
+        orderBy: [desc(shoppingLists.createdAt)],
+      });
 
   if (!list) return null;
 
