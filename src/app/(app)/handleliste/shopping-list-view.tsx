@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { generateShoppingList, toggleItem, deleteShoppingList, shareShoppingList } from "./actions";
+import { generateShoppingList, toggleItem, deleteShoppingList, shareShoppingList, updateItemPrice } from "./actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingCart, Loader2, Trash2, Share2, Square, CheckSquare, Link2 } from "lucide-react";
+import { ShoppingCart, Loader2, Trash2, Share2, Square, CheckSquare, Pencil, Check, X } from "lucide-react";
 
 interface ShoppingListItem {
   id: number;
@@ -14,6 +15,7 @@ interface ShoppingListItem {
   checked: boolean;
   category: string | null;
   estimatedPriceOre: number | null;
+  priceSource: string | null;
 }
 
 interface ShoppingList {
@@ -167,28 +169,12 @@ export function ShoppingListView({ list }: { list: ShoppingList | null }) {
           <CardContent className="pt-0">
             <ul className="space-y-0.5">
               {items.map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => handleToggle(item.id, !item.checked)}
-                    className={`w-full flex items-center gap-3 rounded-md px-2 py-2 text-sm text-left transition-colors cursor-pointer hover:bg-muted ${
-                      item.checked ? "text-muted-foreground" : ""
-                    }`}
-                  >
-                    {item.checked ? (
-                      <CheckSquare className="w-4 h-4 text-primary shrink-0" />
-                    ) : (
-                      <Square className="w-4 h-4 text-muted-foreground shrink-0" />
-                    )}
-                    <span className={`flex-1 ${item.checked ? "line-through" : ""}`}>
-                      {item.quantity} {item.unit} {item.name}
-                    </span>
-                    {item.estimatedPriceOre && !item.checked && (
-                      <span className="text-xs text-muted-foreground shrink-0">
-                        {formatKr(item.estimatedPriceOre)}
-                      </span>
-                    )}
-                  </button>
-                </li>
+                <ShoppingItem
+                  key={item.id}
+                  item={item}
+                  onToggle={handleToggle}
+                  formatKr={formatKr}
+                />
               ))}
             </ul>
           </CardContent>
@@ -201,5 +187,102 @@ export function ShoppingListView({ list }: { list: ShoppingList | null }) {
         </p>
       )}
     </div>
+  );
+}
+
+function ShoppingItem({
+  item,
+  onToggle,
+  formatKr,
+}: {
+  item: ShoppingListItem;
+  onToggle: (id: number, checked: boolean) => void;
+  formatKr: (ore: number) => string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [priceInput, setPriceInput] = useState(
+    item.estimatedPriceOre ? (item.estimatedPriceOre / 100).toFixed(2).replace(".", ",") : ""
+  );
+  const [saving, setSaving] = useState(false);
+
+  async function handleSavePrice() {
+    const parsed = parseFloat(priceInput.replace(",", "."));
+    if (isNaN(parsed) || parsed < 0) return;
+    setSaving(true);
+    await updateItemPrice(item.id, parsed);
+    setSaving(false);
+    setEditing(false);
+  }
+
+  if (editing) {
+    return (
+      <li className="flex items-center gap-2 rounded-md px-2 py-2 bg-muted/50">
+        <span className="text-sm flex-1">
+          {item.quantity} {item.unit} {item.name}
+        </span>
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-muted-foreground">kr</span>
+          <Input
+            value={priceInput}
+            onChange={(e) => setPriceInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSavePrice()}
+            className="w-20 h-7 text-xs"
+            autoFocus
+          />
+          <Button size="sm" variant="ghost" onClick={handleSavePrice} disabled={saving} className="h-7 w-7 p-0">
+            <Check className="w-3.5 h-3.5 text-primary" />
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setEditing(false)} className="h-7 w-7 p-0">
+            <X className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      </li>
+    );
+  }
+
+  return (
+    <li className="group">
+      <div className="flex items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-muted transition-colors">
+        <button
+          onClick={() => onToggle(item.id, !item.checked)}
+          className="shrink-0 cursor-pointer"
+        >
+          {item.checked ? (
+            <CheckSquare className="w-4 h-4 text-primary" />
+          ) : (
+            <Square className="w-4 h-4 text-muted-foreground" />
+          )}
+        </button>
+        <div className={`flex-1 min-w-0 ${item.checked ? "text-muted-foreground" : ""}`}>
+          <span className={item.checked ? "line-through" : ""}>
+            {item.quantity} {item.unit} {item.name}
+          </span>
+          {item.priceSource && !item.checked && (
+            <span className="block text-xs text-muted-foreground truncate">
+              {item.priceSource}
+            </span>
+          )}
+        </div>
+        {!item.checked && (
+          <div className="flex items-center gap-1 shrink-0">
+            {item.estimatedPriceOre ? (
+              <span className="text-xs text-muted-foreground">
+                {formatKr(item.estimatedPriceOre)}
+              </span>
+            ) : (
+              <span className="text-xs text-muted-foreground/50">
+                Ingen pris
+              </span>
+            )}
+            <button
+              onClick={() => setEditing(true)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-muted-foreground hover:text-primary"
+            >
+              <Pencil className="w-3 h-3" />
+            </button>
+          </div>
+        )}
+      </div>
+    </li>
   );
 }

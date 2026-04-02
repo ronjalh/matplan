@@ -165,18 +165,15 @@ export async function generateShoppingList(weekStartDate?: string) {
     await db.insert(shoppingListItems).values(
       items.map((item) => {
         const price = priceMap.get(item.name);
-        // Store product name + store in the name field as suffix
-        const displayName = price
-          ? `${item.name}`
-          : item.name;
         return {
           shoppingListId: list.id,
-          name: displayName,
+          name: item.name,
           quantity: roundQuantity(item.quantity, item.unit),
           unit: item.unit,
           checked: false,
           category: guessCategory(item.name),
           estimatedPriceOre: price?.priceOre ?? null,
+          priceSource: price ? `${price.productName} — ${price.store}` : null,
         };
       })
     );
@@ -190,6 +187,19 @@ export async function toggleItem(itemId: number, checked: boolean) {
   await db
     .update(shoppingListItems)
     .set({ checked })
+    .where(eq(shoppingListItems.id, itemId));
+  revalidatePath("/handleliste");
+  return { success: true };
+}
+
+export async function updateItemPrice(itemId: number, priceKr: number) {
+  const priceOre = Math.round(priceKr * 100);
+  await db
+    .update(shoppingListItems)
+    .set({
+      estimatedPriceOre: priceOre,
+      priceSource: "Egendefinert",
+    })
     .where(eq(shoppingListItems.id, itemId));
   revalidatePath("/handleliste");
   return { success: true };

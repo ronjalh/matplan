@@ -337,6 +337,7 @@ export const shoppingListItems = pgTable("shopping_list_items", {
   quantity: real("quantity").notNull(),
   unit: text("unit").notNull(),
   estimatedPriceOre: integer("estimated_price_ore"),
+  priceSource: text("price_source"), // "Helmelk 1l Tine — Joker" or "Egendefinert"
   checked: boolean("checked").notNull().default(false),
   category: text("category"),
 });
