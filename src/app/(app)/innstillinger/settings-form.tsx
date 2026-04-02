@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { updateSettings } from "./actions";
+import { updateSettings, deleteAccount } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingCart, Leaf, Save, Loader2 } from "lucide-react";
+import { ShoppingCart, Leaf, Save, Loader2, Trash2, AlertTriangle } from "lucide-react";
 
 interface Settings {
   priceProvider: string;
@@ -137,6 +137,36 @@ export function SettingsForm({ settings }: { settings: Settings | null | undefin
           <><Save className="w-4 h-4" /> Lagre innstillinger</>
         )}
       </Button>
+
+      {/* Danger zone */}
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2 text-destructive">
+            <AlertTriangle className="w-4 h-4" />
+            Faresone
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Sletting av konto fjerner alle dine data permanent: oppskrifter, måltidsplaner,
+            handlelister, budsjett og kalender. Dette kan ikke angres.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground gap-2"
+            onClick={async () => {
+              const confirmed = prompt(
+                'Skriv "SLETT" for å bekrefte at du vil slette kontoen din permanent:'
+              );
+              if (confirmed !== "SLETT") return;
+              await deleteAccount();
+            }}
+          >
+            <Trash2 className="w-4 h-4" /> Slett min konto
+          </Button>
+        </CardContent>
+      </Card>
     </form>
   );
 }
