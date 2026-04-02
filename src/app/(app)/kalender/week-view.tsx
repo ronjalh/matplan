@@ -16,10 +16,12 @@ import {
   Fish,
   CalendarPlus,
   ShoppingCart,
+  Wand2,
 } from "lucide-react";
 import { addMeal, removeMeal, removeEvent, updateEvent } from "./actions";
 import { AddEventDialog } from "./add-event-dialog";
 import { EditEventDialog } from "./edit-event-dialog";
+import { AutoPlan } from "./auto-plan";
 import Link from "next/link";
 import {
   formatShortDate,
@@ -66,6 +68,8 @@ interface Recipe {
   prepTimeMinutes: number | null;
   isVegetarian: boolean;
   isFishMeal: boolean;
+  isVegan: boolean;
+  cuisine: string | null;
 }
 
 interface WeekViewProps {
@@ -74,9 +78,10 @@ interface WeekViewProps {
   events: CalEvent[];
   allRecipes: Recipe[];
   showFish?: boolean;
+  diet?: string;
 }
 
-export function WeekView({ days, meals, events, allRecipes, showFish = true }: WeekViewProps) {
+export function WeekView({ days, meals, events, allRecipes, showFish = true, diet = "all" }: WeekViewProps) {
   const router = useRouter();
   const dates = days.map((d) => new Date(d));
   const weekNum = getISOWeekNumber(dates[0]);
@@ -84,6 +89,7 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true }: W
   const [addingMeal, setAddingMeal] = useState<{ date: string; mealType: string } | null>(null);
   const [addingEvent, setAddingEvent] = useState<string | null>(null);
   const [editingEvent, setEditingEvent] = useState<CalEvent | null>(null);
+  const [showAutoPlan, setShowAutoPlan] = useState(false);
 
   function navigateWeek(offset: number) {
     const d = new Date(dates[0]);
@@ -140,6 +146,9 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true }: W
           </Button>
           <Button variant="outline" size="sm" onClick={() => navigateWeek(1)}>
             <ChevronRight className="w-4 h-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowAutoPlan(!showAutoPlan)} className="gap-1 ml-2">
+            <Wand2 className="w-4 h-4" /> Generer
           </Button>
           <span className="text-lg font-semibold ml-2">Uke {weekNum}</span>
         </div>
@@ -198,6 +207,17 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true }: W
       {/* Event dialog */}
       {addingEvent && (
         <AddEventDialog date={addingEvent} onClose={() => setAddingEvent(null)} />
+      )}
+
+      {/* Auto-generate plan */}
+      {showAutoPlan && (
+        <AutoPlan
+          recipes={allRecipes}
+          diet={diet}
+          weekDates={dates.map(toISODate)}
+          existingMealDays={new Set(meals.filter(m => m.mealType === "middag").map(m => m.date))}
+          onClose={() => setShowAutoPlan(false)}
+        />
       )}
 
       {/* Edit event dialog */}

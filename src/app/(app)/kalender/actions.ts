@@ -59,7 +59,7 @@ export async function getWeekData(startDate: string, endDate: string) {
   // Get all household recipes for the meal picker
   const allRecipes = await db.query.recipes.findMany({
     where: eq(recipes.householdId, householdId),
-    columns: { id: true, name: true, servings: true, prepTimeMinutes: true, isVegetarian: true, isFishMeal: true },
+    columns: { id: true, name: true, servings: true, prepTimeMinutes: true, isVegetarian: true, isFishMeal: true, isVegan: true, cuisine: true },
   });
 
   return { meals, events, allRecipes };

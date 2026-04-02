@@ -36,6 +36,7 @@ export default async function KalenderPage({
         events={events}
         allRecipes={allRecipes}
         showFish={showFish}
+        diet={settings?.dietaryPreference ?? "all"}
       />
     </div>
   );
