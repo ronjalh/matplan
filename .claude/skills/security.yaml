@@ -1,0 +1,113 @@
+name: security
+description: Security patterns for Matplan — auth verification, ownership checks, shared links, API protection, and common vulnerabilities
+version: 1.0.0
+tags: [security, auth, authorization, vulnerabilities]
+
+instructions: |
+  # Security — Matplan Patterns
+
+  ## Auth Verification Pattern
+  Every Server Action that reads or writes data MUST start with:
+  ```typescript
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: "Ikke logget inn" };
+  ```
+  Or use the `getHouseholdId()` helper which does this internally.
+
+  ## Ownership Verification — The Chain Rule
+  For item-level operations, verify the FULL ownership chain:
+  ```
+  Item → Parent Resource → Household
+  ```
+  Example for shopping list items:
+  ```typescript
+  async function verifyItemOwnership(itemId: number) {
+    const householdId = await getHouseholdId();
+    const item = await db.query.shoppingListItems.findFirst({
+      where: eq(shoppingListItems.id, itemId),
+    });
+    if (!item) return false;
+    const list = await db.query.shoppingLists.findFirst({
+      where: and(
+        eq(shoppingLists.id, item.shoppingListId),
+        eq(shoppingLists.householdId, householdId)
+      ),
+    });
+    return !!list;
+  }
+  ```
+  NEVER trust that an item ID belongs to the current user just because they sent it.
+
+  ## Delete Operations — Verify Before Cascading
+  When deleting a parent with children:
+  ```typescript
+  // WRONG — deletes entries for ANY household
+  await db.delete(budgetEntries).where(eq(budgetEntries.categoryId, categoryId));
+  await db.delete(budgetCategories).where(
+    and(eq(budgetCategories.id, categoryId), eq(budgetCategories.householdId, householdId))
+  );
+
+  // CORRECT — verify first, then delete with scope
+  const cat = await db.query.budgetCategories.findFirst({
+    where: and(eq(budgetCategories.id, categoryId), eq(budgetCategories.householdId, householdId)),
+  });
+  if (!cat) return { success: false, error: "Ikke funnet" };
+  await db.delete(budgetEntries).where(
+    and(eq(budgetEntries.categoryId, categoryId), eq(budgetEntries.householdId, householdId))
+  );
+  await db.delete(budgetCategories).where(eq(budgetCategories.id, categoryId));
+  ```
+
+  ## Shared/Public Endpoints
+  When a resource is shared via token:
+  1. Validate token exists and is not expired
+  2. Verify the operation targets ONLY the linked resource
+  ```typescript
+  // WRONG — allows toggling any item
+  const item = await db.query.shoppingListItems.findFirst({
+    where: eq(shoppingListItems.id, itemId),
+  });
+
+  // CORRECT — scope to linked resource
+  const item = await db.query.shoppingListItems.findFirst({
+    where: and(
+      eq(shoppingListItems.id, itemId),
+      eq(shoppingListItems.shoppingListId, link.resourceId)
+    ),
+  });
+  ```
+
+  ## Security Tokens
+  - Use `crypto.randomUUID()` — full 122 bits entropy
+  - NEVER truncate: `.slice(0, 12)` reduces to 48 bits
+  - Always set expiry (7 days for shared links)
+  - Store in database, not in URL query params if possible
+
+  ## External API Keys
+  - ONLY in environment variables (never `NEXT_PUBLIC_`)
+  - Prefer `Authorization` header over URL query params (avoids log exposure)
+  - Wrap API calls in auth-checked Server Actions (prevent quota exhaustion)
+
+  ## Input Validation
+  - Drizzle ORM prevents SQL injection (no raw SQL ever)
+  - React JSX prevents XSS (no `dangerouslySetInnerHTML`)
+  - Wrap `JSON.parse()` in try/catch
+  - Use `type="number"` on numeric inputs
+  - Validate dates are ISO format before storing
+
+  ## URL Import (SSRF Mitigation)
+  - Current: fetches any user-supplied URL (LOW risk on Vercel serverless)
+  - Future: add URL allowlist for known recipe sites
+  - Uses Googlebot UA — be aware some services trust this
+
+  ## Known Remaining Issues (LOW)
+  - No application-level rate limiting (Vercel has basic DDoS protection)
+  - Spoonacular API key in URL query params (log exposure)
+  - No URL allowlist for URL import
+  - JSON.parse without try/catch in recipe actions
+
+  ## Rules
+  - EVERY new Server Action gets a security check before merge
+  - EVERY new public endpoint verifies scope
+  - Run security audit after each major feature round
+  - See docs/SECURITY-AUDIT.md for full report

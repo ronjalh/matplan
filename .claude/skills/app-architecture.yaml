@@ -56,9 +56,9 @@ instructions: |
   - **Components are feature-grouped.** `components/calendar/`, `components/nutrition/`, not by type.
 
   ## Data Flow
-  1. Page (Server Component) → reads from SQLite via Drizzle → renders
-  2. User action → Server Action → writes to SQLite → revalidates path
-  3. Scraper → Playwright fetches Oda → updates odaProducts table → node-cron schedules weekly
+  1. Page (Server Component) → reads from PostgreSQL (Neon) via Drizzle → renders
+  2. User action → Server Action (auth check!) → writes to PostgreSQL → revalidates path
+  3. Kassalapp/Spoonacular API calls → cached in DB → served from cache
 
   ## Key Constraints
   - NEVER use `'use client'` unless the component needs browser APIs, event handlers, or hooks

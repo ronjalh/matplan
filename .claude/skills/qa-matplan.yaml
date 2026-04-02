@@ -75,6 +75,18 @@ instructions: |
   - **Fritekst-felt for kategoriske data** — Use dropdowns for cuisine, dietary labels etc. Fritekst leads to inconsistent data ("norsk" vs "Norsk") that can't be filtered.
   - **Hiding search/explore behind small buttons** — Use tabs (Mine / Utforsk / Ny) to give equal prominence. Standard pattern from major apps.
 
+  ### Security Checks (MANDATORY for every new feature)
+  - [ ] Server Action has `auth()` or `getHouseholdId()` call at the top
+  - [ ] Database queries filter by `householdId` for shared data
+  - [ ] Item-level operations verify full ownership chain (item → parent → household)
+  - [ ] Public/shared endpoints verify resource scope (token → specific resource)
+  - [ ] No raw SQL — only Drizzle ORM
+  - [ ] No `dangerouslySetInnerHTML`
+  - [ ] API keys only in env vars (no `NEXT_PUBLIC_`)
+  - [ ] Security tokens use full UUID (never truncate)
+  - [ ] Delete operations verify ownership BEFORE deleting related rows
+  - [ ] Search endpoints that call external APIs require auth (prevent quota exhaustion)
+
   ## After Every Session
   Ask: "What mistakes did we fix today that aren't in this QA skill yet?"
   Add new entries to the checklist above.
