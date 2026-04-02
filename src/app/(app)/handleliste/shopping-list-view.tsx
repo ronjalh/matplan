@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toISODate } from "@/lib/date-utils";
 import {
   generateShoppingList,
@@ -215,7 +216,14 @@ export function ShoppingListView({
         </Button>
       </div>
 
-      {error && <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">{error}</p>}
+      {error && (
+        <div className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2 flex items-center justify-between gap-2">
+          <span>{error}</span>
+          <Link href="/kalender" className="shrink-0 text-xs underline hover:no-underline">
+            Gå til kalender →
+          </Link>
+        </div>
+      )}
 
       {/* List name (editable) */}
       <div className="flex items-center gap-2">
