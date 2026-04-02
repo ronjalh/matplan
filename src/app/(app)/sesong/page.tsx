@@ -43,7 +43,7 @@ export default function SesongPage() {
           I sesong — {monthNames[currentMonth - 1]}
         </h1>
         <p className="text-muted-foreground">
-          {inSeason.length} råvarer i sesong, {fromStorage.length} lagervarer tilgjengelig i Norge.
+          {inSeason.length} {inSeason.length === 1 ? "råvare" : "råvarer"} i sesong, {fromStorage.length} {fromStorage.length === 1 ? "lagervare" : "lagervarer"} tilgjengelig i Norge.
         </p>
       </div>
 

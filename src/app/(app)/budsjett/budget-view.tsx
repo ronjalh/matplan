@@ -8,6 +8,7 @@ import {
   addExpense,
   deleteExpense,
   deleteCategory,
+  importShoppingListAsExpense,
 } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,8 @@ import {
   Wallet,
   Loader2,
   X,
+  BarChart3,
+  ShoppingCart,
 } from "lucide-react";
 
 const monthNames = [
@@ -52,16 +55,22 @@ export function BudgetView({
   entries,
   year,
   month,
+  shoppingLists,
 }: {
   categories: Category[];
   entries: Entry[];
   year: number;
   month: number;
+  shoppingLists?: { id: number; name: string; weekStartDate: string }[];
 }) {
   const router = useRouter();
   const [addingExpense, setAddingExpense] = useState<number | null>(null);
   const [addingCategory, setAddingCategory] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [importingList, setImportingList] = useState(false);
+  const [importCategoryId, setImportCategoryId] = useState<number | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   // Expense form state
   const [expDesc, setExpDesc] = useState("");
@@ -161,7 +170,101 @@ export function BudgetView({
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowStats(!showStats)} className="gap-1">
+            <BarChart3 className="w-4 h-4" /> {showStats ? "Skjul" : "Statistikk"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setImportingList(!importingList)} className="gap-1">
+            <ShoppingCart className="w-4 h-4" /> Handleliste
+          </Button>
+        </div>
       </div>
+
+      {/* Import shopping list as expense */}
+      {importingList && (
+        <Card className="p-4">
+          <p className="text-sm font-medium mb-2">Legg handleliste inn som utgift</p>
+          {shoppingLists && shoppingLists.length > 0 ? (
+            <div className="space-y-2">
+              <select
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                defaultValue=""
+                onChange={(e) => {
+                  const listId = parseInt(e.target.value);
+                  if (!isNaN(listId)) setImportCategoryId(null);
+                }}
+                id="import-list-select"
+              >
+                <option value="">Velg handleliste...</option>
+                {shoppingLists.map((l) => (
+                  <option key={l.id} value={l.id}>{l.name}</option>
+                ))}
+              </select>
+              <select
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={importCategoryId ?? ""}
+                onChange={(e) => setImportCategoryId(parseInt(e.target.value) || null)}
+              >
+                <option value="">Velg budsjettategori...</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              {importError && <p className="text-sm text-destructive">{importError}</p>}
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    const select = document.getElementById("import-list-select") as HTMLSelectElement;
+                    const listId = parseInt(select.value);
+                    if (!listId || !importCategoryId) return;
+                    setImportError(null);
+                    const result = await importShoppingListAsExpense(listId, importCategoryId);
+                    if (!result.success) { setImportError(result.error ?? "Noe gikk galt"); return; }
+                    setImportingList(false);
+                  }}
+                >
+                  Legg til som utgift
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setImportingList(false)}>Avbryt</Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Ingen handlelister å importere.</p>
+          )}
+        </Card>
+      )}
+
+      {/* Statistics */}
+      {showStats && categories.length > 0 && (
+        <Card>
+          <CardHeader className="py-3">
+            <CardTitle className="text-base">Fordeling</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              {categories.map((cat) => {
+                const spent = categoryTotals.get(cat.id) ?? 0;
+                const pctOfTotal = totalSpentOre > 0 ? (spent / totalSpentOre) * 100 : 0;
+                return (
+                  <div key={cat.id} className="flex items-center gap-3 text-sm">
+                    <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: cat.color ?? "#7C9A7E" }} />
+                    <span className="flex-1 min-w-0 truncate">{cat.name}</span>
+                    <div className="w-24 h-2 bg-muted rounded-full overflow-hidden shrink-0">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${pctOfTotal}%`, backgroundColor: cat.color ?? "#7C9A7E" }}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground w-12 text-right">{Math.round(pctOfTotal)}%</span>
+                    <span className="text-xs w-16 text-right">{formatKr(spent)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Total summary */}
       <Card>
@@ -261,10 +364,13 @@ export function BudgetView({
                     />
                   </div>
                   <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
                     value={expAmount}
                     onChange={(e) => setExpAmount(e.target.value)}
                     placeholder="kr"
-                    className="w-20 h-8 text-sm"
+                    className="w-24 h-8 text-sm"
                     onKeyDown={(e) => e.key === "Enter" && handleAddExpense(cat.id)}
                   />
                   <Input

@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/auth/auth-config";
 import { db } from "@/db";
-import { budgetCategories, budgetEntries, householdMembers } from "@/db/schema";
+import { budgetCategories, budgetEntries, householdMembers, shoppingLists, shoppingListItems } from "@/db/schema";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -150,6 +150,51 @@ const SIFO_BUDGETS: Record<string, { name: string; limit: number; color: string 
     { name: "Sparing", limit: 300000, color: "#6ABF69" },
   ],
 };
+
+export async function importShoppingListAsExpense(shoppingListId: number, categoryId: number) {
+  const householdId = await getHouseholdId();
+
+  // Get shopping list with items
+  const list = await db.query.shoppingLists.findFirst({
+    where: and(eq(shoppingLists.id, shoppingListId), eq(shoppingLists.householdId, householdId)),
+  });
+  if (!list) return { success: false, error: "Handleliste ikke funnet" };
+
+  const items = await db.query.shoppingListItems.findMany({
+    where: eq(shoppingListItems.shoppingListId, shoppingListId),
+  });
+
+  // Sum all prices
+  const totalOre = items
+    .filter((i) => i.estimatedPriceOre)
+    .reduce((sum, i) => sum + i.estimatedPriceOre!, 0);
+
+  if (totalOre === 0) return { success: false, error: "Handlelisten har ingen priser" };
+
+  const today = new Date();
+  const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+  await db.insert(budgetEntries).values({
+    householdId,
+    categoryId,
+    date,
+    description: `Handleliste: ${list.name}`,
+    amountOre: totalOre,
+  });
+
+  revalidatePath("/budsjett");
+  return { success: true, amountOre: totalOre };
+}
+
+export async function getShoppingListsForBudget() {
+  const householdId = await getHouseholdId();
+
+  return db.query.shoppingLists.findMany({
+    where: eq(shoppingLists.householdId, householdId),
+    orderBy: [desc(shoppingLists.createdAt)],
+    columns: { id: true, name: true, weekStartDate: true },
+  });
+}
 
 export async function seedDefaultCategories(householdType: string = "single") {
   const householdId = await getHouseholdId();

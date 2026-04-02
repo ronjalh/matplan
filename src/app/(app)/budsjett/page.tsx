@@ -1,4 +1,4 @@
-import { getBudgetData, seedDefaultCategories } from "./actions";
+import { getBudgetData, getShoppingListsForBudget } from "./actions";
 import { BudgetView } from "./budget-view";
 
 export default async function BudsjettPage({
@@ -12,6 +12,7 @@ export default async function BudsjettPage({
   const month = params.month ? parseInt(params.month) : now.getMonth() + 1;
 
   const { categories, entries } = await getBudgetData(year, month);
+  const shoppingLists = await getShoppingListsForBudget();
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
@@ -23,6 +24,7 @@ export default async function BudsjettPage({
         entries={entries}
         year={year}
         month={month}
+        shoppingLists={shoppingLists}
       />
     </div>
   );
