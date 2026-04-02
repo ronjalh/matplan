@@ -49,10 +49,22 @@ export async function importFromUrl(url: string) {
     })
     .returning();
 
-  // Save ingredients
+  // Save ingredients — merge duplicates (same name + unit)
   if (recipe.ingredients.length > 0) {
+    const merged = new Map<string, { quantity: number; unit: string; text: string }>();
+    for (const ing of recipe.ingredients) {
+      const key = `${ing.name.toLowerCase()}|${ing.unit}`;
+      const existing = merged.get(key);
+      if (existing) {
+        existing.quantity += ing.quantity;
+        existing.text = `${existing.quantity} ${ing.unit} ${ing.name}`;
+      } else {
+        merged.set(key, { quantity: ing.quantity, unit: ing.unit, text: ing.text });
+      }
+    }
+
     await db.insert(recipeIngredients).values(
-      recipe.ingredients.map((ing) => ({
+      Array.from(merged.values()).map((ing) => ({
         recipeId: saved.id,
         quantity: ing.quantity,
         unit: ing.unit,

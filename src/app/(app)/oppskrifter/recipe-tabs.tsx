@@ -67,7 +67,7 @@ export function RecipeTabs({ recipes }: { recipes: Recipe[] }) {
       <TabsContent value="ny" className="mt-4 max-w-lg space-y-4">
         <RecipeForm />
         <Link href="/oppskrifter/url-import" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
-          <Link2 className="w-4 h-4" /> Eller importer fra URL (matprat.no, etc.)
+          <Link2 className="w-4 h-4" /> Eller importer fra matprat.no
         </Link>
       </TabsContent>
     </Tabs>

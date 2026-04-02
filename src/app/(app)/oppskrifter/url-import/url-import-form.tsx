@@ -58,7 +58,7 @@ export function UrlImportForm() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Fungerer med matprat.no, minimalistbaker.com, budgetbytes.com og de fleste oppskriftssider.
+            Fungerer med matprat.no. Støtte for flere sider kommer.
           </p>
         </CardContent>
       </Card>
