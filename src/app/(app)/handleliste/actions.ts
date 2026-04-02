@@ -13,7 +13,7 @@ import {
 } from "@/db/schema";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { getMonday, getWeekDays, toISODate } from "@/lib/date-utils";
+import { getMonday, getWeekDays, toISODate, getISOWeekNumber } from "@/lib/date-utils";
 import { findBestPrice } from "@/price-api/kassalapp";
 
 async function getHouseholdId() {
@@ -140,11 +140,23 @@ export async function generateShoppingList(weekStartDate?: string) {
     }
   }
 
+  // Generate list name with week number
+  const weekNum = getISOWeekNumber(days[0]);
+  const existingThisWeek = await db.query.shoppingLists.findMany({
+    where: and(
+      eq(shoppingLists.householdId, householdId),
+      eq(shoppingLists.weekStartDate, startDate)
+    ),
+  });
+  const suffix = existingThisWeek.length > 0 ? ` (${existingThisWeek.length + 1})` : "";
+  const listName = `Uke ${weekNum}${suffix}`;
+
   // Create shopping list
   const [list] = await db
     .insert(shoppingLists)
     .values({
       householdId,
+      name: listName,
       weekStartDate: startDate,
       generatedFromMealPlan: true,
     })
@@ -185,7 +197,8 @@ export async function generateShoppingList(weekStartDate?: string) {
           checked: false,
           category: guessCategory(item.name),
           estimatedPriceOre: price?.priceOre ?? null,
-          priceSource: price ? `${price.productName} — ${price.store}` : null,
+          priceSource: price?.productName ?? null,
+          priceStore: price?.store ?? null,
         };
       })
     );
@@ -211,8 +224,57 @@ export async function updateItemPrice(itemId: number, priceKr: number) {
     .set({
       estimatedPriceOre: priceOre,
       priceSource: "Egendefinert",
+      priceStore: "Egendefinert",
     })
     .where(eq(shoppingListItems.id, itemId));
+  revalidatePath("/handleliste");
+  return { success: true };
+}
+
+export async function createEmptyList(name?: string) {
+  const householdId = await getHouseholdId();
+  const today = toISODate(new Date());
+  const weekNum = getISOWeekNumber(new Date());
+
+  const [list] = await db
+    .insert(shoppingLists)
+    .values({
+      householdId,
+      name: name || `Handleliste Uke ${weekNum}`,
+      weekStartDate: today,
+      generatedFromMealPlan: false,
+    })
+    .returning();
+
+  revalidatePath("/handleliste");
+  return { success: true, id: list.id };
+}
+
+export async function renameList(listId: number, name: string) {
+  const householdId = await getHouseholdId();
+  await db
+    .update(shoppingLists)
+    .set({ name: name.trim() })
+    .where(and(eq(shoppingLists.id, listId), eq(shoppingLists.householdId, householdId)));
+  revalidatePath("/handleliste");
+  return { success: true };
+}
+
+export async function addItem(listId: number, name: string, quantity: number, unit: string) {
+  await db.insert(shoppingListItems).values({
+    shoppingListId: listId,
+    name: name.trim(),
+    quantity,
+    unit,
+    checked: false,
+    category: guessCategory(name),
+  });
+  revalidatePath("/handleliste");
+  return { success: true };
+}
+
+export async function removeItem(itemId: number) {
+  await db.delete(shoppingListItems).where(eq(shoppingListItems.id, itemId));
   revalidatePath("/handleliste");
   return { success: true };
 }

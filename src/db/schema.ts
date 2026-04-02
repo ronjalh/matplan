@@ -317,6 +317,7 @@ export const shoppingLists = pgTable("shopping_lists", {
   householdId: integer("household_id")
     .notNull()
     .references(() => households.id, { onDelete: "cascade" }),
+  name: text("name").notNull().default("Handleliste"),
   weekStartDate: text("week_start_date").notNull(),
   generatedFromMealPlan: boolean("generated_from_meal_plan")
     .notNull()
@@ -337,7 +338,8 @@ export const shoppingListItems = pgTable("shopping_list_items", {
   quantity: real("quantity").notNull(),
   unit: text("unit").notNull(),
   estimatedPriceOre: integer("estimated_price_ore"),
-  priceSource: text("price_source"), // "Helmelk 1l Tine — Joker" or "Egendefinert"
+  priceSource: text("price_source"), // "Helmelk 1l Tine"
+  priceStore: text("price_store"), // "Joker", "Rema 1000", "Egendefinert"
   checked: boolean("checked").notNull().default(false),
   category: text("category"),
 });

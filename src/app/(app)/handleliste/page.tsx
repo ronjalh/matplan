@@ -21,7 +21,7 @@ export default async function HandlelistePage({
       </h1>
       <ShoppingListView
         list={currentList}
-        allLists={allLists.map((l) => ({ id: l.id, weekStartDate: l.weekStartDate, createdAt: l.createdAt.toISOString() }))}
+        allLists={allLists.map((l) => ({ id: l.id, name: l.name, weekStartDate: l.weekStartDate, createdAt: l.createdAt.toISOString() }))}
         activeListId={currentList?.id}
       />
     </div>
