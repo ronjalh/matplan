@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   });
   const householdId = membership?.householdId;
 
-  // Get user settings + check onboarding
+  // Get user settings
   const settings = await db.query.userSettings.findFirst({
     where: eq(userSettings.userId, session!.user!.id!),
   });

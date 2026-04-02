@@ -44,3 +44,15 @@ export async function completeOnboarding(formData: FormData) {
 
   redirect("/");
 }
+
+export async function skipOnboarding() {
+  const session = await auth();
+  if (!session?.user?.id) return;
+
+  await db
+    .update(userSettings)
+    .set({ onboardingComplete: true })
+    .where(eq(userSettings.userId, session.user.id));
+
+  redirect("/");
+}

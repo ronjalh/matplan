@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { completeOnboarding } from "./actions";
+import { completeOnboarding, skipOnboarding } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight, ChevronLeft, Leaf, ShoppingCart, Wallet } from "lucide-react";
@@ -21,11 +21,18 @@ export function OnboardingWizard({ userName }: { userName: string }) {
   return (
     <Card className="w-full max-w-lg">
       <CardContent className="p-6 space-y-6">
-        {/* Progress */}
-        <div className="flex gap-1">
-          {steps.map((_, i) => (
-            <div key={i} className={`h-1 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`} />
-          ))}
+        {/* Skip + Progress */}
+        <div className="flex items-center justify-between">
+          <div className="flex gap-1 flex-1">
+            {steps.map((_, i) => (
+              <div key={i} className={`h-1 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`} />
+            ))}
+          </div>
+          <form action={skipOnboarding} className="ml-4">
+            <Button type="submit" variant="ghost" size="sm" className="text-xs text-muted-foreground">
+              Hopp over
+            </Button>
+          </form>
         </div>
 
         {/* Step 1: Welcome */}
