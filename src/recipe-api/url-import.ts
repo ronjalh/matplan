@@ -114,7 +114,7 @@ function parseIngredientString(text: string): { text: string; quantity: number; 
   const cleaned = text.replace(/\s+/g, " ").trim();
 
   // Try to parse "2 ss olje" or "300 g kjøttdeig" or "1 stk. løk"
-  const match = cleaned.match(/^([\d.,/]+)\s*(stk\.?|ss|ts|dl|l|ml|g|kg|båt|båter|boks|pose|pk|fedd|klype|neve)?\s*(.+)/i);
+  const match = cleaned.match(/^([\d.,/]+)\s*(stk\.?|ss|ts|dl|l|ml|g|kg|båter|båt|boks|pose|pk|fedd|klype|neve)?\s*(.+)/i);
 
   if (match) {
     let qty = parseFloat(match[1].replace(",", "."));

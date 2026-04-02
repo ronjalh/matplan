@@ -403,11 +403,11 @@ function extractIngredientName(text: string, quantity?: number, unit?: string): 
     .replace(/^ca\.?\s*/i, "")
     // Remove all leading number patterns (handles "2,5" and "400")
     .replace(/^[\d.,]+\s*/g, "")
-    // Remove known units (Norwegian + English)
-    .replace(/^(g|kg|dl|l|ml|ss|ts|stk|pk|fedd|klype|bunt|kvast|porsjon|neve|blad|skive|bx|glass|tbsps?|tsps?|cups?|oz|lbs?|servings?|tablespoons?|teaspoons?|pinch|dash|small|medium|large|handful|cans?|pieces?|whole|slices?|sprigs?|cloves?|bunch|packet|package)\s+/i, "")
-    // Remove another round of numbers (for "4 tbsps 2 tbsps koriander" → after first strip, might have "2 tbsps koriander")
+    // Remove known units (Norwegian + English) — with optional trailing period
+    .replace(/^(g|kg|dl|l|ml|ss|ts|stk|pk|fedd|klype|bunt|kvast|porsjon|neve|blad|skive|bx|glass|båter?|boks|pose|tbsps?|tsps?|cups?|oz|lbs?|servings?|tablespoons?|teaspoons?|pinch|dash|small|medium|large|handful|cans?|pieces?|whole|slices?|sprigs?|cloves?|bunch|packet|package)\.?\s+/i, "")
+    // Remove another round of numbers (for "4 tbsps 2 tbsps koriander")
     .replace(/^[\d.,]+\s*/g, "")
-    .replace(/^(g|kg|dl|l|ml|ss|ts|stk|pk|fedd|klype|tbsps?|tsps?|cups?|oz|lbs?|servings?|tablespoons?|teaspoons?|small|medium|large)\s+/i, "")
+    .replace(/^(g|kg|dl|l|ml|ss|ts|stk|pk|fedd|klype|båter?|boks|pose|tbsps?|tsps?|cups?|oz|lbs?|servings?|tablespoons?|teaspoons?|small|medium|large)\.?\s+/i, "")
     .trim();
 
   // If nothing left, use text as-is
