@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toISODate } from "@/lib/date-utils";
 import {
   generateShoppingList,
   toggleItem,
@@ -12,13 +13,14 @@ import {
   renameList,
   addItem,
   removeItem,
+  addShoppingTrip,
 } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ShoppingCart, Loader2, Trash2, Share2, Square, CheckSquare,
-  Pencil, Check, X, Plus,
+  Pencil, Check, X, Plus, CalendarPlus,
 } from "lucide-react";
 
 interface ShoppingListItem {
@@ -64,6 +66,9 @@ export function ShoppingListView({
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(list?.name ?? "");
   const [addingItem, setAddingItem] = useState(false);
+  const [addingToCalendar, setAddingToCalendar] = useState(false);
+  const [tripDate, setTripDate] = useState(toISODate(new Date()));
+  const [tripTime, setTripTime] = useState("");
   const [newItemName, setNewItemName] = useState("");
   const [newItemQty, setNewItemQty] = useState("");
   const [newItemUnit, setNewItemUnit] = useState("stk");
@@ -244,10 +249,53 @@ export function ShoppingListView({
         >
           <Share2 className="w-4 h-4" /> {shareUrl ? "Kopiert!" : "Del"}
         </Button>
+        <Button variant="outline" size="sm" onClick={() => setAddingToCalendar(!addingToCalendar)} className="gap-1">
+          <CalendarPlus className="w-4 h-4" /> Handletur
+        </Button>
         <Button variant="ghost" size="sm" onClick={handleDelete} className="text-muted-foreground hover:text-destructive">
           <Trash2 className="w-4 h-4" />
         </Button>
       </div>
+
+      {/* Add shopping trip to calendar */}
+      {addingToCalendar && (
+        <Card className="p-3">
+          <p className="text-sm font-medium mb-2">Legg handletur i kalender</p>
+          <div className="flex gap-2 items-end">
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Dato</label>
+              <Input
+                type="date"
+                value={tripDate}
+                onChange={(e) => setTripDate(e.target.value)}
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Kl. (valgfritt)</label>
+              <Input
+                type="time"
+                value={tripTime}
+                onChange={(e) => setTripTime(e.target.value)}
+                className="h-8 text-sm"
+              />
+            </div>
+            <Button
+              size="sm"
+              className="h-8"
+              onClick={async () => {
+                await addShoppingTrip(list.id, tripDate, tripTime || undefined);
+                setAddingToCalendar(false);
+              }}
+            >
+              Legg til
+            </Button>
+            <Button size="sm" variant="ghost" className="h-8" onClick={() => setAddingToCalendar(false)}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Store filter */}
       {stores.length > 1 && (

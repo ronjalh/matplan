@@ -276,6 +276,8 @@ export const calendarEvents = pgTable("calendar_events", {
     .notNull(),
   color: text("color"),
   recurrenceRule: text("recurrence_rule"),
+  linkedResourceType: text("linked_resource_type").$type<"shoppingList">(),
+  linkedResourceId: integer("linked_resource_id"),
 });
 
 // ============================================================================

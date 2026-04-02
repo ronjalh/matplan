@@ -15,9 +15,11 @@ import {
   Moon,
   Fish,
   CalendarPlus,
+  ShoppingCart,
 } from "lucide-react";
 import { addMeal, removeMeal, removeEvent } from "./actions";
 import { AddEventDialog } from "./add-event-dialog";
+import Link from "next/link";
 import {
   formatShortDate,
   getISOWeekNumber,
@@ -52,6 +54,8 @@ interface CalEvent {
   eventType: string;
   startTime: string | null;
   endTime: string | null;
+  linkedResourceType: string | null;
+  linkedResourceId: number | null;
 }
 
 interface Recipe {
@@ -260,30 +264,45 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
               })}
 
               {/* Events */}
-              {dayEvents.map((event) => (
-                <div
-                  key={event.id}
-                  className="group relative rounded-md px-2 py-1 text-xs border-l-2"
-                  style={{
-                    borderLeftColor:
-                      event.eventType === "aktivitet" ? "var(--color-fish)" :
-                      event.eventType === "avtale" ? "var(--color-terracotta)" :
-                      event.eventType === "paamminnelse" ? "var(--color-warning)" :
-                      "var(--muted-foreground)",
-                  }}
-                >
-                  <span className="truncate block">{event.title}</span>
-                  {event.startTime && (
-                    <span className="text-muted-foreground">{event.startTime}{event.endTime && `–${event.endTime}`}</span>
-                  )}
-                  <button
-                    onClick={() => handleRemoveEvent(event.id)}
-                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+              {dayEvents.map((event) => {
+                const hasLink = event.linkedResourceType === "shoppingList" && event.linkedResourceId;
+                const eventContent = (
+                  <div
+                    key={event.id}
+                    className={`group relative rounded-md px-2 py-1 text-xs border-l-2 ${hasLink ? "hover:bg-muted cursor-pointer" : ""}`}
+                    style={{
+                      borderLeftColor:
+                        event.eventType === "aktivitet" ? "var(--color-fish)" :
+                        event.eventType === "avtale" ? "var(--color-terracotta)" :
+                        event.eventType === "paamminnelse" ? "var(--color-warning)" :
+                        "var(--muted-foreground)",
+                    }}
                   >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
+                    <span className="truncate block">{event.title}</span>
+                    {event.startTime && (
+                      <span className="text-muted-foreground">{event.startTime}{event.endTime && `–${event.endTime}`}</span>
+                    )}
+                    {hasLink && (
+                      <ShoppingCart className="w-3 h-3 text-primary absolute top-1 right-5" />
+                    )}
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveEvent(event.id); }}
+                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                );
+
+                if (hasLink) {
+                  return (
+                    <Link key={event.id} href={`/handleliste?id=${event.linkedResourceId}`}>
+                      {eventContent}
+                    </Link>
+                  );
+                }
+                return eventContent;
+              })}
 
               {/* Add event button */}
               <button

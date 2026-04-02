@@ -9,6 +9,7 @@ import {
   shoppingLists,
   shoppingListItems,
   sharedLinks,
+  calendarEvents,
   householdMembers,
 } from "@/db/schema";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
@@ -253,6 +254,28 @@ export async function createEmptyList(name?: string) {
 
   revalidatePath("/handleliste");
   return { success: true, id: list.id };
+}
+
+export async function addShoppingTrip(listId: number, date: string, time?: string) {
+  const householdId = await getHouseholdId();
+  const list = await db.query.shoppingLists.findFirst({
+    where: and(eq(shoppingLists.id, listId), eq(shoppingLists.householdId, householdId)),
+  });
+  if (!list) return { success: false, error: "Liste ikke funnet" };
+
+  await db.insert(calendarEvents).values({
+    householdId,
+    date,
+    startTime: time || null,
+    title: `Handletur: ${list.name}`,
+    eventType: "avtale",
+    linkedResourceType: "shoppingList",
+    linkedResourceId: listId,
+  });
+
+  revalidatePath("/kalender");
+  revalidatePath("/handleliste");
+  return { success: true };
 }
 
 export async function renameList(listId: number, name: string) {
