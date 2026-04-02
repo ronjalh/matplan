@@ -1,18 +1,29 @@
-import { Wallet } from "lucide-react";
+import { getBudgetData, seedDefaultCategories } from "./actions";
+import { BudgetView } from "./budget-view";
 
-export default function BudsjettPage() {
+export default async function BudsjettPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ year?: string; month?: string }>;
+}) {
+  const params = await searchParams;
+  const now = new Date();
+  const year = params.year ? parseInt(params.year) : now.getFullYear();
+  const month = params.month ? parseInt(params.month) : now.getMonth() + 1;
+
+  const { categories, entries } = await getBudgetData(year, month);
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-[family-name:var(--font-fraunces)] font-semibold mb-2">
+    <div className="max-w-3xl mx-auto space-y-4">
+      <h1 className="text-2xl font-[family-name:var(--font-fraunces)] font-semibold">
         Budsjett
       </h1>
-      <p className="text-muted-foreground mb-8">
-        Hold styr på matbudsjettet og andre utgifter.
-      </p>
-      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-        <Wallet className="w-12 h-12 mb-4 opacity-30" />
-        <p>Budsjettoversikten kommer snart</p>
-      </div>
+      <BudgetView
+        categories={categories}
+        entries={entries}
+        year={year}
+        month={month}
+      />
     </div>
   );
 }
