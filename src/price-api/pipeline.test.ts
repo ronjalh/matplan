@@ -32,13 +32,13 @@ const COMMON_GROCERY_ITEMS: [string, string | null][] = [
 
   // Grønnsaker
   ["løk", "gul løk"],
-  ["hvitløk", "hvitløk fersk"],
+  ["hvitløk", "hvitløk"],
   ["gulrot", "gulrøtter pose"],
-  ["brokkoli", "brokkoli fersk"],
-  ["tomat", "tomater løsvekt"],
-  ["agurk", "agurk fersk løsvekt"],
+  ["brokkoli", "brokkoli stk"],
+  ["tomat", "tomater"],
+  ["agurk", "agurk norsk"],
   ["paprika", "paprika rød"],
-  ["spinat", "spinat fersk"],
+  ["spinat", "babyspinat"],
 
   // Kjøtt
   ["kylling", "kyllingfilet prior"],

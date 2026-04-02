@@ -1,55 +1,83 @@
 name: prismatching-laerdommer
-description: Lessons learned from Kassalapp price matching — what works, what fails, and why
-version: 1.0.0
-tags: [pricing, kassalapp, matching, lessons]
+description: Critical lessons for Kassalapp price matching — what causes regressions and how to prevent them
+version: 2.0.0
+tags: [pricing, kassalapp, matching, lessons, regression]
 
 instructions: |
   # Prismatching Lærdommer
 
-  ## Hva som feiler og hvorfor
+  ## KRITISK: Hva som forårsaker regresjoner
 
-  ### Problem 1: Generiske søkeord
-  "salsa" → Makrell i Salsa (hermetikk) i stedet for salsa-saus
-  "mango" → Smudi Pålegg Mango (pålegg) i stedet for fersk mango
-  "sesamfrø" → Grissini med Sesamfrø (brødstenger) i stedet for frø
+  ### Regel 1: "fersk" og "løsvekt" GIR OFTE 0 RESULTATER
+  Kassalapp returnerer INGEN produkter for:
+  - "agurk fersk løsvekt" → 0 resultater
+  - "tomater løsvekt" → 0 resultater
+  - "spinat fersk" → 0 resultater (returnerer tortelloni)
+  - "brokkoli fersk" → 0 resultater (returnerer falafel)
+  - "blomkål fersk" → 0 resultater
+  - "lime løsvekt" → 0 resultater
+  - "avokado frukt fersk" → 0 resultater
 
-  **Årsak:** Kassalapp returnerer produkter der søkeordet er EN del av navnet,
-  ikke hovedproduktet. "Salsa" matcher "Makrell i Salsa" fordi ordet finnes.
+  ALDRI legg til "fersk" eller "løsvekt" i refinements uten å TESTE MOT API-ET FØRST.
 
-  **Løsning:** Scoring-algoritmen bør sjekke om søkeordet er HOVEDPRODUKTET
-  (starter med eller er hoveddelen av navnet), ikke bare at det finnes i navnet.
+  ### Regel 2: Hva som FAKTISK fungerer på Kassalapp
+  | Mønster | Eksempel | Fungerer? |
+  |---------|----------|-----------|
+  | Bare navnet | "tomater" | ✅ Ja (men kan gi feil produkt) |
+  | Navn + "stk" | "lime pr stk" | ✅ Ja |
+  | Navn + "norsk" | "agurk norsk" | ✅ Ja |
+  | Navn + merke | "bananer bama" | ✅ Ja |
+  | Flertallsform | "sitroner" | ✅ Ja |
+  | Navn + "fersk" | "brokkoli fersk" | ❌ Ofte 0 resultater |
+  | Navn + "løsvekt" | "lime løsvekt" | ❌ Ofte 0 resultater |
+  | Navn + "fersk løsvekt" | "agurk fersk løsvekt" | ❌ Alltid 0 |
 
-  ### Problem 2: Sammensatte produktnavn
-  Kassalapp-produkter har formatet: "Produktnavn Variant Størrelse Merke"
-  F.eks. "Stabbur-Makrell Hakket i Salsa 110g Stabburet"
+  ### Regel 3: ALLTID test nye refinements mot Kassalapp API
+  Før du endrer en refinement:
+  ```bash
+  curl -s -H "Authorization: Bearer $API_KEY" \
+    "https://kassal.app/api/v1/products?search=QUERY&size=2"
+  ```
+  Sjekk at den returnerer ≥1 resultat og at resultatet er riktig produkt.
 
-  Når vi søker "salsa" matcher dette fordi "Salsa" er i navnet.
-  Men hovedproduktet er "Makrell", ikke "Salsa".
+  ### Regel 4: Ikke legg til "Dessert" i EXCLUDE_CATEGORIES
+  "Dessert"-kategorien i Kassalapp inneholder MYE mer enn dessert.
+  Å filtrere den ut fjerner mange gyldige produkter.
 
-  **Løsning:** Sjekk om søkeordet matcher STARTEN av produktnavnet,
-  eller er det eneste ordet (ikke bare substring).
+  ### Regel 5: \b regex fungerer IKKE med norske tegn
+  JavaScript `\b` word boundary feiler med ø, å, æ.
+  "løk" matcher ikke `\blok\b` fordi ø ikke er et word character.
+  Bruk space/start/end boundaries: `(?:^|\\s)key(?:\\s|$)` i stedet.
 
-  ### Problem 3: Word position matters
-  "Mango" i "Smudi Pålegg Mango&Fersken" er et tilleggsord.
-  "Mango" i "Mango 1stk løsvekt" er hovedproduktet.
+  ### Regel 6: STRIP_PATTERN kan ødelegge ingrediensnavn
+  Å legge til vanlige matord som "mel" i STRIP_PATTERN fjerner dem fra
+  sammensatte ord. Vær VELDIG forsiktig med hva som legges til.
 
-  **Løsning:** Gi høyere score til matcher i starten av produktnavnet.
+  ## Verifisert fungerende refinements (april 2026)
+  | Ingrediens | Refinement | Kassalapp-resultat |
+  |-----------|------------|-------------------|
+  | lime | lime pr stk | Lime pr stk kr 8,49 |
+  | avokado | avokado stk | Økologisk Avokado 2stk kr 49,90 |
+  | sitron | sitroner | Små Sitroner kr 26 |
+  | banan | bananer bama | Bananer Bama kr 5,98 |
+  | agurk | agurk norsk | Agurk hel Norsk kr 29,90 |
+  | blomkål | blomkål stk | Blomkål pr stk kr 14,90 |
+  | poteter | poteter løsvekt | Poteter løsvekt kr 3,24 |
+  | gul løk | gul løk | Løk Gul 2stk kr 19,90 |
+  | isbergsalat | isbergsalat | Isbergsalat stykk kr 29,90 |
+  | babyspinat | babyspinat | Babyspinat 65g kr 22,90 |
 
-  ## Hva som fungerer
-  - Spesifikke søkeord med merkenavn: "helmelk tine", "kjøttdeig gilde"
-  - "fersk" og "løsvekt" kvalifikatorer for frukt/grønt
-  - Filtrering av barnemat-kategorier
-  - Bulk-filtrering (>2.5kg, storkjøkken)
-  - Pris-sanity-cap (kr 250)
-
-  ## Forbedringer å implementere
-  1. **Position-score:** +20 hvis søkeord starter produktnavnet, +5 hvis det er midt i
-  2. **Main-product detection:** Første ord(ene) i produktnavn er hovedproduktet
-  3. **Negative scoring for "i X" mønster:** "Makrell i Salsa" → "Salsa" er tilbehør, ikke hovedprodukt
-  4. **Mer aggressive refinements:** "salsa" → "salsa dip", "mango" → "mango fersk løsvekt"
+  ## Prosess for å endre refinements
+  1. ALLTID kjør `npm test` FØRST for å se baseline
+  2. Test ny query mot Kassalapp API med curl
+  3. Verifiser at den returnerer ≥1 relevant resultat
+  4. Oppdater refinement OG tilhørende test
+  5. Kjør `npm test` igjen — ALLE tester må passere
+  6. Deploy og verifiser i produksjon med ny handleliste
+  7. Hvis success rate SYNKER — revert umiddelbart
 
   ## Rules
-  - ALLTID test med `npm test` etter endringer i prismatching
-  - Nye ingredienser som feiler → legg til i refinements OG accuracy-tester
-  - Kassalapp API returnerer max 100 resultater — bruk 10-15 og score dem
-  - Norske tegn (ø, å, æ) fungerer IKKE med \b regex — bruk space/start/end
+  - ALDRI anta at "fersk"/"løsvekt" fungerer — test mot API
+  - ALLTID verifiser med `npm test` før og etter endringer
+  - ALDRI fjern en fungerende refinement uten å teste erstatningen
+  - Pris-regrsjoner er den vanligste feilen — vær ekstremt forsiktig

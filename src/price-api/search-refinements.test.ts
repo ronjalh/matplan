@@ -16,7 +16,7 @@ describe("refineSearchQuery", () => {
       ["salt", "jodsalt"],
       ["pepper", "sort pepper kvern"],
       ["løk", "gul løk"],
-      ["hvitløk", "hvitløk fersk"],
+      ["hvitløk", "hvitløk"],
       ["gulrot", "gulrøtter pose"],
       ["ris", "jasminris"],
       ["pasta", "spaghetti barilla"],
@@ -43,7 +43,7 @@ describe("refineSearchQuery", () => {
       ["jalapeno", "chili jalapeño"],
       ["cilantro", "koriander fersk"],
       ["bell pepper", "paprika rød fersk"],
-      ["garlic", "hvitløk fersk"],
+      ["garlic", "hvitløk"],
       ["lemon juice", "sitronsaft"],
       ["lime juice", "limesaft"],
       ["coconut milk", "kokosmelk"],
@@ -57,7 +57,7 @@ describe("refineSearchQuery", () => {
   describe("Strips units and numbers before matching", () => {
     const cases: [string, string][] = [
       ["1 klype salt", "jodsalt"],
-      ["2 fedd hvitløk", "hvitløk fersk"],
+      ["2 fedd hvitløk", "hvitløk"],
       ["3 dl melk", "helmelk tine"],
       ["400 g laks", "laksefilet fersk"],
       ["2 ss olivenolje", "olivenolje extra virgin"],
