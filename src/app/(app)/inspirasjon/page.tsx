@@ -104,7 +104,7 @@ export default async function InspirasjonPage() {
             </p>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-lg bg-[var(--color-fish)]/5 p-3 space-y-2">
+              <div className="rounded-lg bg-muted/50 p-3 space-y-2">
                 <p className="text-sm font-medium">Fet fisk (minst 1 gang/uke)</p>
                 <ul className="text-xs text-muted-foreground space-y-1">
                   <li>🐟 Laks — mest populær, allsidig</li>
@@ -115,7 +115,7 @@ export default async function InspirasjonPage() {
                 </ul>
                 <p className="text-[10px] text-muted-foreground">Rik på omega-3 fettsyrer, vitamin D og protein.</p>
               </div>
-              <div className="rounded-lg bg-muted/50 p-3 space-y-2">
+              <div className="rounded-lg bg-[var(--color-fish)]/5 p-3 space-y-2">
                 <p className="text-sm font-medium">Mager fisk</p>
                 <ul className="text-xs text-muted-foreground space-y-1">
                   <li>🐟 Torsk — klassiker, mild smak</li>
@@ -160,22 +160,80 @@ export default async function InspirasjonPage() {
           <p className="text-sm text-muted-foreground">
             Del tallerkenen i tre like store deler for et balansert måltid.
           </p>
-          <div className="grid grid-cols-3 gap-2 text-center">
+          {/* Plate illustration */}
+          <div className="flex justify-center py-2">
+            <svg width="180" height="180" viewBox="0 0 180 180" className="drop-shadow-sm">
+              <circle cx="90" cy="90" r="85" fill="var(--card)" stroke="var(--border)" strokeWidth="2" />
+              {/* Vegetable third */}
+              <path d="M 90 90 L 90 5 A 85 85 0 0 1 163.6 132.5 Z" fill="var(--color-success)" opacity="0.2" />
+              <text x="120" y="60" textAnchor="middle" className="text-xs font-medium fill-[var(--color-success)]">Grønt</text>
+              <text x="120" y="74" textAnchor="middle" className="text-[10px] fill-muted-foreground">⅓</text>
+              {/* Carb third */}
+              <path d="M 90 90 L 163.6 132.5 A 85 85 0 0 1 16.4 132.5 Z" fill="var(--color-warning)" opacity="0.2" />
+              <text x="90" y="145" textAnchor="middle" className="text-xs font-medium fill-[var(--color-warning)]">Karbo</text>
+              <text x="90" y="159" textAnchor="middle" className="text-[10px] fill-muted-foreground">⅓</text>
+              {/* Protein third */}
+              <path d="M 90 90 L 16.4 132.5 A 85 85 0 0 1 90 5 Z" fill="var(--color-terracotta)" opacity="0.2" />
+              <text x="55" y="60" textAnchor="middle" className="text-xs font-medium fill-[var(--color-terracotta)]">Protein</text>
+              <text x="55" y="74" textAnchor="middle" className="text-[10px] fill-muted-foreground">⅓</text>
+            </svg>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center text-sm">
             <div className="rounded-lg bg-[var(--color-success)]/10 p-3">
               <p className="text-2xl mb-1">🥬</p>
-              <p className="text-xs font-medium">⅓ Grønnsaker</p>
-              <p className="text-[10px] text-muted-foreground">Salat, brokkoli, gulrot, paprika</p>
+              <p className="font-medium">Grønnsaker</p>
+              <p className="text-xs text-muted-foreground">Salat, brokkoli, gulrot, paprika</p>
             </div>
             <div className="rounded-lg bg-[var(--color-warning)]/10 p-3">
               <p className="text-2xl mb-1">🍚</p>
-              <p className="text-xs font-medium">⅓ Karbohydrater</p>
-              <p className="text-[10px] text-muted-foreground">Potet, ris, pasta, brød</p>
+              <p className="font-medium">Karbohydrater</p>
+              <p className="text-xs text-muted-foreground">Potet, ris, pasta, brød</p>
             </div>
             <div className="rounded-lg bg-[var(--color-terracotta)]/10 p-3">
               <p className="text-2xl mb-1">🍗</p>
-              <p className="text-xs font-medium">⅓ Protein</p>
-              <p className="text-[10px] text-muted-foreground">Fisk, kjøtt, egg, bønner</p>
+              <p className="font-medium">Protein</p>
+              <p className="text-xs text-muted-foreground">Fisk, kjøtt, egg, bønner</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dairy — 3 om dagen */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <span className="text-lg">🥛</span>
+            Meieriprodukter — 3 om dagen
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Helsedirektoratet anbefaler 3 porsjoner meieriprodukter daglig for kalsium og vitamin D.
+          </p>
+
+          <div className="rounded-lg bg-[var(--color-fish)]/5 p-3 space-y-2">
+            <p className="text-sm font-medium">Hva teller som 1 porsjon?</p>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>🥛 1 glass melk (2 dl)</li>
+              <li>🧀 1-2 skiver ost (20-30g)</li>
+              <li>🥣 1 beger yoghurt (150-200g)</li>
+              <li>🍶 1 glass kefir eller kulturmelk (2 dl)</li>
+            </ul>
+          </div>
+
+          <div className="rounded-lg border border-border p-3">
+            <p className="text-sm font-medium mb-2 flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-[var(--color-warning)]" />
+              Tips for 3 om dagen
+            </p>
+            <ul className="text-xs text-muted-foreground space-y-1.5">
+              <li><span className="font-medium">Frokost:</span> Melk i grøten eller yoghurt med müsli</li>
+              <li><span className="font-medium">Lunsj:</span> Ost på brødskiven</li>
+              <li><span className="font-medium">Mellommåltid:</span> Et glass melk eller en yoghurt</li>
+              <li><span className="font-medium">Middag:</span> Rømme eller fløte i saus</li>
+              <li><span className="font-medium">Laktosefri?</span> Laktosefrie produkter teller like mye</li>
+              <li><span className="font-medium">Vegansk?</span> Velg kalsiumberikede plantemelk-alternativer</li>
+            </ul>
           </div>
         </CardContent>
       </Card>

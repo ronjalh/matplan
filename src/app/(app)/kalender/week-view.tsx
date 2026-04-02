@@ -247,13 +247,13 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true }: W
                     >
                       <div className="flex items-center gap-1">
                         <Icon className="w-3 h-3 text-muted-foreground shrink-0" />
-                        <span className="font-medium truncate">
+                        <span className="font-medium truncate flex-1">
                           {meal.recipeName ?? meal.freeText ?? label}
                         </span>
+                        {meal.recipeIsFishMeal && (
+                          <Fish className="w-3 h-3 text-[var(--color-fish)] shrink-0" />
+                        )}
                       </div>
-                      {meal.recipeIsFishMeal && (
-                        <Fish className="w-3 h-3 text-[var(--color-fish)] absolute top-1 right-5" />
-                      )}
                       <button
                         onClick={() => handleRemoveMeal(meal.id)}
                         className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"

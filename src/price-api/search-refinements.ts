@@ -326,10 +326,13 @@ export function refineSearchQuery(ingredientName: string): string {
   }
 
   // 3. Check if any refinement key appears as a whole word in the cleaned name
+  // Use space/start/end boundaries instead of \b (which fails with ø, å, æ)
   // Sort by key length descending to match longer keys first
   const sortedEntries = Object.entries(refinements).sort((a, b) => b[0].length - a[0].length);
   for (const [key, value] of sortedEntries) {
-    if (value && new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(cleaned)) {
+    if (!value) continue;
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (new RegExp(`(?:^|\\s)${escaped}(?:\\s|$)`).test(cleaned) || cleaned === key) {
       return value;
     }
   }
