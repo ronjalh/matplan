@@ -58,9 +58,9 @@ describe("Kassalapp search accuracy", () => {
   describe("Specific refinements produce good queries", () => {
     const expected: [string, string][] = [
       ["agurk", "agurk fersk løsvekt"],
-      ["mango", "mango fersk"],
-      ["sitron", "sitron løsvekt"],
-      ["lime", "lime løsvekt"],
+      ["mango", "mango stk"],
+      ["sitron", "sitroner"],
+      ["lime", "lime pr stk"],
       ["babyspinat", "babyspinat"],
       ["edamame", "edamame frossen"],
       ["sukkererter", "sukkererter friske"],

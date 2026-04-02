@@ -445,17 +445,48 @@ function roundQuantity(qty: number, unit: string): number {
   }
 }
 
-/** Simple category guesser based on ingredient name */
+/** Category guesser based on ingredient name */
 function guessCategory(name: string): string {
   const n = name.toLowerCase();
-  if (/laks|torsk|sei|reke|fisk|tunfisk|makrell/.test(n)) return "Fisk og sjømat";
-  if (/kylling|kjøttdeig|svin|biff|lam|bacon|pølse|skinke/.test(n)) return "Kjøtt";
-  if (/melk|fløte|rømme|ost|yoghurt|smør|kremost/.test(n)) return "Meieri";
-  if (/brød|lompe|tortilla|pita/.test(n)) return "Brød og bakervarer";
-  if (/ris|pasta|spagetti|nudler|mel|havre|couscous|quinoa/.test(n)) return "Tørrvarer";
-  if (/salt|pepper|kanel|karri|paprika|oregano|basilikum|timian|hvitløk/.test(n)) return "Krydder";
-  if (/olje|eddik|soyasaus|ketchup|sennep|pesto/.test(n)) return "Krydder";
-  if (/eple|banan|appelsin|sitron|bær|mango|ananas/.test(n)) return "Frukt og grønt";
-  if (/løk|gulrot|brokkoli|tomat|paprika|spinat|salat|agurk|potet|squash/.test(n)) return "Frukt og grønt";
+
+  // Fisk og sjømat
+  if (/laks|torsk|sei\b|reke|fisk|tunfisk|makrell|ørret|sild|hyse|kveite|steinbit|breiflabb|blåskjell|kamskjell|sjømat|krabbe|hummer|kaviar/.test(n)) return "Fisk og sjømat";
+
+  // Kjøtt
+  if (/kylling|kjøttdeig|kjøtt|svin|biff|lam|bacon|pølse|skinke|ribbe|entrecote|kalkun|karbonadedeig|farse/.test(n)) return "Kjøtt";
+
+  // Meieri
+  if (/melk|fløte|rømme|ost\b|yoghurt|smør|kremost|parmesan|mozzarella|feta|cheddar|ricotta|cottage/.test(n)) return "Meieri";
+
+  // Egg
+  if (/\begg\b/.test(n)) return "Meieri";
+
+  // Brød og bakervarer
+  if (/brød|lompe|tortilla|pita|rundstykke|knekkebrød|lefse/.test(n)) return "Brød og bakervarer";
+
+  // Frukt
+  if (/eple|banan|appelsin|sitron|lime|mango|ananas|pære|fersken|plomme|kirsebær|drue|melon|avokado|bær|jordbær|blåbær|bringebær|rabarbra/.test(n)) return "Frukt og grønt";
+
+  // Grønnsaker
+  if (/løk|gulrot|brokkoli|tomat|spinat|babyspinat|salat|agurk|potet|squash|blomkål|mais|erter|sukkererter|paprika|aubergine|selleri|purre|rødbeter|asparges|grønnkål|hodekål|rødkål|sopp|sjampinjong|gresskar|vårløk|reddik|nepe|pastinakk|edamame|bønner|kikerter|linser/.test(n)) return "Frukt og grønt";
+
+  // Urter og krydder
+  if (/salt\b|pepper|kanel|karri|oregano|basilikum|timian|rosmarin|persille|koriander|dill|gressløk|ingefær|gurkemeie|spisskummen|muskatnøtt|kardemomme|chili|jalapeño|jalapeno|hvitløk|nellik|laubærblad|mynte|vanilje/.test(n)) return "Krydder";
+
+  // Sauser og tilbehør
+  if (/olje|olivenolje|eddik|soyasaus|ketchup|sennep|pesto|majones|tabasco|sriracha|sambal|hoisin|tomatsaus|tomatpuré|salsa|honning/.test(n)) return "Krydder";
+
+  // Tørrvarer
+  if (/ris\b|pasta|spagetti|nudler|mel\b|hvetemel|havre|couscous|quinoa|maisenna|bakepulver|natron|gjær|sukker|melis|panko|tacokrydder/.test(n)) return "Tørrvarer";
+
+  // Hermetikk
+  if (/hermetisk|boks\b|bokser/.test(n)) return "Tørrvarer";
+
+  // Drikke
+  if (/juice|vin\b|øl\b/.test(n)) return "Drikke";
+
+  // Buljong/fond
+  if (/buljong|fond/.test(n)) return "Tørrvarer";
+
   return "Annet";
 }

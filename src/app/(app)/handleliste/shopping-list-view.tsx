@@ -324,25 +324,9 @@ export function ShoppingListView({
         </Card>
       )}
 
-      {/* Store filter */}
-      {stores.length > 1 && (
+      {/* Store filter — disabled for now, needs better implementation */}
+      {false && stores.length > 1 && (
         <div className="flex flex-wrap gap-1.5 items-center">
-          <span className="text-xs text-muted-foreground mr-1">Butikk:</span>
-          <button
-            onClick={() => setStoreFilter("alle")}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
-              storeFilter === "alle" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-            }`}
-          >Alle</button>
-          {stores.map((store) => (
-            <button
-              key={store}
-              onClick={() => setStoreFilter(store)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
-                storeFilter === store ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-              }`}
-            >{store}</button>
-          ))}
         </div>
       )}
 
@@ -367,8 +351,10 @@ export function ShoppingListView({
         <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${totalItems > 0 ? (checkedCount / totalItems) * 100 : 0}%` }} />
       </div>
 
-      {/* Items by category */}
-      {Array.from(categories.entries()).map(([category, items]) => (
+      {/* Items by category — "Annet" always last */}
+      {Array.from(categories.entries())
+        .sort(([a], [b]) => a === "Annet" ? 1 : b === "Annet" ? -1 : 0)
+        .map(([category, items]) => (
         <Card key={category}>
           <CardHeader className="py-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">{category}</CardTitle>

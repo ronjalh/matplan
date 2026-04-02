@@ -88,8 +88,6 @@ const refinements: Record<string, string> = {
   "edamamebønner": "edamame frossen",
   "squash": "squash fersk",
   "aubergine": "aubergine",
-  "avokado": "avokado frukt fersk",
-  "avocado": "avokado frukt fersk",
   "søtpotet": "søtpotet",
   "purre": "purreløk",
   "selleri": "stangselleri",
@@ -101,15 +99,17 @@ const refinements: Record<string, string> = {
   "vårløk": "vårløk",
 
   // === FRUKT ===
-  "sitron": "sitron løsvekt",
-  "lime": "lime løsvekt",
+  "sitron": "sitroner",
+  "lime": "lime pr stk",
   "eple": "epler pose",
   "epler": "epler pose",
-  "banan": "bananer løsvekt",
-  "bananer": "bananer løsvekt",
-  "appelsin": "appelsin løsvekt",
-  "mango": "mango fersk",
-  "ananas": "ananas fersk",
+  "banan": "bananer bama",
+  "bananer": "bananer bama",
+  "appelsin": "appelsiner",
+  "mango": "mango stk",
+  "avokado": "avokado stk",
+  "avocado": "avokado stk",
+  "ananas": "ananas stk",
 
   // === TØRRVARER ===
   "ris": "jasminris",
