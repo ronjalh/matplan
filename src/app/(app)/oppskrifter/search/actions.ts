@@ -53,6 +53,12 @@ export async function importSpoonacularRecipe(spoonacularId: number) {
     ?.map((s) => `${s.number}. ${s.step}`)
     .join("\n") ?? "";
 
+  // Detect fish from ingredients
+  const fishKeywords = /\b(salmon|cod|tuna|shrimp|prawn|fish|mackerel|trout|herring|haddock|pollock|crab|lobster|mussel|clam|anchov|sardine|tilapia|halibut|swordfish|sea bass|mahi)\b/i;
+  const isFishMeal = detail.extendedIngredients?.some(
+    (ing) => fishKeywords.test(ing.name)
+  ) ?? false;
+
   // Insert recipe
   const [recipe] = await db
     .insert(recipes)
@@ -68,7 +74,7 @@ export async function importSpoonacularRecipe(spoonacularId: number) {
       isGlutenFree: detail.glutenFree,
       isDairyFree: detail.dairyFree,
       isNutFree: false,
-      isFishMeal: false,
+      isFishMeal,
       cuisine: detail.cuisines?.[0] ?? null,
       source: "spoonacular",
       sourceUrl: detail.sourceUrl,

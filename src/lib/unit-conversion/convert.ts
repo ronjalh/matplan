@@ -39,13 +39,17 @@ export function convertToNorwegian(
 
     case "tablespoon":
     case "tablespoons":
-    case "tbsp": {
+    case "tbsp":
+    case "tbsps":
+    case "tbs":
+    case "t": {
       return { quantity: round(quantity, 0.5), unit: "ss", approximate: false };
     }
 
     case "teaspoon":
     case "teaspoons":
-    case "tsp": {
+    case "tsp":
+    case "tsps": {
       return { quantity: round(quantity, 0.5), unit: "ts", approximate: false };
     }
 
@@ -156,10 +160,53 @@ export function convertToNorwegian(
       return { quantity: Math.round(quantity), unit: "kvast", approximate: false };
 
     case "pinch":
+    case "pinches":
       return { quantity, unit: "klype", approximate: false };
 
     case "dash":
+    case "dashes":
       return { quantity, unit: "dæsj", approximate: false };
+
+    case "serving":
+    case "servings":
+      return { quantity: Math.round(quantity), unit: "porsjon", approximate: false };
+
+    case "small":
+    case "medium":
+    case "large":
+      return { quantity: Math.round(quantity), unit: "stk", approximate: false };
+
+    case "handful":
+      return { quantity: Math.round(quantity), unit: "neve", approximate: false };
+
+    case "leaf":
+    case "leaves":
+      return { quantity: Math.round(quantity), unit: "blad", approximate: false };
+
+    case "slice":
+    case "slices":
+      return { quantity: Math.round(quantity), unit: "skive", approximate: false };
+
+    case "can":
+    case "cans":
+      return { quantity: Math.round(quantity), unit: "bx", approximate: false };
+
+    case "jar":
+    case "jars":
+      return { quantity: Math.round(quantity), unit: "glass", approximate: false };
+
+    case "package":
+    case "packages":
+    case "packet":
+    case "packets":
+      return { quantity: Math.round(quantity), unit: "pk", approximate: false };
+
+    case "stick":
+    case "sticks":
+      return { quantity: Math.round(quantity), unit: "stk", approximate: false };
+
+    case "":
+      return { quantity: Math.round(quantity), unit: "stk", approximate: false };
 
     // Unknown unit — pass through
     default:

@@ -103,6 +103,8 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
   }
 
   // Weekly stats
+  const dinnerMeals = meals.filter((m) => m.mealType === "middag");
+  const uniqueDinners = new Set(dinnerMeals.map((m) => m.recipeId ?? m.freeText)).size;
   const fishCount = meals.filter((m) => m.recipeIsFishMeal).length;
 
   async function handleAddMeal(recipeId: number) {
@@ -147,7 +149,7 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
             {fishCount >= 2 && " ✓"}
           </span>
           <span className="text-muted-foreground">
-            {meals.length} måltider planlagt
+            {dinnerMeals.length}/7 middager ({uniqueDinners} unike)
           </span>
         </div>
       </div>
