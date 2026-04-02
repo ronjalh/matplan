@@ -117,7 +117,7 @@ export default async function DashboardPage() {
         <DashboardCard href="/handleliste" icon="shoppingcart" title="Handleliste" description="Generer handleliste fra ukeplanen" color="#E06090" />
         <DashboardCard href="/budsjett" icon="wallet" title="Budsjett" description="Hold styr på matbudsjettet og andre utgifter" color="#9B7ED8" />
         <DashboardCard href="/sesong" icon="sprout" title="I sesong" description="Se hva som er i sesong i Norge akkurat nå" color="#6ABF69" />
-        <DashboardCard href="/inspirasjon" icon="heart" title="Inspirasjon" description="Tips for å spise sunnere og spare penger" color="#E06090" />
+        <DashboardCard href="/inspirasjon" icon="heart" title="Inspirasjon" description="Tips for å spise sunnere og spare penger" color="#E8685A" />
       </div>
 
       {/* ─── Weekly overview section ─── */}
