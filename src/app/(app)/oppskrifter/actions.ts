@@ -179,7 +179,7 @@ export async function updateRecipe(recipeId: number, formData: FormData): Promis
   return { success: true };
 }
 
-const FISH_KEYWORDS = /\b(salmon|cod|tuna|shrimp|prawn|fish|mackerel|trout|herring|haddock|pollock|crab|lobster|mussel|anchov|sardine|tilapia|halibut|laks|torsk|sei|reke|tunfisk|makrell|ørret|sild|hyse|krabbe|fisk)\b/i;
+const FISH_KEYWORDS = /(salmon|cod\b|tuna|shrimp|prawn|fish|mackerel|trout|herring|haddock|pollock|crab|lobster|mussel|anchov|sardine|tilapia|halibut|laks|torsk|sei\b|seifilet|reke|tunfisk|makrell|ørret|sild|hyse|krabbe|fisk|kveite|steinbit|breiflabb|piggvar|sjøkreps|blåskjell|kamskjell|hummer|sjømat|klippfisk|lutefisk|skalldyr|kaviar)/i;
 
 export async function retagFishRecipes(): Promise<ActionResult> {
   const householdId = await getHouseholdId();
@@ -194,10 +194,20 @@ export async function retagFishRecipes(): Promise<ActionResult> {
       where: eq(recipeIngredients.recipeId, recipe.id),
     });
 
-    const hasFish = ings.some((i) => FISH_KEYWORDS.test(i.originalText ?? ""));
+    const hasFish = ings.some((i) => FISH_KEYWORDS.test(i.originalText ?? ""))
+      || FISH_KEYWORDS.test(recipe.name); // Also check recipe title
 
-    if (hasFish !== recipe.isFishMeal) {
-      await db.update(recipes).set({ isFishMeal: hasFish }).where(eq(recipes.id, recipe.id));
+    // Also fix vegetarian flag if it has fish or meat
+    const MEAT_KEYWORDS = /(chicken|beef|pork|lamb|bacon|sausage|ham|kylling|kjøtt|svin|lam|skinke|pølse|karbonadedeig|ribbe|entrecote|biff|kalkun)/i;
+    const hasMeat = ings.some((i) => MEAT_KEYWORDS.test(i.originalText ?? ""))
+      || MEAT_KEYWORDS.test(recipe.name);
+    const shouldBeVegetarian = !hasFish && !hasMeat;
+
+    if (hasFish !== recipe.isFishMeal || (recipe.isVegetarian && !shouldBeVegetarian)) {
+      await db.update(recipes).set({
+        isFishMeal: hasFish,
+        isVegetarian: shouldBeVegetarian && recipe.isVegetarian, // Don't add vegetarian, only remove if wrong
+      }).where(eq(recipes.id, recipe.id));
       updated++;
     }
   }

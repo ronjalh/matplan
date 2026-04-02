@@ -56,8 +56,8 @@ export async function importSpoonacularRecipe(spoonacularId: number) {
     ?.map((s) => `${s.number}. ${s.step}`)
     .join("\n") ?? "";
 
-  // Detect fish from ingredients
-  const fishKeywords = /\b(salmon|cod|tuna|shrimp|prawn|fish|mackerel|trout|herring|haddock|pollock|crab|lobster|mussel|clam|anchov|sardine|tilapia|halibut|swordfish|sea bass|mahi)\b/i;
+  // Detect fish from ingredients (no strict word boundaries for compound words)
+  const fishKeywords = /(salmon|cod\b|tuna|shrimp|prawn|fish|mackerel|trout|herring|haddock|pollock|crab|lobster|mussel|clam|anchov|sardine|tilapia|halibut|swordfish|sea bass|mahi|laks|torsk|reke|kveite|steinbit|breiflabb|sjømat)/i;
   const isFishMeal = detail.extendedIngredients?.some(
     (ing) => fishKeywords.test(ing.name)
   ) ?? false;

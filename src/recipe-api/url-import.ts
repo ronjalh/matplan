@@ -75,12 +75,13 @@ export async function importRecipeFromUrl(url: string): Promise<ImportedRecipe |
       // Parse instructions
       const instructions = parseInstructions(data.recipeInstructions ?? []);
 
-      // Detect fish
-      const fishKeywords = /\b(salmon|cod|tuna|shrimp|prawn|fish|mackerel|trout|laks|torsk|sei|reke|tunfisk|makrell|ørret|sild|fisk)\b/i;
-      const isFishMeal = rawIngredients.some((i) => fishKeywords.test(i));
+      // Detect fish (no word boundaries — matches "laksfilet", "fiskefilet" etc.)
+      const fishKeywords = /(salmon|cod\b|tuna|shrimp|prawn|fish|mackerel|trout|herring|haddock|halibut|laks|torsk|sei\b|seifilet|reke|tunfisk|makrell|ørret|sild|hyse|krabbe|fisk|kveite|steinbit|breiflabb|piggvar|sjøkreps|blåskjell|kamskjell|hummer|sjømat|klippfisk|lutefisk|skalldyr|kaviar)/i;
+      const isFishMeal = rawIngredients.some((i) => fishKeywords.test(i))
+        || fishKeywords.test(data.name ?? ""); // Also check recipe title
 
       // Detect vegetarian
-      const meatKeywords = /\b(chicken|beef|pork|lamb|bacon|sausage|ham|kylling|kjøtt|svin|lam|skinke|pølse|karbonadedeig)\b/i;
+      const meatKeywords = /(chicken|beef|pork|lamb|bacon|sausage|ham|turkey|kylling|kjøtt|svin|lam|skinke|pølse|karbonadedeig|ribbe|entrecote|indrefilet|biff|koteletter|kalkun|and\b|gås)/i;
       const isVegetarian = !rawIngredients.some((i) => meatKeywords.test(i)) && !isFishMeal;
 
       // Image
