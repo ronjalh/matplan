@@ -150,7 +150,14 @@ export function ShoppingListView({
               <Plus className="w-4 h-4" /> Tom handleliste
             </Button>
           </div>
-          {error && <p className="text-sm text-destructive mt-3">{error}</p>}
+          {error && (
+            <div className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2 mt-3 flex items-center justify-between gap-2">
+              <span>{error}</span>
+              <Link href="/kalender" className="shrink-0 text-xs underline hover:no-underline">
+                Gå til kalender →
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     );

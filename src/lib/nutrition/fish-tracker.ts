@@ -34,10 +34,10 @@ export function calculateFishWeek(fishMealCount: number): FishWeekResult {
 export function getFishTrackerLabel(result: FishWeekResult): string {
   switch (result.status) {
     case "below":
-      return `${result.fishMeals} av 2–3 fiskmåltider`;
+      return `${result.fishMeals} av 2–3 fiskemåltider`;
     case "good":
-      return `${result.fishMeals} av 2–3 fiskmåltider ✓`;
+      return `${result.fishMeals} av 2–3 fiskemåltider ✓`;
     case "above":
-      return `${result.fishMeals} fiskmåltider (anbefalt 2–3)`;
+      return `${result.fishMeals} fiskemåltider (anbefalt 2–3)`;
   }
 }

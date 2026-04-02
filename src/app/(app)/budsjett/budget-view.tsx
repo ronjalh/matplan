@@ -280,7 +280,7 @@ export function BudgetView({
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-muted-foreground">Totalt brukt</span>
             <span className="font-semibold">
-              {formatKr(totalSpentOre)} / {formatKr(totalBudgetOre)}
+              {totalSpentOre > 0 ? formatKr(totalSpentOre) : <span className="font-normal text-muted-foreground">Ingenting ennå</span>} / {formatKr(totalBudgetOre)}
             </span>
           </div>
           <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
@@ -380,7 +380,7 @@ export function BudgetView({
                       </button>
                     </div>
                     <span className="text-sm font-medium">
-                      {formatKr(spent)} / {formatKr(cat.monthlyLimitOre)}
+                      {spent > 0 ? formatKr(spent) : <span className="text-muted-foreground font-normal">Ingen utgifter</span>} / {formatKr(cat.monthlyLimitOre)}
                     </span>
                   </div>
                   <div className="w-full h-2 bg-muted rounded-full overflow-hidden mt-2">
