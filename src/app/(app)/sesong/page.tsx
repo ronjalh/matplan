@@ -111,6 +111,20 @@ export default function SesongPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Sesongkalender</CardTitle>
+          <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "var(--color-success)", opacity: 0.8 }} />
+              I sesong (høstes)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "var(--color-fish)", opacity: 0.8 }} />
+              Lagervare (norsk)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm border border-border" />
+              Ikke tilgjengelig
+            </span>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
