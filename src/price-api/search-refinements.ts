@@ -56,6 +56,10 @@ const refinements: Record<string, string> = {
   "reker": "reker pillede",
   "tunfisk": "tunfisk boks",
   "makrell": "makrell boks",
+  "kveite": "kveitefilet",
+  "kveitefilet": "kveitefilet",
+  "steinbit": "steinbit filet",
+  "sjømat": "sjømat",
 
   // === GRØNNSAKER ===
   "løk": "gul løk",
@@ -71,12 +75,17 @@ const refinements: Record<string, string> = {
   "tomat": "tomater løsvekt",
   "tomater": "tomater løsvekt",
   "cherrytomater": "cherrytomater",
-  "agurk": "agurk fersk",
+  "agurk": "agurk fersk løsvekt",
   "spinat": "spinat fersk",
+  "babyspinat": "babyspinat",
   "salat": "isbergsalat",
   "sopp": "sjampinjong",
+  "champignon": "sjampinjong",
   "mais": "mais hermetisk",
   "erter": "erter frosne",
+  "sukkererter": "sukkererter friske",
+  "edamame": "edamame frossen",
+  "edamamebønner": "edamame frossen",
   "squash": "squash fersk",
   "aubergine": "aubergine",
   "avokado": "avokado frukt fersk",
@@ -92,12 +101,14 @@ const refinements: Record<string, string> = {
   "vårløk": "vårløk",
 
   // === FRUKT ===
-  "sitron": "sitron frukt",
-  "lime": "lime frukt",
+  "sitron": "sitron løsvekt",
+  "lime": "lime løsvekt",
   "eple": "epler pose",
-  "banan": "bananer",
-  "appelsin": "appelsin",
-  "mango": "mango frukt",
+  "epler": "epler pose",
+  "banan": "bananer løsvekt",
+  "bananer": "bananer løsvekt",
+  "appelsin": "appelsin løsvekt",
+  "mango": "mango fersk",
   "ananas": "ananas fersk",
 
   // === TØRRVARER ===
@@ -210,7 +221,8 @@ const refinements: Record<string, string> = {
   "onion": "gul løk",
   "garlic": "hvitløk fersk",
   "tomato": "tomater løsvekt",
-  "lemon": "sitron frukt",
+  "tomatoes": "tomater løsvekt",
+  "lemon": "sitron løsvekt",
   "lemon juice": "sitronsaft",
   "lime juice": "limesaft",
   "olive oil": "olivenolje extra virgin",
@@ -279,6 +291,7 @@ const STRIP_PATTERN = /\b(\d+[\d.,]*\s*)?(g|kg|dl|ml|ss|ts|stk|pk|fedd|klype|bun
  */
 function cleanName(name: string): string {
   return name
+    .replace(/^[\d.,]+\s*/g, "") // strip leading numbers
     .replace(STRIP_PATTERN, "")
     .replace(/\s+/g, " ")
     .trim()
@@ -312,9 +325,11 @@ export function refineSearchQuery(ingredientName: string): string {
     }
   }
 
-  // 3. Check if any refinement key is contained in the cleaned name
-  for (const [key, value] of Object.entries(refinements)) {
-    if (cleaned.includes(key) && value) {
+  // 3. Check if any refinement key appears as a whole word in the cleaned name
+  // Sort by key length descending to match longer keys first
+  const sortedEntries = Object.entries(refinements).sort((a, b) => b[0].length - a[0].length);
+  for (const [key, value] of sortedEntries) {
+    if (value && new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(cleaned)) {
       return value;
     }
   }
