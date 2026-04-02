@@ -197,10 +197,7 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader className="py-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-[#9B7ED8]" />
-                  Budsjett denne måneden
-                </CardTitle>
+                <CardTitle className="text-sm">Budsjett denne måneden</CardTitle>
                 <span className="text-sm font-medium">
                   {formatKr(totalSpentOre)} / {formatKr(totalBudgetOre)}
                 </span>
@@ -210,10 +207,8 @@ export default async function DashboardPage() {
                   className="h-full rounded-full transition-all"
                   style={{
                     width: `${Math.min((totalSpentOre / totalBudgetOre) * 100, 100)}%`,
-                    backgroundColor:
-                      totalSpentOre / totalBudgetOre > 1 ? "var(--color-error)" :
-                      totalSpentOre / totalBudgetOre > 0.85 ? "var(--color-warning)" :
-                      "var(--color-success)",
+                    backgroundColor: totalSpentOre / totalBudgetOre > 1 ? "var(--color-error)" : "var(--foreground)",
+                    opacity: totalSpentOre / totalBudgetOre > 1 ? 1 : 0.25,
                   }}
                 />
               </div>
@@ -232,11 +227,9 @@ export default async function DashboardPage() {
                           className="h-full rounded-full"
                           style={{
                             width: `${Math.min(ratio * 100, 100)}%`,
-                            backgroundColor: isSavings
-                              ? cat.color ?? "#4ABFA8"
-                              : ratio > 1 ? "var(--color-error)"
-                              : ratio > 0.85 ? "var(--color-warning)"
-                              : cat.color ?? "var(--color-success)",
+                            backgroundColor: ratio > 1 && !isSavings
+                              ? "var(--color-error)"
+                              : cat.color ?? "#7C9A7E",
                           }}
                         />
                       </div>

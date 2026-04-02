@@ -288,10 +288,8 @@ export function BudgetView({
               className="h-full rounded-full transition-all"
               style={{
                 width: `${Math.min((totalSpentOre / totalBudgetOre) * 100, 100)}%`,
-                backgroundColor:
-                  totalSpentOre / totalBudgetOre > 1 ? "var(--color-error)" :
-                  totalSpentOre / totalBudgetOre > 0.85 ? "var(--color-warning)" :
-                  "var(--color-success)",
+                backgroundColor: totalSpentOre / totalBudgetOre > 1 ? "var(--color-error)" : "var(--foreground)",
+                opacity: totalSpentOre / totalBudgetOre > 1 ? 1 : 0.25,
               }}
             />
           </div>
@@ -390,11 +388,9 @@ export function BudgetView({
                       className="h-full rounded-full transition-all"
                       style={{
                         width: `${Math.min(ratio * 100, 100)}%`,
-                        backgroundColor: cat.name.toLowerCase().includes("sparing")
-                          ? cat.color ?? "#4ABFA8" // Savings: always use own color (more = good)
-                          : ratio > 1 ? "var(--color-error)"
-                          : ratio > 0.85 ? "var(--color-warning)"
-                          : cat.color ?? "var(--color-success)",
+                        backgroundColor: ratio > 1 && !cat.name.toLowerCase().includes("sparing")
+                          ? "var(--color-error)"
+                          : cat.color ?? "#7C9A7E",
                       }}
                     />
                   </div>
