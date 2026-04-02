@@ -40,7 +40,7 @@ export default function SesongPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-[family-name:var(--font-fraunces)] font-semibold mb-1">
-          I sesong — {monthNames[currentMonth - 1]}
+          I sesong <span className="text-base font-normal text-muted-foreground">· {monthNames[currentMonth - 1]}</span>
         </h1>
         <p className="text-muted-foreground">
           {inSeason.length} {inSeason.length === 1 ? "råvare" : "råvarer"} i sesong, {fromStorage.length} {fromStorage.length === 1 ? "lagervare" : "lagervarer"} tilgjengelig i Norge.
