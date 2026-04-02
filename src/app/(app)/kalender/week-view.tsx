@@ -205,8 +205,9 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true }: W
         <EditEventDialog event={editingEvent} onClose={() => setEditingEvent(null)} />
       )}
 
-      {/* Week grid */}
-      <div className="grid grid-cols-7 gap-2">
+      {/* Week grid — scrollable on mobile */}
+      <div className="overflow-x-auto -mx-2 px-2 pb-2">
+      <div className="grid grid-cols-7 gap-2 min-w-[700px]">
         {dates.map((date) => {
           const dateStr = toISODate(date);
           const today = isToday(date);
@@ -330,6 +331,7 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true }: W
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

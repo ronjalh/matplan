@@ -409,7 +409,7 @@ export function BudgetView({
 
               {/* Add expense inline */}
               {addingExpense === cat.id ? (
-                <div className="flex gap-2 items-end mt-2">
+                <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end mt-2">
                   <div className="flex-1">
                     <Input
                       value={expDesc}
@@ -421,6 +421,7 @@ export function BudgetView({
                       autoFocus
                     />
                   </div>
+                  <div className="flex gap-2">
                   <Input
                     type="number"
                     step="0.01"
@@ -444,6 +445,7 @@ export function BudgetView({
                   <Button size="sm" variant="ghost" className="h-8" onClick={() => setAddingExpense(null)}>
                     <X className="w-4 h-4" />
                   </Button>
+                  </div>
                 </div>
               ) : (
                 <Button
