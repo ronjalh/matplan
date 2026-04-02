@@ -25,9 +25,12 @@ export function getWeekDays(date: Date): Date[] {
   });
 }
 
-/** Format date as ISO string yyyy-mm-dd */
+/** Format date as ISO string yyyy-mm-dd (local timezone, not UTC) */
 export function toISODate(date: Date): string {
-  return date.toISOString().split("T")[0];
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 /** Format date as Norwegian short: "man 1. apr" */

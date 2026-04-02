@@ -200,6 +200,7 @@ const refinements: Record<string, string> = {
   "chicken breast": "kyllingfilet prior",
   "chicken thigh": "kyllinglår",
   "ground beef": "kjøttdeig gilde",
+  "beef": "storfe kjøtt",
   "salmon": "laksefilet fersk",
   "shrimp": "reker pillede",
   "flaky fish": "torskefilet fersk",
@@ -267,8 +268,11 @@ const refinements: Record<string, string> = {
   "salt and pepper": "",
 };
 
-/** Units and noise words to strip from ingredient names */
-const STRIP_PATTERN = /\b(\d+[\d.,]*\s*)?(g|kg|dl|l|ml|ss|ts|stk|pk|fedd|klype|bunt|kvast|dæsj|porsjon|neve|blad|skive|bx|glass|tbsp|tbsps|tsp|tsps|cup|cups|oz|lb|lbs|serving|servings|tablespoon|tablespoons|teaspoon|teaspoons|pinch|dash|small|medium|large|handful|can|cans|piece|pieces|whole|fresh|dried|ground|chopped|minced|sliced|diced|crushed|to taste)\b/gi;
+/** Units and noise words to strip from ingredient names.
+ * NOTE: "l" (liter) is NOT included as single char — it would strip "l" from "løk" → "øk".
+ * Use "dl", "ml", "l " (with space) patterns instead.
+ */
+const STRIP_PATTERN = /\b(\d+[\d.,]*\s*)?(g|kg|dl|ml|ss|ts|stk|pk|fedd|klype|bunt|kvast|dæsj|porsjon|neve|blad|skive|bx|glass|tbsp|tbsps|tsp|tsps|cup|cups|oz|lb|lbs|serving|servings|tablespoon|tablespoons|teaspoon|teaspoons|pinch|dash|small|medium|large|handful|can|cans|piece|pieces|whole|fresh|dried|chopped|minced|sliced|diced|crushed|to taste)\b/gi;
 
 /**
  * Clean ingredient name for search: strip units, numbers, adjectives.
