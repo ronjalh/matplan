@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   Wallet,
   Sprout,
+  Heart,
   Settings,
 } from "lucide-react";
 import Link from "next/link";
@@ -29,6 +30,7 @@ const navItems = [
   { title: "Handleliste", url: "/handleliste", icon: ShoppingCart },
   { title: "Budsjett", url: "/budsjett", icon: Wallet },
   { title: "Sesong", url: "/sesong", icon: Sprout },
+  { title: "Inspirasjon", url: "/inspirasjon", icon: Heart },
 ];
 
 export function AppSidebar() {
