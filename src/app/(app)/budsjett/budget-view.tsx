@@ -420,6 +420,7 @@ export function BudgetView({
                       onChange={(e) => setExpDesc(e.target.value)}
                       placeholder="Beskrivelse"
                       className="h-8 text-sm"
+                      autoComplete="off"
                       onKeyDown={(e) => e.key === "Enter" && handleAddExpense(cat.id)}
                       autoFocus
                     />
@@ -432,6 +433,7 @@ export function BudgetView({
                     onChange={(e) => setExpAmount(e.target.value)}
                     placeholder="kr"
                     className="w-24 h-8 text-sm"
+                    autoComplete="off"
                     onKeyDown={(e) => e.key === "Enter" && handleAddExpense(cat.id)}
                   />
                   <Input
@@ -530,10 +532,12 @@ function ExpenseItem({ entry, year, month }: { entry: Entry; year: number; month
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
           className="h-7 text-xs flex-1"
+          autoComplete="off"
           autoFocus
         />
         <Input
           type="number"
+          autoComplete="off"
           step="0.01"
           min="0"
           value={amount}
