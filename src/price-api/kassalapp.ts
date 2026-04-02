@@ -25,6 +25,7 @@ export interface KassalappProduct {
     code: string;
     logo: string;
   };
+  category?: { name: string }[];
 }
 
 export interface KassalappSearchResponse {
@@ -33,17 +34,17 @@ export interface KassalappSearchResponse {
 }
 
 /**
- * Search for products by name.
+ * Search for products by name. Handles URL encoding for Norwegian chars.
  */
 export async function searchProducts(
   query: string,
-  size: number = 5
+  size: number = 10
 ): Promise<KassalappProduct[]> {
   const url = `${BASE_URL}/products?search=${encodeURIComponent(query)}&size=${size}`;
 
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${getApiKey()}` },
-    next: { revalidate: 86400 }, // cache 24h
+    next: { revalidate: 86400 },
   });
 
   if (!res.ok) {
@@ -52,15 +53,45 @@ export async function searchProducts(
   }
 
   const data: KassalappSearchResponse = await res.json();
-  return data.data;
+  return data.data ?? [];
 }
 
 import { refineSearchQuery } from "./search-refinements";
 
+/** Categories to exclude — baby food, snacks, etc. that pollute results */
+const EXCLUDE_CATEGORIES = new Set([
+  "Barnemat",
+  "Barneprodukter",
+  "Is",
+  "Iskrem",
+  "Snacks",
+  "Godteri",
+]);
+
+/** Words in product names that indicate it's not a raw ingredient */
+const EXCLUDE_NAME_PATTERNS = /\b(barnegrøt|babymat|barnemat|iskrem|is\s|sjokolademelk|smoothie|gele|drops|pastill)\b/i;
+
+/**
+ * Filter out irrelevant products (baby food, ice cream, snacks).
+ */
+function filterRelevant(products: KassalappProduct[]): KassalappProduct[] {
+  return products.filter((p) => {
+    // Exclude by category
+    if (p.category?.some((c) => EXCLUDE_CATEGORIES.has(c.name))) return false;
+    // Exclude by name pattern
+    if (EXCLUDE_NAME_PATTERNS.test(p.name)) return false;
+    return true;
+  });
+}
+
 /**
  * Search and return the best match for an ingredient name.
- * Uses search refinements to improve results (e.g., "melk" → "helmelk 1l").
- * Returns the cheapest product matching the query.
+ *
+ * Strategy:
+ * 1. Refine the search query (ingredient name → product search term)
+ * 2. Search Kassalapp with the refined query
+ * 3. Filter out irrelevant results (baby food, snacks)
+ * 4. Return cheapest remaining product
  */
 export async function findBestPrice(ingredientName: string): Promise<{
   product: KassalappProduct;
@@ -68,19 +99,29 @@ export async function findBestPrice(ingredientName: string): Promise<{
 } | null> {
   try {
     const query = refineSearchQuery(ingredientName);
-    if (!query) return null; // Skip items like "vann" (water)
+    if (!query) return null;
 
-    const products = await searchProducts(query, 5);
-    if (products.length === 0) return null;
+    const products = await searchProducts(query, 10);
+    const relevant = filterRelevant(products);
 
-    // Sort by price, return cheapest
-    const sorted = products.sort((a, b) => a.current_price - b.current_price);
-    const best = sorted[0];
+    if (relevant.length > 0) {
+      const sorted = relevant.sort((a, b) => a.current_price - b.current_price);
+      return {
+        product: sorted[0],
+        priceOre: Math.round(sorted[0].current_price * 100),
+      };
+    }
 
-    return {
-      product: best,
-      priceOre: Math.round(best.current_price * 100),
-    };
+    // If all filtered out, try the unfiltered cheapest as fallback
+    if (products.length > 0) {
+      const sorted = products.sort((a, b) => a.current_price - b.current_price);
+      return {
+        product: sorted[0],
+        priceOre: Math.round(sorted[0].current_price * 100),
+      };
+    }
+
+    return null;
   } catch {
     return null;
   }
