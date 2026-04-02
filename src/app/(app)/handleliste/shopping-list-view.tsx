@@ -150,24 +150,24 @@ export function ShoppingListView({
       .filter((s): s is string => !!s && s !== "Egendefinert")
   )].sort();
 
-  // Group items by category
+  // Split checked and unchecked
+  const uncheckedItemsList = list.items.filter((i) => !i.checked);
+  const checkedItemsList = list.items.filter((i) => i.checked);
+
+  // Group unchecked items by category
   const categories = new Map<string, ShoppingListItem[]>();
-  for (const item of list.items) {
+  for (const item of uncheckedItemsList) {
     const cat = item.category ?? "Annet";
     if (!categories.has(cat)) categories.set(cat, []);
     categories.get(cat)!.push(item);
   }
-  for (const items of categories.values()) {
-    items.sort((a, b) => Number(a.checked) - Number(b.checked));
-  }
 
   const totalItems = list.items.length;
-  const checkedItems = list.items.filter((i) => i.checked).length;
-  const uncheckedItems = list.items.filter((i) => !i.checked);
-  const totalPriceOre = uncheckedItems
+  const checkedCount = checkedItemsList.length;
+  const totalPriceOre = uncheckedItemsList
     .filter((i) => i.estimatedPriceOre)
     .reduce((sum, i) => sum + i.estimatedPriceOre!, 0);
-  const itemsWithoutPrice = uncheckedItems.filter((i) => !i.estimatedPriceOre).length;
+  const itemsWithoutPrice = uncheckedItemsList.filter((i) => !i.estimatedPriceOre).length;
 
   return (
     <div className="space-y-4">
@@ -275,7 +275,7 @@ export function ShoppingListView({
       <div className="flex items-center justify-between text-sm">
         <div className="space-y-0.5">
           <div className="text-muted-foreground">
-            <span className="font-medium text-foreground">{checkedItems}</span> av {totalItems} huket av
+            <span className="font-medium text-foreground">{checkedCount}</span> av {totalItems} huket av
           </div>
           {totalPriceOre > 0 && (
             <div>
@@ -289,7 +289,7 @@ export function ShoppingListView({
 
       {/* Progress */}
       <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${totalItems > 0 ? (checkedItems / totalItems) * 100 : 0}%` }} />
+        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${totalItems > 0 ? (checkedCount / totalItems) * 100 : 0}%` }} />
       </div>
 
       {/* Items by category */}
@@ -313,6 +313,31 @@ export function ShoppingListView({
           </CardContent>
         </Card>
       ))}
+
+      {/* Completed items */}
+      {checkedItemsList.length > 0 && (
+        <details className="group">
+          <summary className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground py-2">
+            <Check className="w-4 h-4 text-primary" />
+            <span>Fullført ({checkedItemsList.length})</span>
+          </summary>
+          <Card className="mt-2 opacity-75">
+            <CardContent className="pt-4">
+              <ul className="space-y-0.5">
+                {checkedItemsList.map((item) => (
+                  <ShoppingItem
+                    key={item.id}
+                    item={item}
+                    onToggle={handleToggle}
+                    onRemove={removeItem}
+                    formatKr={formatKr}
+                  />
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </details>
+      )}
 
       {/* Add item */}
       {addingItem ? (

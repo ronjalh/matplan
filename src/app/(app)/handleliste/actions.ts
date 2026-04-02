@@ -140,16 +140,8 @@ export async function generateShoppingList(weekStartDate?: string) {
     }
   }
 
-  // Generate list name with week number
-  const weekNum = getISOWeekNumber(days[0]);
-  const existingThisWeek = await db.query.shoppingLists.findMany({
-    where: and(
-      eq(shoppingLists.householdId, householdId),
-      eq(shoppingLists.weekStartDate, startDate)
-    ),
-  });
-  const suffix = existingThisWeek.length > 0 ? ` (${existingThisWeek.length + 1})` : "";
-  const listName = `Uke ${weekNum}${suffix}`;
+  // Generate list name
+  const listName = await generateListName(householdId);
 
   // Create shopping list
   const [list] = await db
@@ -231,16 +223,29 @@ export async function updateItemPrice(itemId: number, priceKr: number) {
   return { success: true };
 }
 
+async function generateListName(householdId: number): Promise<string> {
+  const weekNum = getISOWeekNumber(new Date());
+  const baseName = `Uke ${weekNum}`;
+
+  // Count existing lists with same base name
+  const allLists = await db.query.shoppingLists.findMany({
+    where: eq(shoppingLists.householdId, householdId),
+  });
+  const sameNameCount = allLists.filter((l) => l.name.startsWith(baseName)).length;
+
+  return sameNameCount > 0 ? `${baseName} (${sameNameCount + 1})` : baseName;
+}
+
 export async function createEmptyList(name?: string) {
   const householdId = await getHouseholdId();
   const today = toISODate(new Date());
-  const weekNum = getISOWeekNumber(new Date());
+  const listName = name || await generateListName(householdId);
 
   const [list] = await db
     .insert(shoppingLists)
     .values({
       householdId,
-      name: name || `Handleliste Uke ${weekNum}`,
+      name: listName,
       weekStartDate: today,
       generatedFromMealPlan: false,
     })
