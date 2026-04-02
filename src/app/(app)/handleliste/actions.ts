@@ -126,7 +126,8 @@ export async function generateShoppingList(weekStartDate?: string) {
 
   for (const ing of allIngredients) {
     const multiplier = recipeMultipliers.get(ing.recipeId) ?? 1;
-    const name = extractIngredientName(ing.originalText ?? `${ing.quantity} ${ing.unit}`);
+    // Extract just the ingredient name from originalText
+    const name = extractIngredientName(ing.originalText ?? "", ing.quantity, ing.unit);
     const key = `${name.toLowerCase()}|${ing.unit}`;
 
     const existing = aggregated.get(key);
@@ -362,11 +363,40 @@ export async function shareShoppingList(listId: number): Promise<{ success: true
   return { success: true, token };
 }
 
-/** Extract ingredient name from "400 g laks" → "laks" */
-function extractIngredientName(text: string): string {
-  // Remove leading quantity + unit pattern
-  const cleaned = text.replace(/^[\d.,]+\s*(g|kg|dl|l|ml|ss|ts|stk|pk|fedd|klype|ca\.?\s*[\d.,]*\s*(g|kg|dl|l|ml))\s*/i, "");
-  return cleaned.trim() || text;
+/**
+ * Extract just the ingredient name from originalText.
+ * Handles formats:
+ *   "400 g laks" → "laks"
+ *   "ca. 2,5 dl chicken broth" → "chicken broth"
+ *   "2 ss limesaft" → "limesaft"
+ *   "1 stk avokado" → "avokado"
+ *
+ * Strategy: strip ALL leading quantity/unit patterns aggressively.
+ */
+function extractIngredientName(text: string, quantity?: number, unit?: string): string {
+  if (!text) return "";
+
+  let cleaned = text
+    // Remove "ca. " prefix
+    .replace(/^ca\.?\s*/i, "")
+    // Remove all leading number patterns (handles "2,5" and "400")
+    .replace(/^[\d.,]+\s*/g, "")
+    // Remove known units (Norwegian + English)
+    .replace(/^(g|kg|dl|l|ml|ss|ts|stk|pk|fedd|klype|bunt|kvast|porsjon|neve|blad|skive|bx|glass|tbsps?|tsps?|cups?|oz|lbs?|servings?|tablespoons?|teaspoons?|pinch|dash|small|medium|large|handful|cans?|pieces?|whole|slices?|sprigs?|cloves?|bunch|packet|package)\s+/i, "")
+    // Remove another round of numbers (for "4 tbsps 2 tbsps koriander" → after first strip, might have "2 tbsps koriander")
+    .replace(/^[\d.,]+\s*/g, "")
+    .replace(/^(g|kg|dl|l|ml|ss|ts|stk|pk|fedd|klype|tbsps?|tsps?|cups?|oz|lbs?|servings?|tablespoons?|teaspoons?|small|medium|large)\s+/i, "")
+    .trim();
+
+  // If nothing left, use text as-is
+  if (!cleaned) cleaned = text;
+
+  // Remove "to taste", "for garnish" etc.
+  cleaned = cleaned
+    .replace(/,?\s*(to taste|for garnish|for serving|as needed|optional)\s*$/i, "")
+    .trim();
+
+  return cleaned || text;
 }
 
 /** Round quantity to sensible precision */

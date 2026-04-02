@@ -69,7 +69,7 @@ const EXCLUDE_CATEGORIES = new Set([
 ]);
 
 /** Words in product names that indicate it's not a raw ingredient */
-const EXCLUDE_NAME_PATTERNS = /\b(barnegrøt|babymat|barnemat|iskrem|is\s|sjokolademelk|smoothie|gele|drops|pastill)\b/i;
+const EXCLUDE_NAME_PATTERNS = /\b(barnegrøt|babymat|barnemat|babysmoothie|ispinne|iskrem|is\b|sjokolademelk|smoothie|gele|drops|pastill|godtepose|chips|potetgull|snacksboks|6mnd|8mnd|12mnd|fr[aå]\s*\d+\s*m[nå]d)\b/i;
 
 /**
  * Filter out irrelevant products (baby food, ice cream, snacks).
