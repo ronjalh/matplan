@@ -46,7 +46,17 @@
 - "Sparing"-kategori i budsjett bør IKKE bruke warning/error farger — mer spart = bra. Bruk alltid kategorifargen.
 - Utgiftsposter bør være klikkbare for redigering — skrivefeil i beskrivelse/beløp/dato er vanlig.
 
+### Sikkerhet
+- **ALLE Server Actions må sjekke auth.** Selv "uskyldige" som toggleItem kan missbrukes.
+- **Eierskap må verifiseres hele kjeden.** Item → List → Household. Ikke nok å bare sjekke item ID.
+- **Shared links = public endpoints.** Må verifisere at item tilhører den spesifikke delte ressursen.
+- **Aldri trunkér sikkerhets-tokens.** Full UUID (122 bit) er riktig. 12 chars (48 bit) er for svakt.
+- **deleteCategory-mønsteret:** Sjekk eierskap FØR du sletter relaterte rader.
+- **Søk-endepunkter bør ha auth.** Ellers kan noen tømme API-kvoten din.
+- **Gjør sikkerhetsaudit regelmessig.** Nye features introduserer nye hull.
+
 ### Prosess
 - Tester finner reelle bugs (toISODate, regex). Verdt å skrive.
 - Kassalapp-refinements er pågående — 150+ er bra men trenger bruker-lært matching.
 - Test alltid på Vercel-deploy, ikke bare localhost.
+- Sikkerhetsaudit bør gjøres etter hver større feature-runde.
