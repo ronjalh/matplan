@@ -126,7 +126,7 @@ const SIFO_BUDGETS: Record<string, { name: string; limit: number; color: string 
     { name: "Helse og hygiene", limit: 60000, color: "#9B7ED8" },
     { name: "Fritid og kultur", limit: 80000, color: "#E8A838" },
     { name: "Kommunikasjon", limit: 40000, color: "#4A90A4" },
-    { name: "Sparing", limit: 150000, color: "#6ABF69" },
+    { name: "Sparing", limit: 150000, color: "#4ABFA8" },
   ],
   couple: [
     { name: "Mat og drikke", limit: 560000, color: "#7C9A7E" },
@@ -136,7 +136,7 @@ const SIFO_BUDGETS: Record<string, { name: string; limit: number; color: string 
     { name: "Helse og hygiene", limit: 80000, color: "#9B7ED8" },
     { name: "Fritid og kultur", limit: 120000, color: "#E8A838" },
     { name: "Kommunikasjon", limit: 60000, color: "#4A90A4" },
-    { name: "Sparing", limit: 250000, color: "#6ABF69" },
+    { name: "Sparing", limit: 250000, color: "#4ABFA8" },
   ],
   family: [
     { name: "Mat og drikke", limit: 840000, color: "#7C9A7E" },
@@ -147,7 +147,7 @@ const SIFO_BUDGETS: Record<string, { name: string; limit: number; color: string 
     { name: "Fritid og kultur", limit: 150000, color: "#E8A838" },
     { name: "Barnehage/SFO", limit: 300000, color: "#C27B5A" },
     { name: "Kommunikasjon", limit: 80000, color: "#4A90A4" },
-    { name: "Sparing", limit: 300000, color: "#6ABF69" },
+    { name: "Sparing", limit: 300000, color: "#4ABFA8" },
   ],
 };
 

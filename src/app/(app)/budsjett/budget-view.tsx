@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   seedDefaultCategories,
   createCategory,
+  updateCategory,
   addExpense,
   deleteExpense,
   deleteCategory,
@@ -24,6 +25,7 @@ import {
   X,
   BarChart3,
   ShoppingCart,
+  Pencil,
 } from "lucide-react";
 
 const monthNames = [
@@ -66,6 +68,10 @@ export function BudgetView({
   const router = useRouter();
   const [addingExpense, setAddingExpense] = useState<number | null>(null);
   const [addingCategory, setAddingCategory] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<number | null>(null);
+  const [editCatName, setEditCatName] = useState("");
+  const [editCatLimit, setEditCatLimit] = useState("");
+  const [editCatColor, setEditCatColor] = useState("#7C9A7E");
   const [seeding, setSeeding] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [importingList, setImportingList] = useState(false);
@@ -298,31 +304,99 @@ export function BudgetView({
         const spent = categoryTotals.get(cat.id) ?? 0;
         const ratio = cat.monthlyLimitOre > 0 ? spent / cat.monthlyLimitOre : 0;
         const catEntries = entries.filter((e) => e.categoryId === cat.id);
+        const isEditing = editingCategory === cat.id;
 
         return (
-          <Card key={cat.id}>
+          <Card key={cat.id} className="group/card">
             <CardHeader className="py-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color ?? "#7C9A7E" }} />
-                  <CardTitle className="text-sm">{cat.name}</CardTitle>
+              {isEditing ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      value={editCatName}
+                      onChange={(e) => setEditCatName(e.target.value)}
+                      className="h-8 text-sm flex-1"
+                      autoFocus
+                    />
+                    <Input
+                      type="number"
+                      value={editCatLimit}
+                      onChange={(e) => setEditCatLimit(e.target.value)}
+                      placeholder="Grense kr/mnd"
+                      className="h-8 text-sm w-28"
+                    />
+                    <input
+                      type="color"
+                      value={editCatColor}
+                      onChange={(e) => setEditCatColor(e.target.value)}
+                      className="h-8 w-8 rounded cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="h-7"
+                      onClick={async () => {
+                        const limit = parseFloat(editCatLimit);
+                        if (editCatName.trim() && !isNaN(limit) && limit > 0) {
+                          await updateCategory(cat.id, editCatName.trim(), limit, editCatColor);
+                        }
+                        setEditingCategory(null);
+                      }}
+                    >Lagre</Button>
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => setEditingCategory(null)}>Avbryt</Button>
+                    <div className="flex-1" />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-destructive hover:text-destructive"
+                      onClick={async () => {
+                        if (confirm(`Slette "${cat.name}" og alle utgifter?`)) {
+                          await deleteCategory(cat.id);
+                          setEditingCategory(null);
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3 mr-1" /> Slett kategori
+                    </Button>
+                  </div>
                 </div>
-                <span className="text-sm font-medium">
-                  {formatKr(spent)} / {formatKr(cat.monthlyLimitOre)}
-                </span>
-              </div>
-              <div className="w-full h-2 bg-muted rounded-full overflow-hidden mt-2">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${Math.min(ratio * 100, 100)}%`,
-                    backgroundColor:
-                      ratio > 1 ? "var(--color-error)" :
-                      ratio > 0.85 ? "var(--color-warning)" :
-                      cat.color ?? "var(--color-success)",
-                  }}
-                />
-              </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color ?? "#7C9A7E" }} />
+                      <CardTitle className="text-sm">{cat.name}</CardTitle>
+                      <button
+                        onClick={() => {
+                          setEditingCategory(cat.id);
+                          setEditCatName(cat.name);
+                          setEditCatLimit(String(cat.monthlyLimitOre / 100));
+                          setEditCatColor(cat.color ?? "#7C9A7E");
+                        }}
+                        className="opacity-0 group-hover/card:opacity-100 transition-opacity text-muted-foreground hover:text-primary cursor-pointer"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <span className="text-sm font-medium">
+                      {formatKr(spent)} / {formatKr(cat.monthlyLimitOre)}
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden mt-2">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(ratio * 100, 100)}%`,
+                        backgroundColor:
+                          ratio > 1 ? "var(--color-error)" :
+                          ratio > 0.85 ? "var(--color-warning)" :
+                          cat.color ?? "var(--color-success)",
+                      }}
+                    />
+                  </div>
+                </>
+              )}
             </CardHeader>
             <CardContent className="pt-0">
               {/* Entries */}
