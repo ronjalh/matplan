@@ -108,7 +108,7 @@ export default function SesongPage() {
       ))}
 
       {/* Monthly calendar grid */}
-      <Card>
+      <Card id="kalender">
         <CardHeader>
           <CardTitle className="text-base">Sesongkalender</CardTitle>
           <div className="flex gap-4 mt-2 text-xs text-muted-foreground">

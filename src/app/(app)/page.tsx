@@ -172,7 +172,7 @@ export default async function DashboardPage() {
             <CardContent>
               {inSeason.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Lite høstes i Norge akkurat nå. <Link href="/sesong" className="text-primary hover:underline">Se hva som kommer snart →</Link>
+                  Lite høstes i Norge akkurat nå. <Link href="/sesong#kalender" className="text-primary hover:underline">Se hva som kommer snart →</Link>
                 </p>
               ) : (
                 <div className="flex flex-wrap gap-1.5">

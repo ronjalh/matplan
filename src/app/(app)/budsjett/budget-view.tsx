@@ -496,6 +496,23 @@ export function BudgetView({
           <Plus className="w-4 h-4" /> Ny kategori
         </Button>
       )}
+
+      {/* Delete all */}
+      {categories.length > 0 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full text-muted-foreground hover:text-destructive text-xs"
+          onClick={async () => {
+            if (!confirm("Slette hele budsjettet? Alle kategorier og utgifter fjernes. Du kan opprette et nytt etterpå.")) return;
+            for (const cat of categories) {
+              await deleteCategory(cat.id);
+            }
+          }}
+        >
+          <Trash2 className="w-3 h-3 mr-1" /> Slett hele budsjettet
+        </Button>
+      )}
     </div>
   );
 }
