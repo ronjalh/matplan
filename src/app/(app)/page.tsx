@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getWeekDays, toISODate, getISOWeekNumber } from "@/lib/date-utils";
 import { getAvailableProduce } from "@/data/seasonal-produce";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -17,6 +18,14 @@ export default async function DashboardPage() {
     where: eq(householdMembers.userId, session!.user!.id!),
   });
   const householdId = membership?.householdId;
+
+  // Check onboarding
+  const settingsCheck = await db.query.userSettings.findFirst({
+    where: eq(userSettings.userId, session!.user!.id!),
+  });
+  if (settingsCheck && !settingsCheck.onboardingComplete) {
+    redirect("/onboarding");
+  }
 
   // Get user dietary preference
   const settings = await db.query.userSettings.findFirst({
