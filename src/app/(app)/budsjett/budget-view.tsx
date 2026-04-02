@@ -7,6 +7,7 @@ import {
   createCategory,
   updateCategory,
   addExpense,
+  updateExpense,
   deleteExpense,
   deleteCategory,
   importShoppingListAsExpense,
@@ -26,6 +27,7 @@ import {
   BarChart3,
   ShoppingCart,
   Pencil,
+  Check,
 } from "lucide-react";
 
 const monthNames = [
@@ -388,10 +390,11 @@ export function BudgetView({
                       className="h-full rounded-full transition-all"
                       style={{
                         width: `${Math.min(ratio * 100, 100)}%`,
-                        backgroundColor:
-                          ratio > 1 ? "var(--color-error)" :
-                          ratio > 0.85 ? "var(--color-warning)" :
-                          cat.color ?? "var(--color-success)",
+                        backgroundColor: cat.name.toLowerCase().includes("sparing")
+                          ? cat.color ?? "#4ABFA8" // Savings: always use own color (more = good)
+                          : ratio > 1 ? "var(--color-error)"
+                          : ratio > 0.85 ? "var(--color-warning)"
+                          : cat.color ?? "var(--color-success)",
                       }}
                     />
                   </div>
@@ -403,23 +406,7 @@ export function BudgetView({
               {catEntries.length > 0 && (
                 <ul className="space-y-1 mb-2">
                   {catEntries.map((entry) => (
-                    <li key={entry.id} className="group flex items-center justify-between text-sm py-1">
-                      <div>
-                        <span className="text-muted-foreground text-xs mr-2">
-                          {entry.date.split("-").reverse().slice(0, 2).join(".")}
-                        </span>
-                        {entry.description}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span>{formatKr(entry.amountOre)}</span>
-                        <button
-                          onClick={() => deleteExpense(entry.id)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive cursor-pointer"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </li>
+                    <ExpenseItem key={entry.id} entry={entry} />
                   ))}
                 </ul>
               )}
@@ -512,5 +499,89 @@ export function BudgetView({
         </Button>
       )}
     </div>
+  );
+}
+
+function ExpenseItem({ entry }: { entry: Entry }) {
+  const [editing, setEditing] = useState(false);
+  const [desc, setDesc] = useState(entry.description ?? "");
+  const [amount, setAmount] = useState(String(entry.amountOre / 100));
+  const [date, setDate] = useState(entry.date);
+
+  function formatKr(ore: number) {
+    return `kr ${(ore / 100).toLocaleString("nb-NO", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  }
+
+  if (editing) {
+    return (
+      <li className="flex gap-2 items-end py-1 bg-muted/50 rounded-md px-2">
+        <Input
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+          className="h-7 text-xs flex-1"
+          autoFocus
+        />
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="h-7 text-xs w-20"
+        />
+        <Input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="h-7 text-xs w-28"
+        />
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 w-7 p-0"
+          onClick={async () => {
+            const amt = parseFloat(amount);
+            if (desc.trim() && !isNaN(amt) && amt > 0) {
+              await updateExpense(entry.id, desc.trim(), amt, date);
+            }
+            setEditing(false);
+          }}
+        >
+          <Check className="w-3.5 h-3.5 text-primary" />
+        </Button>
+        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setEditing(false)}>
+          <X className="w-3.5 h-3.5" />
+        </Button>
+      </li>
+    );
+  }
+
+  return (
+    <li className="group flex items-center justify-between text-sm py-1">
+      <button
+        onClick={() => setEditing(true)}
+        className="text-left flex-1 cursor-pointer hover:text-primary transition-colors"
+      >
+        <span className="text-muted-foreground text-xs mr-2">
+          {entry.date.split("-").reverse().slice(0, 2).join(".")}
+        </span>
+        {entry.description}
+      </button>
+      <div className="flex items-center gap-1">
+        <span>{formatKr(entry.amountOre)}</span>
+        <button
+          onClick={() => setEditing(true)}
+          className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary cursor-pointer"
+        >
+          <Pencil className="w-3 h-3" />
+        </button>
+        <button
+          onClick={() => deleteExpense(entry.id)}
+          className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive cursor-pointer"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+    </li>
   );
 }

@@ -102,6 +102,22 @@ export async function addExpense(categoryId: number, date: string, description: 
   return { success: true };
 }
 
+export async function updateExpense(entryId: number, description: string, amountKr: number, date: string) {
+  const householdId = await getHouseholdId();
+
+  await db
+    .update(budgetEntries)
+    .set({
+      description: description.trim(),
+      amountOre: Math.round(amountKr * 100),
+      date,
+    })
+    .where(and(eq(budgetEntries.id, entryId), eq(budgetEntries.householdId, householdId)));
+
+  revalidatePath("/budsjett");
+  return { success: true };
+}
+
 export async function deleteExpense(entryId: number) {
   const householdId = await getHouseholdId();
 
