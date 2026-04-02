@@ -255,6 +255,7 @@ export const mealPlan = pgTable("meal_plan", {
   recipeId: integer("recipe_id").references(() => recipes.id),
   servingsOverride: integer("servings_override"),
   freeText: text("free_text"),
+  isFishMeal: boolean("is_fish_meal").notNull().default(false),
 });
 
 // ============================================================================

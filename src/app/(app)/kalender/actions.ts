@@ -37,6 +37,7 @@ export async function getWeekData(startDate: string, endDate: string) {
       recipePrepTime: recipes.prepTimeMinutes,
       recipeIsVegetarian: recipes.isVegetarian,
       recipeIsFishMeal: recipes.isFishMeal,
+      mealIsFishMeal: mealPlan.isFishMeal,
     })
     .from(mealPlan)
     .leftJoin(recipes, eq(mealPlan.recipeId, recipes.id))
@@ -71,7 +72,8 @@ export async function addMeal(
   date: string,
   mealType: MealType,
   recipeId: number | null,
-  freeText: string | null
+  freeText: string | null,
+  isFishMeal: boolean = false
 ) {
   const householdId = await getHouseholdId();
 
@@ -88,7 +90,7 @@ export async function addMeal(
     // Update existing
     await db
       .update(mealPlan)
-      .set({ recipeId, freeText })
+      .set({ recipeId, freeText, isFishMeal })
       .where(eq(mealPlan.id, existing.id));
   } else {
     await db.insert(mealPlan).values({
@@ -97,6 +99,7 @@ export async function addMeal(
       mealType,
       recipeId,
       freeText,
+      isFishMeal,
     });
   }
 

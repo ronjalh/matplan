@@ -48,6 +48,7 @@ interface Meal {
   recipePrepTime: number | null;
   recipeIsVegetarian: boolean | null;
   recipeIsFishMeal: boolean | null;
+  mealIsFishMeal: boolean;
 }
 
 interface CalEvent {
@@ -112,7 +113,7 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true, die
   // Weekly stats
   const dinnerMeals = meals.filter((m) => m.mealType === "middag");
   const uniqueDinners = new Set(dinnerMeals.map((m) => m.recipeId ?? m.freeText)).size;
-  const fishCount = meals.filter((m) => m.recipeIsFishMeal).length;
+  const fishCount = meals.filter((m) => m.recipeIsFishMeal || m.mealIsFishMeal).length;
 
   async function handleAddMeal(recipeId: number) {
     if (!addingMeal) return;
@@ -270,7 +271,7 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true, die
                         <span className="font-medium truncate flex-1">
                           {meal.recipeName ?? meal.freeText ?? label}
                         </span>
-                        {meal.recipeIsFishMeal && (
+                        {(meal.recipeIsFishMeal || meal.mealIsFishMeal) && (
                           <Fish className="w-3 h-3 text-[var(--color-fish)] shrink-0" />
                         )}
                       </div>

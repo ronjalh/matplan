@@ -83,9 +83,9 @@ export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }
 
       if (meal.recipe.id < 0) {
         // Matprat recipe — add as free text (no DB recipe)
-        await addMeal(date, "middag", null, meal.recipe.name);
+        await addMeal(date, "middag", null, meal.recipe.name, meal.recipe.isFishMeal);
       } else {
-        await addMeal(date, "middag", meal.recipe.id, null);
+        await addMeal(date, "middag", meal.recipe.id, null, meal.recipe.isFishMeal);
       }
     }
     setSaving(false);
