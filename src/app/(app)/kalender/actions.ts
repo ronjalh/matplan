@@ -140,6 +140,30 @@ export async function addEvent(
   return { success: true };
 }
 
+export async function updateEvent(
+  eventId: number,
+  data: { title?: string; startTime?: string; endTime?: string; eventType?: string }
+) {
+  const householdId = await getHouseholdId();
+  const event = await db.query.calendarEvents.findFirst({
+    where: and(eq(calendarEvents.id, eventId), eq(calendarEvents.householdId, householdId)),
+  });
+  if (!event) return { success: false, error: "Hendelse ikke funnet" };
+
+  await db
+    .update(calendarEvents)
+    .set({
+      ...(data.title !== undefined && { title: data.title }),
+      ...(data.startTime !== undefined && { startTime: data.startTime || null }),
+      ...(data.endTime !== undefined && { endTime: data.endTime || null }),
+      ...(data.eventType !== undefined && { eventType: data.eventType as any }),
+    })
+    .where(eq(calendarEvents.id, eventId));
+
+  revalidatePath("/kalender");
+  return { success: true };
+}
+
 export async function removeEvent(eventId: number) {
   const householdId = await getHouseholdId();
   const event = await db.query.calendarEvents.findFirst({

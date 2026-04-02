@@ -17,8 +17,9 @@ import {
   CalendarPlus,
   ShoppingCart,
 } from "lucide-react";
-import { addMeal, removeMeal, removeEvent } from "./actions";
+import { addMeal, removeMeal, removeEvent, updateEvent } from "./actions";
 import { AddEventDialog } from "./add-event-dialog";
+import { EditEventDialog } from "./edit-event-dialog";
 import Link from "next/link";
 import {
   formatShortDate,
@@ -80,7 +81,8 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
   const weekNum = getISOWeekNumber(dates[0]);
 
   const [addingMeal, setAddingMeal] = useState<{ date: string; mealType: string } | null>(null);
-  const [addingEvent, setAddingEvent] = useState<string | null>(null); // date string
+  const [addingEvent, setAddingEvent] = useState<string | null>(null);
+  const [editingEvent, setEditingEvent] = useState<CalEvent | null>(null);
 
   function navigateWeek(offset: number) {
     const d = new Date(dates[0]);
@@ -193,6 +195,11 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
         <AddEventDialog date={addingEvent} onClose={() => setAddingEvent(null)} />
       )}
 
+      {/* Edit event dialog */}
+      {editingEvent && (
+        <EditEventDialog event={editingEvent} onClose={() => setEditingEvent(null)} />
+      )}
+
       {/* Week grid */}
       <div className="grid grid-cols-7 gap-2">
         {dates.map((date) => {
@@ -269,7 +276,8 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
                 const eventContent = (
                   <div
                     key={event.id}
-                    className={`group relative rounded-md px-2 py-1 text-xs border-l-2 ${hasLink ? "hover:bg-muted cursor-pointer" : ""}`}
+                    onClick={() => !hasLink && setEditingEvent(event)}
+                    className={`group relative rounded-md px-2 py-1 text-xs border-l-2 hover:bg-muted cursor-pointer`}
                     style={{
                       borderLeftColor:
                         event.eventType === "aktivitet" ? "var(--color-fish)" :

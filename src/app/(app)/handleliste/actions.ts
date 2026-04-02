@@ -263,6 +263,19 @@ export async function addShoppingTrip(listId: number, date: string, time?: strin
   });
   if (!list) return { success: false, error: "Liste ikke funnet" };
 
+  // Check for existing trip for same list on same day
+  const existing = await db.query.calendarEvents.findFirst({
+    where: and(
+      eq(calendarEvents.householdId, householdId),
+      eq(calendarEvents.date, date),
+      eq(calendarEvents.linkedResourceType, "shoppingList"),
+      eq(calendarEvents.linkedResourceId, listId)
+    ),
+  });
+  if (existing) {
+    return { success: false, error: "Handletur for denne listen er allerede lagt inn denne dagen" };
+  }
+
   await db.insert(calendarEvents).values({
     householdId,
     date,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toISODate } from "@/lib/date-utils";
 import {
@@ -63,6 +63,15 @@ export function ShoppingListView({
   const [error, setError] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [storeFilter, setStoreFilter] = useState<string>("alle");
+
+  // Reset share button when switching lists
+  useEffect(() => {
+    setShareUrl(null);
+    setStoreFilter("alle");
+    setEditingName(false);
+    setAddingToCalendar(false);
+    setAddingItem(false);
+  }, [activeListId]);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(list?.name ?? "");
   const [addingItem, setAddingItem] = useState(false);
@@ -243,6 +252,7 @@ export function ShoppingListView({
               const url = `${window.location.origin}/shared/${result.token}`;
               setShareUrl(url);
               navigator.clipboard.writeText(url);
+              setTimeout(() => setShareUrl(null), 2000);
             }
           }}
           className="gap-1"
@@ -284,7 +294,8 @@ export function ShoppingListView({
               size="sm"
               className="h-8"
               onClick={async () => {
-                await addShoppingTrip(list.id, tripDate, tripTime || undefined);
+                const result = await addShoppingTrip(list.id, tripDate, tripTime || undefined);
+                if (!result.success) { setError(result.error ?? "Noe gikk galt"); return; }
                 setAddingToCalendar(false);
               }}
             >
