@@ -10,6 +10,7 @@ import {
   deleteShoppingList,
   shareShoppingList,
   updateItemPrice,
+  updateItemQuantity,
   createEmptyList,
   renameList,
   addItem,
@@ -464,32 +465,54 @@ function ShoppingItem({
   formatKr: (ore: number) => string;
 }) {
   const [editing, setEditing] = useState(false);
+  const [editingQty, setEditingQty] = useState(false);
+  const [qtyInput, setQtyInput] = useState(String(item.quantity));
   const [priceInput, setPriceInput] = useState(
     item.estimatedPriceOre ? (item.estimatedPriceOre / 100).toFixed(2).replace(".", ",") : ""
   );
+  const [storeInput, setStoreInput] = useState(item.priceStore === "Egendefinert" ? "" : item.priceStore ?? "");
   const [saving, setSaving] = useState(false);
 
   async function handleSavePrice() {
     const parsed = parseFloat(priceInput.replace(",", "."));
     if (isNaN(parsed) || parsed < 0) return;
     setSaving(true);
-    await updateItemPrice(item.id, parsed);
+    await updateItemPrice(item.id, parsed, storeInput || undefined);
     setSaving(false);
     setEditing(false);
   }
 
+  async function handleSaveQty() {
+    const parsed = parseFloat(qtyInput.replace(",", "."));
+    if (isNaN(parsed) || parsed <= 0) return;
+    await updateItemQuantity(item.id, parsed);
+    setEditingQty(false);
+  }
+
   if (editing) {
     return (
-      <li className="flex items-center gap-2 rounded-md px-2 py-2 bg-muted/50">
-        <span className="text-sm flex-1">{item.quantity} {item.unit} {item.name}</span>
+      <li className="rounded-md px-2 py-2 bg-muted/50 space-y-2">
+        <span className="text-sm">{item.quantity} {item.unit} {item.name}</span>
         <div className="flex items-center gap-1">
           <span className="text-xs text-muted-foreground">kr</span>
           <Input
+            type="number"
+            step="0.01"
+            min="0"
             value={priceInput}
             onChange={(e) => setPriceInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSavePrice()}
             className="w-20 h-7 text-xs"
+            autoComplete="off"
             autoFocus
+          />
+          <Input
+            value={storeInput}
+            onChange={(e) => setStoreInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSavePrice()}
+            placeholder="Butikk"
+            className="w-24 h-7 text-xs"
+            autoComplete="off"
           />
           <Button size="sm" variant="ghost" onClick={handleSavePrice} disabled={saving} className="h-7 w-7 p-0">
             <Check className="w-3.5 h-3.5 text-primary" />
@@ -509,12 +532,39 @@ function ShoppingItem({
           {item.checked ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-muted-foreground" />}
         </button>
         <span className={`flex-1 min-w-0 ${item.checked ? "text-muted-foreground line-through" : ""}`}>
-          {item.quantity} {item.unit} {item.name}
+          {editingQty ? (
+            <span className="inline-flex items-center gap-1">
+              <Input
+                type="number"
+                step="any"
+                min="0.1"
+                value={qtyInput}
+                onChange={(e) => setQtyInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleSaveQty(); if (e.key === "Escape") setEditingQty(false); }}
+                onBlur={handleSaveQty}
+                className="w-16 h-6 text-xs inline"
+                autoFocus
+              />
+              {item.unit} {item.name}
+            </span>
+          ) : (
+            <span>
+              <button
+                onClick={() => !item.checked && setEditingQty(true)}
+                className="hover:text-primary cursor-pointer"
+                title="Klikk for å endre mengde"
+              >
+                {item.quantity} {item.unit}
+              </button>
+              {" "}{item.name}
+            </span>
+          )}
         </span>
         {!item.checked && (
           <div className="flex items-center gap-1.5 shrink-0">
             {item.estimatedPriceOre ? (
-              <span className="text-xs text-muted-foreground">
+              <span className={`text-xs ${item.estimatedPriceOre > 25000 ? "text-[var(--color-warning)]" : "text-muted-foreground"}`}>
+                {item.estimatedPriceOre > 25000 && "⚠ "}
                 {formatKr(item.estimatedPriceOre)}
                 {item.priceSource && (
                   <span className="text-[10px] ml-1 opacity-70">

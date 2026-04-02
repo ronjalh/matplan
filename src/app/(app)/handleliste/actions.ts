@@ -215,6 +215,16 @@ async function verifyItemOwnership(itemId: number) {
   return !!list;
 }
 
+export async function updateItemQuantity(itemId: number, quantity: number) {
+  if (!(await verifyItemOwnership(itemId))) return { success: false, error: "Ikke tilgang" };
+  await db
+    .update(shoppingListItems)
+    .set({ quantity: Math.max(0.1, quantity) })
+    .where(eq(shoppingListItems.id, itemId));
+  revalidatePath("/handleliste");
+  return { success: true };
+}
+
 export async function toggleItem(itemId: number, checked: boolean) {
   if (!(await verifyItemOwnership(itemId))) return { success: false, error: "Ikke tilgang" };
   await db
@@ -225,7 +235,7 @@ export async function toggleItem(itemId: number, checked: boolean) {
   return { success: true };
 }
 
-export async function updateItemPrice(itemId: number, priceKr: number) {
+export async function updateItemPrice(itemId: number, priceKr: number, storeName?: string) {
   if (!(await verifyItemOwnership(itemId))) return { success: false, error: "Ikke tilgang" };
   const priceOre = Math.round(priceKr * 100);
   await db
@@ -233,7 +243,7 @@ export async function updateItemPrice(itemId: number, priceKr: number) {
     .set({
       estimatedPriceOre: priceOre,
       priceSource: "Egendefinert",
-      priceStore: "Egendefinert",
+      priceStore: storeName?.trim() || "Egendefinert",
     })
     .where(eq(shoppingListItems.id, itemId));
   revalidatePath("/handleliste");
