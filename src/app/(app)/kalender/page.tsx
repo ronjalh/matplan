@@ -1,6 +1,10 @@
 import { getWeekData } from "./actions";
 import { WeekView } from "./week-view";
-import { getMonday, getWeekDays, toISODate } from "@/lib/date-utils";
+import { getWeekDays, toISODate } from "@/lib/date-utils";
+import { auth } from "@/lib/auth/auth-config";
+import { db } from "@/db";
+import { userSettings } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export default async function KalenderPage({
   searchParams,
@@ -15,6 +19,12 @@ export default async function KalenderPage({
 
   const { meals, events, allRecipes } = await getWeekData(startDate, endDate);
 
+  const session = await auth();
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.userId, session!.user!.id!),
+  });
+  const showFish = settings?.dietaryPreference !== "vegetarian" && settings?.dietaryPreference !== "vegan";
+
   return (
     <div className="max-w-6xl mx-auto space-y-4">
       <h1 className="text-2xl font-[family-name:var(--font-fraunces)] font-semibold">
@@ -25,6 +35,7 @@ export default async function KalenderPage({
         meals={meals}
         events={events}
         allRecipes={allRecipes}
+        showFish={showFish}
       />
     </div>
   );

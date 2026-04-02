@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/auth-config";
 import { db } from "@/db";
-import { mealPlan, recipes, householdMembers, budgetCategories, budgetEntries } from "@/db/schema";
+import { mealPlan, recipes, householdMembers, budgetCategories, budgetEntries, userSettings } from "@/db/schema";
 import { eq, and, gte, lte } from "drizzle-orm";
 import { Compass, Fish, Utensils, Sprout } from "lucide-react";
 import { DashboardCard } from "@/components/dashboard-card";
@@ -17,6 +17,13 @@ export default async function DashboardPage() {
     where: eq(householdMembers.userId, session!.user!.id!),
   });
   const householdId = membership?.householdId;
+
+  // Get user dietary preference
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.userId, session!.user!.id!),
+  });
+  const diet = settings?.dietaryPreference ?? "all";
+  const showFish = diet !== "vegetarian" && diet !== "vegan";
 
   const days = getWeekDays(new Date());
   const startDate = toISODate(days[0]);
@@ -111,7 +118,7 @@ export default async function DashboardPage() {
       {/* ─── Weekly overview section ─── */}
       <div className="border-t border-border pt-6 space-y-4">
         <h2 className="text-lg font-[family-name:var(--font-fraunces)] font-semibold text-muted-foreground">
-          Denne uken — Uke {weekNum}
+          Denne uken <span className="text-sm font-normal">(uke {weekNum})</span>
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -120,7 +127,7 @@ export default async function DashboardPage() {
             <CardHeader className="py-3">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Utensils className="w-4 h-4 text-[#C27B5A]" />
-                Middager og fisk
+                {showFish ? "Middager og fisk" : "Middager"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -140,6 +147,7 @@ export default async function DashboardPage() {
                   ))}
                 </div>
               </div>
+              {showFish && (
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-muted-foreground">Fiskmåltider</span>
@@ -158,6 +166,7 @@ export default async function DashboardPage() {
                   ))}
                 </div>
               </div>
+              )}
             </CardContent>
           </Card>
 
@@ -166,7 +175,7 @@ export default async function DashboardPage() {
             <CardHeader className="py-3">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Sprout className="w-4 h-4 text-[var(--color-success)]" />
-                I sesong — {monthNames[currentMonth - 1]}
+                I sesong <span className="font-normal text-muted-foreground">· {monthNames[currentMonth - 1]}</span>
               </CardTitle>
             </CardHeader>
             <CardContent>

@@ -73,9 +73,10 @@ interface WeekViewProps {
   meals: Meal[];
   events: CalEvent[];
   allRecipes: Recipe[];
+  showFish?: boolean;
 }
 
-export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
+export function WeekView({ days, meals, events, allRecipes, showFish = true }: WeekViewProps) {
   const router = useRouter();
   const dates = days.map((d) => new Date(d));
   const weekNum = getISOWeekNumber(dates[0]);
@@ -143,11 +144,13 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
           <span className="text-lg font-semibold ml-2">Uke {weekNum}</span>
         </div>
         <div className="flex items-center gap-4 text-sm">
-          <span className={`flex items-center gap-1.5 ${fishCount >= 2 ? "text-[var(--color-fish)]" : "text-muted-foreground"}`}>
-            <Fish className="w-4 h-4" />
-            {fishCount}/2–3 fisk
-            {fishCount >= 2 && " ✓"}
-          </span>
+          {showFish && (
+            <span className={`flex items-center gap-1.5 ${fishCount >= 2 ? "text-[var(--color-fish)]" : "text-muted-foreground"}`}>
+              <Fish className="w-4 h-4" />
+              {fishCount}/2–3 fisk
+              {fishCount >= 2 && " ✓"}
+            </span>
+          )}
           <span className="text-muted-foreground">
             {dinnerMeals.length}/7 middager ({uniqueDinners} unike)
           </span>
