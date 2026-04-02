@@ -92,9 +92,9 @@ export function BudgetView({
   const totalBudgetOre = categories.reduce((s, c) => s + c.monthlyLimitOre, 0);
   const totalSpentOre = entries.reduce((s, e) => s + e.amountOre, 0);
 
-  async function handleSeed() {
+  async function handleSeed(type: string) {
     setSeeding(true);
-    await seedDefaultCategories();
+    await seedDefaultCategories(type);
     setSeeding(false);
   }
 
@@ -119,18 +119,29 @@ export function BudgetView({
   // Empty state
   if (categories.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Wallet className="w-12 h-12 mb-4 opacity-30" />
-        <p className="text-center mb-4">Ingen budsjettkategorier ennå.</p>
-        <div className="flex gap-2">
-          <Button onClick={handleSeed} disabled={seeding} className="gap-2">
-            {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wallet className="w-4 h-4" />}
-            Bruk norske standardkategorier
+        <p className="text-center mb-2 font-medium text-foreground">Start med SIFO referansebudsjett</p>
+        <p className="text-center mb-6 text-sm max-w-md">
+          Velg husstandstype for å få norske standardkategorier med anbefalte grenser.
+          Du kan redigere alt etterpå.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2 mb-4">
+          <Button onClick={() => handleSeed("single")} disabled={seeding} variant="outline" className="gap-2">
+            {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            Enslig (~kr 10 800/mnd)
           </Button>
-          <Button variant="outline" onClick={() => setAddingCategory(true)} className="gap-2">
-            <Plus className="w-4 h-4" /> Lag egen
+          <Button onClick={() => handleSeed("couple")} disabled={seeding} variant="outline" className="gap-2">
+            Par (~kr 18 500/mnd)
+          </Button>
+          <Button onClick={() => handleSeed("family")} disabled={seeding} variant="outline" className="gap-2">
+            Familie m/barn (~kr 28 000/mnd)
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground mb-4">Kilde: SIFO referansebudsjettet (OsloMet)</p>
+        <Button variant="ghost" size="sm" onClick={() => setAddingCategory(true)} className="gap-2">
+          <Plus className="w-4 h-4" /> Eller lag helt egen
+        </Button>
       </div>
     );
   }

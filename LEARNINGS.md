@@ -3,47 +3,45 @@
 ## 2026-04-01 — Fase 1 & 2 Oppstart
 
 ### Tekniske funn
-
-- **Neon connection string:** `channel_binding=require` forårsaker problemer. Fjern det — `sslmode=require` er nok.
-
-- **NextAuth DrizzleAdapter:** Krever eksplisitte tabellreferanser: `{ usersTable: users, accountsTable: accounts, sessionsTable: sessions, verificationTokensTable: verificationTokens }`. Uten dette feiler auth med `42P01` (relation does not exist).
-
-- **NextAuth signIn redirect:** Server Action `signIn()` fra `@/lib/auth/auth-config` redirecter ikke riktig i nettleseren. Bruk klient-side `signIn()` fra `next-auth/react` i stedet.
-
-- **shadcn/ui + React 19:** `asChild` prop gir TypeScript-feil og runtime warnings. Bruk vanlige `<Link>`-elementer i stedet.
-
-- **Drizzle-kit:** Leser ikke `.env.local` automatisk. Må ha `import "dotenv/config"` i `drizzle.config.ts` og en kopi som `.env`.
-
-- **Server Actions: ALDRI throw i produksjon.** `throw new Error()` gir generisk "Server Components render error" — feilmeldingen stripes bort. Bruk alltid `return { success: false, error: "melding" }` og sjekk resultatet i klienten.
-
-- **Kan ikke sende React-komponenter (ikoner) fra Server til Client Components.** Lucide-ikoner er objekter med metoder og kan ikke serialiseres over server/client-grensen. Løsning: bruk streng-basert icon-mapping i client component (`iconMap = { calendar: Calendar, ... }`) og send streng-nøkkel som prop.
-
-- **CSS spacing med Link-wrapper:** `space-y-3` og `gap-3` fungerer ikke når `<Link>` er inline. Må sette `className="block"` på Link for at flex/grid gap skal fungere mellom kort.
-
-- **Spoonacular auth:** Profil-siden viser "hash" og "pin", men API-nøkkelen er en separat verdi som finnes et annet sted i konsollen. Hash er IKKE API-nøkkelen.
+- **Neon:** `channel_binding=require` feiler. Bruk kun `sslmode=require`.
+- **NextAuth DrizzleAdapter:** Trenger eksplisitte tabellreferanser.
+- **NextAuth signIn:** Bruk klient-side `signIn()` fra `next-auth/react`, ikke server action.
+- **shadcn/ui + React 19:** `asChild` gir TypeScript-feil. Bruk `<Link>` direkte.
+- **Drizzle-kit:** Trenger `import "dotenv/config"` + `.env` kopi.
+- **Server Actions:** ALDRI throw. Returner `{ success, error }`.
+- **Server→Client grense:** Kan ikke sende React-komponenter. Bruk streng-mapping.
+- **Link spacing:** `<Link>` trenger `className="block"` for flex gap.
+- **Spoonacular:** "hash" ≠ API key. Separate verdier.
 
 ### UX-lærdommer
+- Dark mode toggle i header, ikke sidebar. Kun sol/måne.
+- ALLTID double-submit protection.
+- Bygg full CRUD samtidig.
+- Ingredienser fra dag 1.
+- Dropdown > fritekst for kategorier.
+- Hover-effekter med unik farge per kort.
+- Faner for lik prominens (Mine/Utforsk/Ny).
 
-- **Dark mode toggle:** Ikke plasser i sidebar footer — brukere finner den ikke. Plasser ved siden av profil-avatar i headeren.
+## 2026-04-02 — Fase 3-6
 
-- **Dobbelt-submit på skjemaer:** Brukere dobbeltklikker. ALLTID implementer: (1) `disabled={pending}` på submit-knappen, (2) `if (pending) return` guard i handler, (3) reset skjema etter vellykket submit.
+### Tekniske funn
+- **toISODate() UTC-bug:** `.toISOString()` → UTC → feil dato. Bruk `getFullYear()/getMonth()/getDate()`. Funnet av Vitest.
+- **Regex "løk"→"øk":** `\bl\b` i STRIP_PATTERN matcher "l" i "løk". Fjern single-char enheter.
+- **"ground beef"→"beef":** "ground" i STRIP_PATTERN for aggressiv. Fjern, legg til "beef" refinement.
+- **Kassalapp → barnemat:** Vage søk returnerer babypuré/iskrem. Løsning: spesifikke produktnavn i refinements + filtrer ut barnemat-kategorier + ekskluder "6mnd"/"8mnd" i produktnavn.
+- **Kassalapp URL-encoding:** Norske tegn MÅ URL-encodes. `encodeURIComponent()` fungerer.
+- **Drizzle-kit non-interactive:** Kan ikke rename kolonner. Legg til nye i stedet.
+- **Fish detection:** Spoonacular-import satte `isFishMeal: false` hardkodet. Fikset med regex på ingrediensnavn.
 
-- **CRUD er ikke komplett uten Read og Update:** Å bygge Create uten View/Edit er halvferdig. Brukere forventer å kunne klikke på det de nettopp lagde. Bygg alltid full CRUD samtidig.
+### UX-lærdommer
+- Fargekoder trenger ALLTID legende/forklaring.
+- "Kopiert!"-knapper bør resette etter 2s og ved kontekstbytte.
+- Avhukede varer → egen "Fullført"-seksjon, ikke blandet.
+- Repeating events: enklere å opprette N separate events.
+- Kalender-handleliste kobling via linkedResourceType/Id er elegant.
+- Handlelistenavn bør være konsistente ("Uke 14", ikke mix av formater).
 
-- **Oppskrifter trenger ingredienser fra dag 1:** En oppskrift uten ingrediens-felt er ikke en oppskrift. Aldri ship oppskrift-CRUD uten ingredienser.
-
-- **Duplikat-innhold irriterer:** Brukere oppretter lett duplikater (dobbeltklikk, gjentatte submissions). Implementer duplikatsjekk server-side (sjekk navn i household).
-
-- **Kjøkken bør være dropdown, ikke fritekst.** Gir konsistente verdier for filtrering. Fritekst → "norsk", "Norsk", "NORSK" — umulig å filtrere.
-
-- **Hover-effekter signaliserer klikkbarhet.** Kort uten hover-effekt ser ut som statisk innhold. Bruk: border-farge endring, shadow, scale, tittel-farge — og unik farge per kort gir identitet.
-
-- **Søk/Utforsk bør være like prominent som egne data.** Ikke gjem søk bak en liten knapp. Bruk faner (Mine oppskrifter / Utforsk / Ny) — standard mønster fra Mealime, Paprika etc.
-
-### Prosess-lærdommer
-
-- **Bygg minimalt men komplett:** Ikke ship halvferdige features. Bedre å ha færre features som er fullstendige.
-
-- **Test i nettleser tidlig:** Bygg-feil fanges av `next build`, men UX-problemer oppdages bare ved å faktisk bruke appen.
-
-- **Produksjon avslører feil som dev skjuler.** Server Action throws, serialiseringsfeil, og env-variabler som mangler — test alltid på Vercel-deploy, ikke bare localhost.
+### Prosess
+- Tester finner reelle bugs (toISODate, regex). Verdt å skrive.
+- Kassalapp-refinements er pågående — 150+ er bra men trenger bruker-lært matching.
+- Test alltid på Vercel-deploy, ikke bare localhost.

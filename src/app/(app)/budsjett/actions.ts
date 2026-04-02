@@ -113,7 +113,45 @@ export async function deleteExpense(entryId: number) {
   return { success: true };
 }
 
-export async function seedDefaultCategories() {
+/**
+ * SIFO reference budgets (2025 approximate, in øre/month).
+ * Source: OsloMet/SIFO Referansebudsjettet
+ */
+const SIFO_BUDGETS: Record<string, { name: string; limit: number; color: string }[]> = {
+  single: [
+    { name: "Mat og drikke", limit: 320000, color: "#7C9A7E" },
+    { name: "Bolig og energi", limit: 550000, color: "#4A90A4" },
+    { name: "Transport", limit: 100000, color: "#C27B5A" },
+    { name: "Klær og sko", limit: 80000, color: "#E06090" },
+    { name: "Helse og hygiene", limit: 60000, color: "#9B7ED8" },
+    { name: "Fritid og kultur", limit: 80000, color: "#E8A838" },
+    { name: "Kommunikasjon", limit: 40000, color: "#4A90A4" },
+    { name: "Sparing", limit: 150000, color: "#6ABF69" },
+  ],
+  couple: [
+    { name: "Mat og drikke", limit: 560000, color: "#7C9A7E" },
+    { name: "Bolig og energi", limit: 700000, color: "#4A90A4" },
+    { name: "Transport", limit: 150000, color: "#C27B5A" },
+    { name: "Klær og sko", limit: 120000, color: "#E06090" },
+    { name: "Helse og hygiene", limit: 80000, color: "#9B7ED8" },
+    { name: "Fritid og kultur", limit: 120000, color: "#E8A838" },
+    { name: "Kommunikasjon", limit: 60000, color: "#4A90A4" },
+    { name: "Sparing", limit: 250000, color: "#6ABF69" },
+  ],
+  family: [
+    { name: "Mat og drikke", limit: 840000, color: "#7C9A7E" },
+    { name: "Bolig og energi", limit: 900000, color: "#4A90A4" },
+    { name: "Transport", limit: 200000, color: "#C27B5A" },
+    { name: "Klær og sko", limit: 150000, color: "#E06090" },
+    { name: "Helse og hygiene", limit: 100000, color: "#9B7ED8" },
+    { name: "Fritid og kultur", limit: 150000, color: "#E8A838" },
+    { name: "Barnehage/SFO", limit: 300000, color: "#C27B5A" },
+    { name: "Kommunikasjon", limit: 80000, color: "#4A90A4" },
+    { name: "Sparing", limit: 300000, color: "#6ABF69" },
+  ],
+};
+
+export async function seedDefaultCategories(householdType: string = "single") {
   const householdId = await getHouseholdId();
 
   const existing = await db.query.budgetCategories.findMany({
@@ -121,15 +159,7 @@ export async function seedDefaultCategories() {
   });
   if (existing.length > 0) return { success: false, error: "Kategorier finnes allerede" };
 
-  const defaults = [
-    { name: "Mat og drikke", limit: 400000, color: "#7C9A7E" },
-    { name: "Bolig og energi", limit: 800000, color: "#4A90A4" },
-    { name: "Transport", limit: 200000, color: "#C27B5A" },
-    { name: "Klær og sko", limit: 100000, color: "#E06090" },
-    { name: "Helse og hygiene", limit: 80000, color: "#9B7ED8" },
-    { name: "Fritid og kultur", limit: 100000, color: "#E8A838" },
-    { name: "Sparing", limit: 200000, color: "#6ABF69" },
-  ];
+  const defaults = SIFO_BUDGETS[householdType] ?? SIFO_BUDGETS.single;
 
   await db.insert(budgetCategories).values(
     defaults.map((d, i) => ({

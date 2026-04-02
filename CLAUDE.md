@@ -59,8 +59,14 @@ Connection: `@neondatabase/serverless` HTTP driver
 - `qa-matplan` — quality gate checklist
 
 ## Current State
-Fase 1 in progress. Working: auth, database, sidebar layout, dashboard.
-Next: onboarding, i18n, Vercel deploy.
+All 6 phases complete. Live at matplan-one.vercel.app.
+- Fase 1: ✅ Auth, DB, layout, design system, Vercel deploy
+- Fase 2: ✅ Recipes (own + Spoonacular 685k+), ingredients, unit conversion, filtering
+- Fase 3: ✅ Calendar (meals + events, fish tracker, repeating events)
+- Fase 4: ✅ Shopping list (Kassalapp prices, share via link, add/remove items)
+- Fase 5: ✅ Budget (categories, expenses, monthly overview, SIFO defaults)
+- Fase 6: ✅ Seasonal page, live dashboard, 143 tests passing
+Next: Fase 7 features (onboarding, i18n, PWA, meal plan templates, pantry)
 
 ## Learning Log
 See LEARNINGS.md for codebase-specific discoveries and gotchas.
