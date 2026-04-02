@@ -179,6 +179,34 @@ export async function updateRecipe(recipeId: number, formData: FormData): Promis
   return { success: true };
 }
 
+const FISH_KEYWORDS = /\b(salmon|cod|tuna|shrimp|prawn|fish|mackerel|trout|herring|haddock|pollock|crab|lobster|mussel|anchov|sardine|tilapia|halibut|laks|torsk|sei|reke|tunfisk|makrell|ørret|sild|hyse|krabbe|fisk)\b/i;
+
+export async function retagFishRecipes(): Promise<ActionResult> {
+  const householdId = await getHouseholdId();
+
+  const allRecipes = await db.query.recipes.findMany({
+    where: eq(recipes.householdId, householdId),
+  });
+
+  let updated = 0;
+  for (const recipe of allRecipes) {
+    const ings = await db.query.recipeIngredients.findMany({
+      where: eq(recipeIngredients.recipeId, recipe.id),
+    });
+
+    const hasFish = ings.some((i) => FISH_KEYWORDS.test(i.originalText ?? ""));
+
+    if (hasFish !== recipe.isFishMeal) {
+      await db.update(recipes).set({ isFishMeal: hasFish }).where(eq(recipes.id, recipe.id));
+      updated++;
+    }
+  }
+
+  revalidatePath("/oppskrifter");
+  revalidatePath("/kalender");
+  return { success: true };
+}
+
 export async function deleteRecipe(recipeId: number): Promise<ActionResult> {
   const householdId = await getHouseholdId();
 

@@ -101,6 +101,30 @@ export function SettingsForm({ settings }: { settings: Settings | null | undefin
         </CardContent>
       </Card>
 
+      {/* Maintenance */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Vedlikehold</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              const { retagFishRecipes } = await import("@/app/(app)/oppskrifter/actions");
+              await retagFishRecipes();
+              alert("Fiskemerking oppdatert for alle oppskrifter!");
+            }}
+          >
+            Oppdater fiskemerking på oppskrifter
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Skanner ingredienser og merker oppskrifter som inneholder fisk.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Hidden theme field — keep current value */}
       <input type="hidden" name="theme" value={settings?.theme ?? "system"} />
 

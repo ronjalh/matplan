@@ -41,6 +41,11 @@
 - Kalender-handleliste kobling via linkedResourceType/Id er elegant.
 - Handlelistenavn bør være konsistente ("Uke 14", ikke mix av formater).
 
+### UX-lærdommer (del 2)
+- Input-felt for penger/tall ALLTID `type="number"` — brukere skriver bokstaver ellers.
+- "Sparing"-kategori i budsjett bør IKKE bruke warning/error farger — mer spart = bra. Bruk alltid kategorifargen.
+- Utgiftsposter bør være klikkbare for redigering — skrivefeil i beskrivelse/beløp/dato er vanlig.
+
 ### Prosess
 - Tester finner reelle bugs (toISODate, regex). Verdt å skrive.
 - Kassalapp-refinements er pågående — 150+ er bra men trenger bruker-lært matching.

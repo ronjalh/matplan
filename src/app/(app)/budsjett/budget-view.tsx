@@ -406,7 +406,7 @@ export function BudgetView({
               {catEntries.length > 0 && (
                 <ul className="space-y-1 mb-2">
                   {catEntries.map((entry) => (
-                    <ExpenseItem key={entry.id} entry={entry} />
+                    <ExpenseItem key={entry.id} entry={entry} year={year} month={month} />
                   ))}
                 </ul>
               )}
@@ -502,11 +502,16 @@ export function BudgetView({
   );
 }
 
-function ExpenseItem({ entry }: { entry: Entry }) {
+function ExpenseItem({ entry, year, month }: { entry: Entry; year: number; month: number }) {
   const [editing, setEditing] = useState(false);
   const [desc, setDesc] = useState(entry.description ?? "");
   const [amount, setAmount] = useState(String(entry.amountOre / 100));
   const [date, setDate] = useState(entry.date);
+
+  // Check if edited date is in a different month
+  const editedMonth = date ? parseInt(date.split("-")[1]) : month;
+  const editedYear = date ? parseInt(date.split("-")[0]) : year;
+  const dateOutOfMonth = editing && (editedMonth !== month || editedYear !== year);
 
   function formatKr(ore: number) {
     return `kr ${(ore / 100).toLocaleString("nb-NO", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -514,7 +519,13 @@ function ExpenseItem({ entry }: { entry: Entry }) {
 
   if (editing) {
     return (
-      <li className="flex gap-2 items-end py-1 bg-muted/50 rounded-md px-2">
+      <li className="py-1 bg-muted/50 rounded-md px-2 space-y-1">
+        {dateOutOfMonth && (
+          <p className="text-xs text-[var(--color-warning)]">
+            Denne datoen er i en annen måned — utgiften flyttes dit ved lagring.
+          </p>
+        )}
+        <div className="flex gap-2 items-end">
         <Input
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
@@ -552,6 +563,7 @@ function ExpenseItem({ entry }: { entry: Entry }) {
         <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setEditing(false)}>
           <X className="w-3.5 h-3.5" />
         </Button>
+        </div>
       </li>
     );
   }
