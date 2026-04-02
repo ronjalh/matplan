@@ -58,40 +58,66 @@ export async function searchProducts(
 
 import { refineSearchQuery } from "./search-refinements";
 
-/** Categories to exclude — baby food, snacks, etc. that pollute results */
+/** Categories to exclude — baby food, snacks, etc. */
 const EXCLUDE_CATEGORIES = new Set([
-  "Barnemat",
-  "Barneprodukter",
-  "Is",
-  "Iskrem",
-  "Snacks",
-  "Godteri",
+  "Barnemat", "Barneprodukter", "Is", "Iskrem", "Snacks", "Godteri", "Dessert",
 ]);
 
-/** Words in product names that indicate it's not a raw ingredient */
-const EXCLUDE_NAME_PATTERNS = /\b(barnegrøt|babymat|barnemat|babysmoothie|ispinne|iskrem|is\b|sjokolademelk|smoothie|gele|drops|pastill|godtepose|chips|potetgull|snacksboks|6mnd|8mnd|12mnd|fr[aå]\s*\d+\s*m[nå]d)\b/i;
+/** Name patterns to exclude */
+const EXCLUDE_NAME_PATTERNS = /\b(barnegrøt|babymat|barnemat|babysmoothie|ispinne|iskrem|sjokolademelk|smoothie|gele|drops|pastill|godtepose|chips|potetgull|snacksboks|6mnd|8mnd|12mnd)\b/i;
+
+/** Check if product is a bulk/commercial package */
+function isLikelyBulkPackage(p: KassalappProduct): boolean {
+  if (p.weight && p.weight_unit === "kg" && p.weight > 2.5) return true;
+  if (p.weight && p.weight_unit === "g" && p.weight > 2500) return true;
+  if (/\b(\d+\s*x\s*\d+|storkjøkken|storhusholdning|catering|kasse|storpack)\b/i.test(p.name)) return true;
+  return false;
+}
+
+/** Score how well a product matches the search query */
+function scoreMatch(product: KassalappProduct, searchTerms: string[]): number {
+  const name = product.name.toLowerCase();
+  let score = 0;
+
+  // Each search term found in product name
+  for (const term of searchTerms) {
+    if (term.length >= 2 && name.includes(term.toLowerCase())) score += 10;
+  }
+
+  // Penalize wrong product types that sneak through filters
+  const PENALTY_WORDS = ["sylte", "syltet", "pulver", "tørket", "konsentr", "granulat", "dressing"];
+  for (const pw of PENALTY_WORDS) {
+    if (name.includes(pw) && !searchTerms.some(t => t.includes(pw))) score -= 15;
+  }
+
+  // Penalize baby food/bulk
+  if (/6mnd|8mnd|12mnd|barnegrøt|babymat/i.test(name)) score -= 30;
+  if (isLikelyBulkPackage(product)) score -= 20;
+
+  // Prefer shorter names (less noise = more likely a simple product)
+  score -= name.length * 0.1;
+
+  return score;
+}
+
+/** Max reasonable price per category (in øre) */
+const MAX_PRICE_ORE = 25000; // kr 250
 
 /**
- * Filter out irrelevant products (baby food, ice cream, snacks).
+ * Filter out irrelevant products.
  */
 function filterRelevant(products: KassalappProduct[]): KassalappProduct[] {
   return products.filter((p) => {
-    // Exclude by category
     if (p.category?.some((c) => EXCLUDE_CATEGORIES.has(c.name))) return false;
-    // Exclude by name pattern
     if (EXCLUDE_NAME_PATTERNS.test(p.name)) return false;
+    if (isLikelyBulkPackage(p)) return false;
     return true;
   });
 }
 
 /**
  * Search and return the best match for an ingredient name.
- *
- * Strategy:
- * 1. Refine the search query (ingredient name → product search term)
- * 2. Search Kassalapp with the refined query
- * 3. Filter out irrelevant results (baby food, snacks)
- * 4. Return cheapest remaining product
+ * Uses: refinement → search → filter → score → sanity check.
  */
 export async function findBestPrice(ingredientName: string): Promise<{
   product: KassalappProduct;
@@ -104,23 +130,25 @@ export async function findBestPrice(ingredientName: string): Promise<{
     const products = await searchProducts(query, 10);
     const relevant = filterRelevant(products);
 
-    if (relevant.length > 0) {
-      const sorted = relevant.sort((a, b) => a.current_price - b.current_price);
-      return {
-        product: sorted[0],
-        priceOre: Math.round(sorted[0].current_price * 100),
-      };
+    const searchTerms = query.toLowerCase().split(/\s+/);
+
+    // Sort by relevance score first, then by price
+    const scored = (relevant.length > 0 ? relevant : products)
+      .map((p) => ({ product: p, score: scoreMatch(p, searchTerms) }))
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.product.current_price - b.product.current_price;
+      });
+
+    // Find first result within sanity price limit
+    for (const { product } of scored) {
+      const priceOre = Math.round(product.current_price * 100);
+      if (priceOre <= MAX_PRICE_ORE) {
+        return { product, priceOre };
+      }
     }
 
-    // If all filtered out, try the unfiltered cheapest as fallback
-    if (products.length > 0) {
-      const sorted = products.sort((a, b) => a.current_price - b.current_price);
-      return {
-        product: sorted[0],
-        priceOre: Math.round(sorted[0].current_price * 100),
-      };
-    }
-
+    // If all prices are insane, return null
     return null;
   } catch {
     return null;

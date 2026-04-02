@@ -273,6 +273,25 @@ const refinements: Record<string, string> = {
   "ham": "kokt skinke gilde",
   "sausage": "grillpølse gilde",
 
+  // === EKSTRA (vanlige ingredienser som mangler) ===
+  "tahini": "tahini",
+  "sambal oelek": "sambal oelek",
+  "hoisinsaus": "hoisin saus",
+  "tacokrydder": "tacokrydder santa maria",
+  "cottage cheese": "cottage cheese",
+  "riskrem": "riskrem tine",
+  "laktosfri melk": "melk laktosfri",
+  "søt chili saus": "sweet chili saus",
+  "wokgrønnsaker": "wok grønnsaker frossen",
+  "frisk basilikum": "basilikum fersk",
+  "frisk persille": "persille fersk",
+  "fersk koriander": "koriander fersk",
+  "rød paprika": "paprika rød fersk",
+  "grønt eple": "epler grønne",
+  "rødt eple": "epler røde",
+  "store reker": "reker pillede",
+  "hvit saus": "hvit saus toro",
+
   // === SKIP (gratis/ubetydelig) ===
   "vann": "",
   "is": "",
@@ -284,7 +303,7 @@ const refinements: Record<string, string> = {
  * NOTE: "l" (liter) is NOT included as single char — it would strip "l" from "løk" → "øk".
  * Use "dl", "ml", "l " (with space) patterns instead.
  */
-const STRIP_PATTERN = /\b(\d+[\d.,]*\s*)?(g|kg|dl|ml|ss|ts|stk|pk|fedd|klype|bunt|kvast|dæsj|porsjon|neve|blad|skive|bx|glass|tbsp|tbsps|tsp|tsps|cup|cups|oz|lb|lbs|serving|servings|tablespoon|tablespoons|teaspoon|teaspoons|pinch|dash|small|medium|large|handful|can|cans|piece|pieces|whole|fresh|dried|chopped|minced|sliced|diced|crushed|to taste)\b/gi;
+const STRIP_PATTERN = /\b(\d+[\d.,]*\s*)?(g|kg|dl|ml|ss|ts|stk|pk|fedd|klype|bunt|kvast|dæsj|porsjon|neve|blad|skive|bx|glass|tbsp|tbsps|tsp|tsps|cup|cups|oz|lb|lbs|serving|servings|tablespoon|tablespoons|teaspoon|teaspoons|pinch|dash|small|medium|large|handful|can|cans|piece|pieces|whole|fresh|dried|chopped|minced|sliced|diced|crushed|to taste|fersk|frisk|stor|store|liten|små|fin|grov|hakket|skivet|revet|finhakket|grovhakket)\b/gi;
 
 /**
  * Clean ingredient name for search: strip units, numbers, adjectives.
