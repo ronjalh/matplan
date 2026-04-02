@@ -22,9 +22,12 @@ export async function POST(
     return NextResponse.json({ error: "Ugyldig lenke" }, { status: 404 });
   }
 
-  // Get current item state
+  // Verify item belongs to the linked shopping list
   const item = await db.query.shoppingListItems.findFirst({
-    where: eq(shoppingListItems.id, itemId),
+    where: and(
+      eq(shoppingListItems.id, itemId),
+      eq(shoppingListItems.shoppingListId, link.resourceId)
+    ),
   });
 
   if (!item) {

@@ -202,7 +202,21 @@ export async function generateShoppingList(weekStartDate?: string) {
   return { success: true, id: list.id, itemCount: items.length };
 }
 
+/** Verify item belongs to user's household */
+async function verifyItemOwnership(itemId: number) {
+  const householdId = await getHouseholdId();
+  const item = await db.query.shoppingListItems.findFirst({
+    where: eq(shoppingListItems.id, itemId),
+  });
+  if (!item) return false;
+  const list = await db.query.shoppingLists.findFirst({
+    where: and(eq(shoppingLists.id, item.shoppingListId), eq(shoppingLists.householdId, householdId)),
+  });
+  return !!list;
+}
+
 export async function toggleItem(itemId: number, checked: boolean) {
+  if (!(await verifyItemOwnership(itemId))) return { success: false, error: "Ikke tilgang" };
   await db
     .update(shoppingListItems)
     .set({ checked })
@@ -212,6 +226,7 @@ export async function toggleItem(itemId: number, checked: boolean) {
 }
 
 export async function updateItemPrice(itemId: number, priceKr: number) {
+  if (!(await verifyItemOwnership(itemId))) return { success: false, error: "Ikke tilgang" };
   const priceOre = Math.round(priceKr * 100);
   await db
     .update(shoppingListItems)
@@ -303,6 +318,12 @@ export async function renameList(listId: number, name: string) {
 }
 
 export async function addItem(listId: number, name: string, quantity: number, unit: string) {
+  const householdId = await getHouseholdId();
+  const list = await db.query.shoppingLists.findFirst({
+    where: and(eq(shoppingLists.id, listId), eq(shoppingLists.householdId, householdId)),
+  });
+  if (!list) return { success: false, error: "Ikke tilgang" };
+
   await db.insert(shoppingListItems).values({
     shoppingListId: listId,
     name: name.trim(),
@@ -316,6 +337,7 @@ export async function addItem(listId: number, name: string, quantity: number, un
 }
 
 export async function removeItem(itemId: number) {
+  if (!(await verifyItemOwnership(itemId))) return { success: false, error: "Ikke tilgang" };
   await db.delete(shoppingListItems).where(eq(shoppingListItems.id, itemId));
   revalidatePath("/handleliste");
   return { success: true };
@@ -344,8 +366,8 @@ export async function shareShoppingList(listId: number): Promise<{ success: true
   });
   if (!list) return { success: false, error: "Liste ikke funnet" };
 
-  // Generate random token
-  const token = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+  // Generate cryptographically random token (full UUID = 122 bits entropy)
+  const token = crypto.randomUUID().replace(/-/g, "");
 
   // Expire in 7 days
   const expiresAt = new Date();

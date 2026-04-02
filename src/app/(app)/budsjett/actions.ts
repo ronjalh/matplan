@@ -78,10 +78,16 @@ export async function updateCategory(categoryId: number, name: string, monthlyLi
 export async function deleteCategory(categoryId: number) {
   const householdId = await getHouseholdId();
 
-  await db.delete(budgetEntries).where(eq(budgetEntries.categoryId, categoryId));
-  await db.delete(budgetCategories).where(
-    and(eq(budgetCategories.id, categoryId), eq(budgetCategories.householdId, householdId))
+  // Verify category belongs to household before deleting entries
+  const cat = await db.query.budgetCategories.findFirst({
+    where: and(eq(budgetCategories.id, categoryId), eq(budgetCategories.householdId, householdId)),
+  });
+  if (!cat) return { success: false, error: "Kategori ikke funnet" };
+
+  await db.delete(budgetEntries).where(
+    and(eq(budgetEntries.categoryId, categoryId), eq(budgetEntries.householdId, householdId))
   );
+  await db.delete(budgetCategories).where(eq(budgetCategories.id, categoryId));
 
   revalidatePath("/budsjett");
   return { success: true };

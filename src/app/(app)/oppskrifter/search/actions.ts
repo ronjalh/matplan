@@ -15,6 +15,9 @@ export async function searchSpoonacular(params: {
   cuisine?: string;
   maxReadyTime?: number;
 }) {
+  const session = await auth();
+  if (!session?.user?.id) return { results: [], offset: 0, number: 0, totalResults: 0 };
+
   const result = await searchRecipes({
     query: params.query,
     diet: params.diet as any,
