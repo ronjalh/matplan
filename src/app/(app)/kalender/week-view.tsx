@@ -290,15 +290,17 @@ export function WeekView({ days, meals, events, allRecipes }: WeekViewProps) {
                     {event.startTime && (
                       <span className="text-muted-foreground">{event.startTime}{event.endTime && `–${event.endTime}`}</span>
                     )}
-                    {hasLink && (
-                      <ShoppingCart className="w-3 h-3 text-primary absolute top-1 right-5" />
-                    )}
-                    <button
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveEvent(event.id); }}
-                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
+                    <div className="flex items-center justify-end gap-1 mt-0.5">
+                      {hasLink && (
+                        <ShoppingCart className="w-3 h-3 text-primary" />
+                      )}
+                      <button
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveEvent(event.id); }}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 );
 
