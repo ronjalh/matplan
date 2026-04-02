@@ -65,7 +65,9 @@ export default async function DashboardPage() {
   }
 
   const currentMonth = new Date().getMonth() + 1;
-  const inSeason = getAvailableProduce(currentMonth).filter((p) => p.status === "in-season");
+  const available = getAvailableProduce(currentMonth);
+  const inSeason = available.filter((p) => p.status === "in-season");
+  const fromStorage = available.filter((p) => p.status === "from-storage");
   const monthNames = ["januar", "februar", "mars", "april", "mai", "juni", "juli", "august", "september", "oktober", "november", "desember"];
 
   function formatKr(ore: number) {
@@ -168,21 +170,24 @@ export default async function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-1.5">
-                {inSeason.slice(0, 8).map((p) => (
-                  <span
-                    key={p.name}
-                    className="text-xs bg-[var(--color-success)]/10 text-[var(--color-success)] rounded-full px-2 py-0.5"
-                  >
-                    {p.name}
-                  </span>
-                ))}
-                {inSeason.length > 8 && (
-                  <Link href="/sesong" className="text-xs text-muted-foreground hover:text-primary">
-                    +{inSeason.length - 8} til
-                  </Link>
-                )}
-              </div>
+              {inSeason.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Lite høstes i Norge akkurat nå. <Link href="/sesong" className="text-primary hover:underline">Se hva som kommer snart →</Link>
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {inSeason.slice(0, 8).map((p) => (
+                    <span key={p.name} className="text-xs bg-[var(--color-success)]/10 text-[var(--color-success)] rounded-full px-2 py-0.5">
+                      {p.name}
+                    </span>
+                  ))}
+                  {inSeason.length > 8 && (
+                    <Link href="/sesong" className="text-xs text-muted-foreground hover:text-primary">
+                      +{inSeason.length - 8} til
+                    </Link>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
