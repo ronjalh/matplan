@@ -26,12 +26,23 @@ export function AddEventDialog({ date, onClose }: AddEventDialogProps) {
   const [eventType, setEventType] = useState("aktivitet");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [repeat, setRepeat] = useState("none");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || pending) return;
     setPending(true);
-    await addEvent(date, title.trim(), eventType, startTime || undefined, endTime || undefined);
+
+    if (repeat === "none") {
+      await addEvent(date, title.trim(), eventType, startTime || undefined, endTime || undefined);
+    } else {
+      // Create multiple events based on repeat pattern
+      const dates = generateRepeatDates(date, repeat);
+      for (const d of dates) {
+        await addEvent(d, title.trim(), eventType, startTime || undefined, endTime || undefined);
+      }
+    }
+
     setPending(false);
     onClose();
   }
@@ -107,10 +118,47 @@ export function AddEventDialog({ date, onClose }: AddEventDialogProps) {
             />
           </div>
         </div>
+        <div className="space-y-1">
+          <Label className="text-xs">Gjenta</Label>
+          <select
+            value={repeat}
+            onChange={(e) => setRepeat(e.target.value)}
+            className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+          >
+            <option value="none">Ikke gjenta</option>
+            <option value="weekly-4">Hver uke (4 uker)</option>
+            <option value="weekly-8">Hver uke (8 uker)</option>
+            <option value="weekly-12">Hver uke (12 uker)</option>
+            <option value="biweekly-8">Annenhver uke (8 uker)</option>
+            <option value="monthly-3">Hver måned (3 mnd)</option>
+            <option value="monthly-6">Hver måned (6 mnd)</option>
+          </select>
+        </div>
         <Button type="submit" disabled={pending} className="w-full" size="sm">
-          {pending ? "Lagrer..." : "Legg til"}
+          {pending ? "Lagrer..." : repeat !== "none" ? "Legg til (flere hendelser)" : "Legg til"}
         </Button>
       </form>
     </Card>
   );
+}
+
+function generateRepeatDates(startDate: string, pattern: string): string[] {
+  const dates: string[] = [];
+  const start = new Date(startDate);
+  const [type, countStr] = pattern.split("-");
+  const count = parseInt(countStr) || 4;
+
+  for (let i = 0; i < count; i++) {
+    const d = new Date(start);
+    if (type === "weekly") {
+      d.setDate(start.getDate() + i * 7);
+    } else if (type === "biweekly") {
+      d.setDate(start.getDate() + i * 14);
+    } else if (type === "monthly") {
+      d.setMonth(start.getMonth() + i);
+    }
+    dates.push(d.toISOString().split("T")[0]);
+  }
+
+  return dates;
 }
