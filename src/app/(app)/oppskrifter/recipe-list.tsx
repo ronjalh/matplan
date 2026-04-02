@@ -31,6 +31,7 @@ const dietFilters = [
   { key: "all", label: "Alle" },
   { key: "vegetarian", label: "Vegetar" },
   { key: "vegan", label: "Vegan" },
+  { key: "pescetarian", label: "Pescetarisk" },
   { key: "glutenFree", label: "Glutenfri" },
   { key: "dairyFree", label: "Melkefri" },
   { key: "fish", label: "Fisk" },
@@ -61,6 +62,7 @@ export function RecipeList({ recipes }: { recipes: Recipe[] }) {
         switch (dietFilter) {
           case "vegetarian": return r.isVegetarian;
           case "vegan": return r.isVegan;
+          case "pescetarian": return r.isVegetarian || r.isFishMeal; // fish OK, meat not
           case "glutenFree": return r.isGlutenFree;
           case "dairyFree": return r.isDairyFree;
           case "fish": return r.isFishMeal;
