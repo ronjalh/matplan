@@ -83,9 +83,10 @@ interface WeekViewProps {
   allRecipes: Recipe[];
   showFish?: boolean;
   diet?: string;
+  autoOpenPlan?: boolean;
 }
 
-export function WeekView({ days, meals, events, allRecipes, showFish = true, diet = "all" }: WeekViewProps) {
+export function WeekView({ days, meals, events, allRecipes, showFish = true, diet = "all", autoOpenPlan = false }: WeekViewProps) {
   const router = useRouter();
   const dates = days.map((d) => new Date(d));
   const weekNum = getISOWeekNumber(dates[0]);
@@ -93,7 +94,7 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true, die
   const [addingMeal, setAddingMeal] = useState<{ date: string; mealType: string } | null>(null);
   const [addingEvent, setAddingEvent] = useState<string | null>(null);
   const [editingEvent, setEditingEvent] = useState<CalEvent | null>(null);
-  const [showAutoPlan, setShowAutoPlan] = useState(false);
+  const [showAutoPlan, setShowAutoPlan] = useState(autoOpenPlan);
   const [clearing, setClearing] = useState(false);
 
   async function handleClearMeals() {

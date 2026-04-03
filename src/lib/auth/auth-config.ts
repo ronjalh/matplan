@@ -56,6 +56,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
   callbacks: {
+    authorized({ auth: sessionData, request }) {
+      const isLoggedIn = !!sessionData?.user;
+      const isOnLoginPage = request.nextUrl.pathname === "/login";
+      if (isOnLoginPage) return true; // Always allow login page
+      return isLoggedIn; // Redirect to login if not authenticated
+    },
     async session({ session, user }) {
       // Add householdId to session for easy access
       if (user?.id) {

@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { completeOnboarding, skipOnboarding } from "./actions";
+import { completeOnboarding, skipOnboarding, quickPlanOnboarding } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, ChevronLeft, Leaf, ShoppingCart, Wallet } from "lucide-react";
+import { ChevronRight, ChevronLeft, Leaf, ShoppingCart, Wallet, Wand2, Users } from "lucide-react";
 import { PandaMascot } from "@/components/panda-mascot";
 
 const steps = ["Velkommen", "Kosthold", "Priskilde", "Budsjett"];
 
 export function OnboardingWizard({ userName }: { userName: string }) {
   const [step, setStep] = useState(0);
+  const [quickMode, setQuickMode] = useState(false);
+  const [quickDiet, setQuickDiet] = useState("all");
+  const [quickServings, setQuickServings] = useState("4");
   const [diet, setDiet] = useState("all");
   const [priceProvider, setPriceProvider] = useState("kassalapp");
   const [budgetType, setBudgetType] = useState("skip");
@@ -36,7 +39,7 @@ export function OnboardingWizard({ userName }: { userName: string }) {
         </div>
 
         {/* Step 1: Welcome */}
-        {step === 0 && (
+        {step === 0 && !quickMode && (
           <div className="text-center space-y-4 py-4">
             <PandaMascot size={80} />
             <h2 className="text-2xl font-[family-name:var(--font-fraunces)] font-semibold">
@@ -46,9 +49,89 @@ export function OnboardingWizard({ userName }: { userName: string }) {
               Matplan hjelper deg med å planlegge måltider, lage handlelister og holde styr på budsjettet.
               La oss sette opp appen for deg — det tar under ett minutt.
             </p>
-            <Button onClick={next} className="gap-2">
-              Kom i gang <ChevronRight className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-col gap-2 items-center">
+              <Button onClick={next} className="gap-2">
+                Kom i gang <ChevronRight className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" onClick={() => setQuickMode(true)} className="gap-2">
+                <Wand2 className="w-4 h-4" /> Bare lag en middagsplan for meg!
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Quick plan mode */}
+        {step === 0 && quickMode && (
+          <div className="space-y-5 py-2">
+            <div className="text-center space-y-2">
+              <PandaMascot size={60} />
+              <h2 className="text-xl font-[family-name:var(--font-fraunces)] font-semibold">
+                Rask middagsplan
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Svar på to spørsmål, så genererer vi en ukeplan for deg.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Hvor mange spiser?</span>
+              </div>
+              <div className="flex gap-2">
+                {["1", "2", "3", "4", "5", "6"].map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setQuickServings(n)}
+                    className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                      quickServings === n ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Leaf className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Kosthold</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "all", label: "Alt" },
+                  { value: "vegetarian", label: "Vegetar" },
+                  { value: "vegan", label: "Vegan" },
+                  { value: "pescetarian", label: "Pescetarianer" },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setQuickDiet(opt.value)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                      quickDiet === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-between pt-2">
+              <Button variant="ghost" onClick={() => setQuickMode(false)}>
+                <ChevronLeft className="w-4 h-4" /> Tilbake
+              </Button>
+              <form action={async (formData) => {
+                formData.set("diet", quickDiet);
+                formData.set("servings", quickServings);
+                await quickPlanOnboarding(formData);
+              }}>
+                <Button type="submit" className="gap-2">
+                  <Wand2 className="w-4 h-4" /> Generer ukesplan
+                </Button>
+              </form>
+            </div>
           </div>
         )}
 

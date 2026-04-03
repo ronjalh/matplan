@@ -9,7 +9,7 @@ import { eq } from "drizzle-orm";
 export default async function KalenderPage({
   searchParams,
 }: {
-  searchParams: Promise<{ week?: string }>;
+  searchParams: Promise<{ week?: string; autoplan?: string }>;
 }) {
   const params = await searchParams;
   const baseDate = params.week ? new Date(params.week) : new Date();
@@ -37,6 +37,7 @@ export default async function KalenderPage({
         allRecipes={allRecipes}
         showFish={showFish}
         diet={settings?.dietaryPreference ?? "all"}
+        autoOpenPlan={params.autoplan === "true"}
       />
     </div>
   );

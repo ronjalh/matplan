@@ -56,3 +56,23 @@ export async function skipOnboarding() {
 
   redirect("/");
 }
+
+export async function quickPlanOnboarding(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return;
+
+  const diet = formData.get("diet") as string;
+  const servings = formData.get("servings") as string;
+
+  const validDiets = ["all", "vegetarian", "vegan", "pescetarian"];
+
+  await db
+    .update(userSettings)
+    .set({
+      dietaryPreference: (validDiets.includes(diet) ? diet : "all") as any,
+      onboardingComplete: true,
+    })
+    .where(eq(userSettings.userId, session.user.id));
+
+  redirect(`/kalender?autoplan=true&servings=${servings || "4"}`);
+}
