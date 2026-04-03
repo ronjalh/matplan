@@ -216,7 +216,7 @@ export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }
         {/* Actions */}
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={regenerate} className="gap-1">
-            <RefreshCw className="w-3.5 h-3.5" /> Ny forslag
+            <RefreshCw className="w-3.5 h-3.5" /> Nytt forslag
           </Button>
           {plan.meals.length > 0 && (
             <Button size="sm" onClick={handleApply} disabled={saving} className="gap-1 flex-1">

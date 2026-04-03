@@ -17,8 +17,10 @@ import {
   CalendarPlus,
   ShoppingCart,
   Wand2,
+  Trash2,
+  BookPlus,
 } from "lucide-react";
-import { addMeal, removeMeal, removeEvent, updateEvent } from "./actions";
+import { addMeal, removeMeal, removeEvent, updateEvent, clearWeekMeals, importSuggestionAsRecipe } from "./actions";
 import { AddEventDialog } from "./add-event-dialog";
 import { EditEventDialog } from "./edit-event-dialog";
 import { AutoPlan } from "./auto-plan";
@@ -91,6 +93,17 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true, die
   const [addingEvent, setAddingEvent] = useState<string | null>(null);
   const [editingEvent, setEditingEvent] = useState<CalEvent | null>(null);
   const [showAutoPlan, setShowAutoPlan] = useState(false);
+  const [clearing, setClearing] = useState(false);
+
+  async function handleClearMeals() {
+    if (!confirm("Fjerne alle måltider for denne uken?")) return;
+    setClearing(true);
+    const start = toISODate(dates[0]);
+    const end = toISODate(dates[6]);
+    await clearWeekMeals(start, end);
+    setClearing(false);
+    router.refresh();
+  }
 
   function navigateWeek(offset: number) {
     const d = new Date(dates[0]);
@@ -125,6 +138,13 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true, die
     await removeMeal(mealId);
   }
 
+  async function handleImportSuggestion(mealId: number) {
+    const result = await importSuggestionAsRecipe(mealId);
+    if (result.success) {
+      router.refresh();
+    }
+  }
+
   async function handleRemoveEvent(eventId: number) {
     await removeEvent(eventId);
   }
@@ -151,6 +171,11 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true, die
           <Button variant="outline" size="sm" onClick={() => setShowAutoPlan(!showAutoPlan)} className="gap-1 ml-2">
             <Wand2 className="w-4 h-4" /> Generer
           </Button>
+          {meals.length > 0 && (
+            <Button variant="outline" size="sm" onClick={handleClearMeals} disabled={clearing} className="gap-1 text-muted-foreground hover:text-destructive">
+              <Trash2 className="w-4 h-4" /> Tøm
+            </Button>
+          )}
           <span className="text-lg font-semibold ml-2">Uke {weekNum}</span>
         </div>
         <div className="flex items-center gap-4 text-sm">
@@ -261,10 +286,10 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true, die
                 const meal = getMeal(dateStr, key);
 
                 if (meal) {
-                  return (
+                  const mealContent = (
                     <div
                       key={key}
-                      className="group relative rounded-md bg-primary/10 px-2 py-1.5 text-xs"
+                      className={`group relative rounded-md bg-primary/10 px-2 py-1.5 text-xs ${meal.recipeId ? "cursor-pointer hover:bg-primary/20 transition-colors" : ""}`}
                     >
                       <div className="flex items-center gap-1">
                         <Icon className="w-3 h-3 text-muted-foreground shrink-0" />
@@ -275,14 +300,30 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true, die
                           <Fish className="w-3 h-3 text-[var(--color-fish)] shrink-0" />
                         )}
                       </div>
-                      <button
-                        onClick={() => handleRemoveMeal(meal.id)}
-                        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
+                      <div className="absolute top-1 right-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {!meal.recipeId && meal.freeText && (
+                          <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleImportSuggestion(meal.id); }}
+                            className="text-muted-foreground hover:text-primary"
+                            title="Lagre som oppskrift"
+                          >
+                            <BookPlus className="w-3 h-3" />
+                          </button>
+                        )}
+                        <button
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveMeal(meal.id); }}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                   );
+
+                  if (meal.recipeId) {
+                    return <Link key={key} href={`/oppskrifter/${meal.recipeId}`} className="block">{mealContent}</Link>;
+                  }
+                  return mealContent;
                 }
 
                 return (

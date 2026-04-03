@@ -167,6 +167,62 @@ export async function updateEvent(
   return { success: true };
 }
 
+export async function clearWeekMeals(startDate: string, endDate: string) {
+  const householdId = await getHouseholdId();
+  await db
+    .delete(mealPlan)
+    .where(
+      and(
+        eq(mealPlan.householdId, householdId),
+        gte(mealPlan.date, startDate),
+        lte(mealPlan.date, endDate)
+      )
+    );
+  revalidatePath("/kalender");
+  return { success: true };
+}
+
+export async function importSuggestionAsRecipe(mealId: number) {
+  const householdId = await getHouseholdId();
+
+  // Find the meal
+  const meal = await db.query.mealPlan.findFirst({
+    where: and(eq(mealPlan.id, mealId), eq(mealPlan.householdId, householdId)),
+  });
+  if (!meal) return { success: false as const, error: "Måltid ikke funnet" };
+  if (meal.recipeId) return { success: false as const, error: "Allerede knyttet til oppskrift" };
+  if (!meal.freeText) return { success: false as const, error: "Ingen oppskriftnavn å importere" };
+
+  // Check if recipe already exists with this name
+  const existing = await db.query.recipes.findFirst({
+    where: and(eq(recipes.householdId, householdId), eq(recipes.name, meal.freeText)),
+  });
+
+  let recipeId: number;
+  if (existing) {
+    recipeId = existing.id;
+  } else {
+    const [newRecipe] = await db.insert(recipes).values({
+      householdId,
+      name: meal.freeText,
+      servings: 4,
+      isFishMeal: meal.isFishMeal,
+      source: "manual",
+    }).returning({ id: recipes.id });
+    recipeId = newRecipe.id;
+  }
+
+  // Link meal to recipe
+  await db
+    .update(mealPlan)
+    .set({ recipeId, freeText: null })
+    .where(eq(mealPlan.id, mealId));
+
+  revalidatePath("/kalender");
+  revalidatePath("/oppskrifter");
+  return { success: true as const, recipeId };
+}
+
 export async function removeEvent(eventId: number) {
   const householdId = await getHouseholdId();
   const event = await db.query.calendarEvents.findFirst({
