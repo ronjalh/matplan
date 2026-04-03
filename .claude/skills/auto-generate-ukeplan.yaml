@@ -39,9 +39,16 @@ instructions: |
   ## Algorithm Details
   - Targets 2-3 fish meals/week (spread across days)
   - Respects dietary preferences (vegetarian/vegan/pescetarian)
+  - Optional kid-friendly filter (`isKidFriendly` flag on recipes)
   - Prefers unique recipes, allows repeats when pool is small
   - Warns about insufficient recipes or fish
   - Skips days with existing middag
+
+  ## Kid-Friendly Support
+  - `isKidFriendly` boolean on MatpratRecipe interface
+  - 20 of 60 recipes marked kid-friendly (fiskekaker, pølser, taco, pasta, etc.)
+  - "Barnevennlig" toggle in auto-plan UI
+  - Falls back to all recipes with warning if no kid-friendly match diet
 
   ## Tests
   - `src/lib/meal-plan/auto-generate.test.ts` — 10 tests

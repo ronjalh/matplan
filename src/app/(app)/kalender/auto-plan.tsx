@@ -19,6 +19,7 @@ interface Recipe {
   isFishMeal: boolean;
   isVegetarian: boolean;
   isVegan: boolean;
+  isKidFriendly?: boolean;
   cuisine: string | null;
   prepTimeMinutes: number | null;
 }
@@ -33,9 +34,11 @@ interface AutoPlanProps {
 
 export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }: AutoPlanProps) {
   const router = useRouter();
-  const [source, setSource] = useState<RecipeSource>(recipes.length > 0 ? "mine" : "matprat");
+  const defaultSource = recipes.length > 0 ? "mine" as RecipeSource : "matprat" as RecipeSource;
+  const [source, setSource] = useState<RecipeSource>(defaultSource);
+  const [kidFriendly, setKidFriendly] = useState(false);
   const [plan, setPlan] = useState(() =>
-    generateWeekPlan(getRecipePool(recipes.length > 0 ? "mine" : "matprat", recipes), diet as any)
+    generateWeekPlan(getRecipePool(defaultSource, recipes), diet as any, 2, false)
   );
   const [saving, setSaving] = useState(false);
 
@@ -47,13 +50,25 @@ export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }
     }
   }
 
+  function regen(src?: RecipeSource, kid?: boolean) {
+    const s = src ?? source;
+    const k = kid ?? kidFriendly;
+    setPlan(generateWeekPlan(getRecipePool(s, recipes), diet as any, 2, k));
+  }
+
   function changeSource(src: RecipeSource) {
     setSource(src);
-    setPlan(generateWeekPlan(getRecipePool(src, recipes), diet as any));
+    regen(src);
+  }
+
+  function toggleKidFriendly() {
+    const next = !kidFriendly;
+    setKidFriendly(next);
+    regen(undefined, next);
   }
 
   function regenerate() {
-    setPlan(generateWeekPlan(getRecipePool(source, recipes), diet as any));
+    regen();
   }
 
   function swapMeal(dayIndex: number) {
@@ -135,6 +150,14 @@ export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }
             }`}
           >
             Begge
+          </button>
+          <button
+            onClick={toggleKidFriendly}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+              kidFriendly ? "bg-[var(--color-warning)] text-white" : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Barnevennlig
           </button>
         </div>
 

@@ -9,6 +9,7 @@ interface RecipeForPlan {
   isFishMeal: boolean;
   isVegetarian: boolean;
   isVegan: boolean;
+  isKidFriendly?: boolean;
   cuisine: string | null;
   prepTimeMinutes: number | null;
 }
@@ -25,7 +26,8 @@ interface GeneratedPlan {
 export function generateWeekPlan(
   recipes: RecipeForPlan[],
   diet: "all" | "vegetarian" | "vegan" | "pescetarian",
-  targetFishMeals: number = 2
+  targetFishMeals: number = 2,
+  kidFriendlyOnly: boolean = false
 ): GeneratedPlan {
   const warnings: string[] = [];
 
@@ -37,6 +39,16 @@ export function generateWeekPlan(
     eligible = recipes.filter((r) => r.isVegan);
   } else if (diet === "pescetarian") {
     eligible = recipes.filter((r) => r.isVegetarian || r.isFishMeal);
+  }
+
+  // Filter by kid-friendly if requested
+  if (kidFriendlyOnly) {
+    const kidRecipes = eligible.filter((r) => r.isKidFriendly);
+    if (kidRecipes.length > 0) {
+      eligible = kidRecipes;
+    } else {
+      warnings.push("Ingen barnevennlige oppskrifter funnet — viser alle.");
+    }
   }
 
   if (eligible.length === 0) {

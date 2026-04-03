@@ -1,0 +1,129 @@
+name: personas
+description: User personas for Matplan — guides feature priorities, UX decisions, and testing scenarios
+version: 1.0.0
+tags: [personas, ux, testing, priorities]
+
+instructions: |
+  # Matplan Personas
+
+  Fire brukerprofiler som representerer hovedmålgruppene. Bruk disse til å:
+  - Prioritere features og UX-valg
+  - Teste brukerflyter fra ulike perspektiver
+  - Skrive realistiske testscenarier
+  - Vurdere om en endring gagner alle brukergrupper
+
+  ---
+
+  ## Persona 1: Emma (28) — Vegetarianer, enslig
+
+  **Livssituasjon:** Bor alene i Oslo, jobber som designer. Spiser vegetarisk
+  av miljøhensyn. Har stram økonomi.
+
+  **Matplan-bruk:**
+  - Kosthold: vegetarianer
+  - Husstand: 1 person
+  - Porsjoner: 1-2 (lager gjerne rester)
+  - Budsjett: stramt, følger SIFO "enslig"
+  - Oppskrifter: søker internasjonale vegetaroppskrifter via Spoonacular
+  - Fisk-tracker: skjult (irrelevant)
+  - Handleliste: handler på Rema/Kiwi, prissensitiv
+
+  **Nøkkelbehov:**
+  - Vegetarfilter som default i alt
+  - Billige oppskrifter sortert på pris
+  - Enkel budsjettsporing
+  - Sesongvarer for å spare penger
+
+  **Frustrasjon:**
+  - Irritert hvis fisk/kjøtt-oppskrifter dukker opp
+  - Vil ikke se ernæringsråd om fisk
+
+  ---
+
+  ## Persona 2: Kristin (38) — Mor i barnefamilie
+
+  **Livssituasjon:** Gift, to barn (4 og 7 år). Jobber fulltid som sykepleier.
+  Lite tid til matlaging, barna er kresne.
+
+  **Matplan-bruk:**
+  - Kosthold: alt (ingen restriksjoner)
+  - Husstand: 4 personer
+  - Porsjoner: 4 (noen ganger 5 med gjester)
+  - Budsjett: familiebudsjett SIFO, matposten er den største
+  - Oppskrifter: barnevennlige norske retter, korte tilberedningstider
+  - Fisk-tracker: viktig (barna bør spise fisk)
+  - Handleliste: handler i bulk, deler liste med mann
+
+  **Nøkkelbehov:**
+  - Barnevennlig-filter i autogenerering
+  - Raske middager (under 30 min)
+  - Delt handleliste med familien
+  - Fiskekaker, kjøttboller, taco, pasta — trygge valg for barna
+  - Ukesplan som gjentas (maler)
+
+  **Frustrasjon:**
+  - For eksotiske oppskrifter barna nekter å spise
+  - Lang tilberedningstid på hverdager
+  - Glemmer ting i butikken
+
+  ---
+
+  ## Persona 3: Anders (35) — Far i barnefamilie
+
+  **Livssituasjon:** Gift med Kristin, same husstand. Jobber som ingeniør.
+  Liker å lage mat, men har lite tid. Teknisk anlagt.
+
+  **Matplan-bruk:**
+  - Deler husstand med Kristin (same kalender, handleliste, budsjett)
+  - Handler ofte etter jobb — bruker handlelisten på mobil
+  - Liker å prøve nye oppskrifter i helgen
+  - Importerer oppskrifter fra matprat.no
+
+  **Nøkkelbehov:**
+  - Offline handleliste i butikken
+  - Oppskriftimport fra matprat
+  - QR-koder for deling
+  - Helgmiddager kan være mer avanserte
+
+  **Frustrasjon:**
+  - Handlelisten må fungere uten nett
+  - Vil se priser for å velge butikk
+
+  ---
+
+  ## Persona 4: Simen (23) — Student i kollektiv
+
+  **Livssituasjon:** Bor i kollektiv med 3 andre studenter i Trondheim.
+  Deler noen måltider men lager ofte mat hver for seg. Veldig stramt budsjett.
+
+  **Matplan-bruk:**
+  - Kosthold: alt
+  - Husstand: 1 person (planlegger for seg selv)
+  - Porsjoner: 1-2
+  - Budsjett: studentbudsjett, langt under SIFO
+  - Oppskrifter: billig, enkelt, stort volum (meal prep)
+  - Handleliste: handler på tilbud, Rema/Kiwi
+
+  **Nøkkelbehov:**
+  - Veldig billige oppskrifter
+  - Enkel meal prep (lage mye, spise i flere dager)
+  - Rask auto-generering uten mye oppsett
+  - "Bare lag en middagsplan for meg"-knappen i onboarding
+
+  **Frustrasjon:**
+  - Kompliserte oppskrifter med dyre ingredienser
+  - For mange steg i oppsett
+  - Vil ha rask verdi uten å investere tid
+
+  ---
+
+  ## Bruk i utvikling
+
+  Når du vurderer en feature eller UX-endring, sjekk:
+  1. Fungerer dette for Emma (vegetar, enslig, budsjett)?
+  2. Fungerer dette for Kristin (barnefamilie, lite tid, barnevennlig)?
+  3. Fungerer dette for Anders (delt husstand, mobil, import)?
+  4. Fungerer dette for Simen (student, billig, rask)?
+
+  Hvis en endring bare gagner én persona, vurder om den er generell nok.
+  Hvis den skader en annen persona, finn en løsning som fungerer for alle.

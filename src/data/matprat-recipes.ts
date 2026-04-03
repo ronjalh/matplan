@@ -17,6 +17,7 @@ export interface MatpratRecipe {
   prepTimeMinutes: number | null;
   ingredients: { name: string; quantity: number; unit: string }[];
   instructions: string;
+  isKidFriendly: boolean;
 }
 
 export const matpratRecipes: MatpratRecipe[] = [
@@ -42,6 +43,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett ovnen på 200°C.\n2. Skjær grønnsakene i passende biter og legg dem på et stekebrett med bakepapir.\n3. Dryss over olivenolje, salt og pepper, og bland godt.\n4. Legg laksefiletene oppå grønnsakene. Press hvitløk over fisken.\n5. Klem sitronsaft over laksen og krydre med salt og pepper.\n6. Stek i ovnen i 20–25 minutter til laksen er gjennomstekt og grønnsakene er møre.",
+    isKidFriendly: false,
   },
   {
     id: -2,
@@ -66,6 +68,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Skrell og skjær poteter og gulrøtter i terninger. Finhakk løken.\n2. Smelt smør i en stor gryte og fres løken til den er blank.\n3. Tilsett poteter og gulrot, og hell over vann så det dekker grønnsakene. Kok i 10 minutter.\n4. Skjær fisken i biter og legg den i gryta. La det småkoke i 5–7 minutter.\n5. Tilsett fløte og la suppen varme opp uten å koke. Smak til med salt og pepper.\n6. Server i dype tallerkener med en klatt rømme og rikelig med fersk dill.",
+    isKidFriendly: false,
   },
   {
     id: -3,
@@ -89,6 +92,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett ovnen på 200°C. Kok makaronien etter anvisning på pakken.\n2. Smelt smør i en kasserolle, rør inn mel og la det surre i ett minutt.\n3. Tilsett melken litt etter litt mens du visper. Kok opp til en jevn hvit saus. Krydre med salt, pepper og muskatnøtt.\n4. Skjær fisken i biter og finhakk løken.\n5. Legg makaroni, fisk og løk lagvis i en smurt ildfast form. Hell hvit saus over.\n6. Strø revet ost på toppen.\n7. Stek i ovnen i 25–30 minutter til gratengeb er gyllen og boblende.",
+    isKidFriendly: true,
   },
   {
     id: -4,
@@ -110,6 +114,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Skrell potetene og kok dem i lettsaltet vann i ca. 20 minutter.\n2. Del brokkolien i buketter og dampkok eller kok dem i 3–4 minutter til de er sprø-møre.\n3. Stek baconet sprøtt i en stekepanne. Legg til side på tørkepapir.\n4. Krydre torsken med salt og pepper. Stek den i smør på middels varme i 3–4 minutter på hver side.\n5. Press litt sitronsaft over den ferdige fisken.\n6. Server torsken med poteter, brokkoli og sprøstekt bacon.",
+    isKidFriendly: false,
   },
   {
     id: -5,
@@ -133,6 +138,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Kok nudlene etter anvisning på pakken. Hell av vannet.\n2. Skjær laksen i terninger. Skjær grønnsakene i strimler.\n3. Varm olivenolje i en wok eller stor stekepanne på høy varme.\n4. Stek laksen raskt i 2–3 minutter. Ta den ut av pannen.\n5. Wok grønnsakene med hvitløk og ingefær i 3–4 minutter.\n6. Tilsett nudlene og laksen tilbake i woken. Hell over soyasaus og sesamolje.\n7. Bland alt godt og server umiddelbart.",
+    isKidFriendly: false,
   },
   {
     id: -6,
@@ -155,6 +161,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Skrell potetene og skjær dem i tykke staver. Legg dem i kaldt vann i 10 minutter.\n2. Bland mel, egg, øl og en klype salt til en jevn røre. La den hvile i 10 minutter.\n3. Varm oljen til 180°C i en dyp kjele. Tørk potetstavene og fritér dem i 5–6 minutter til de er gylne. Legg til side.\n4. Skjær torsken i porsjonsbiter. Dypp bitene i røren og fritér i 4–5 minutter til de er sprø og gylne.\n5. Fritér potetene en gang til i 2–3 minutter for ekstra sprøhet.\n6. Server med sitronsaft, salt og eventuelt remulade.",
+    isKidFriendly: true,
   },
   {
     id: -7,
@@ -177,6 +184,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett på risen etter anvisning på pakken.\n2. Skjær løk og paprika i strimler. Finhakk hvitløken.\n3. Varm olivenolje i en stor panne og fres løk, paprika og hvitløk i 3 minutter.\n4. Tilsett karripulver og rør godt i ett minutt.\n5. Hell i kokosmelk og la det småkoke i 5 minutter.\n6. Skjær seien i biter, legg den i sausen og la det koke forsiktig i 8–10 minutter.\n7. Smak til med salt og server over ris.",
+    isKidFriendly: false,
   },
   {
     id: -8,
@@ -199,6 +207,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Krydre laksen med salt og pepper. Stek den i en varm panne i 3–4 minutter på hver side. Del i biter.\n2. Skjær avokado, tomat og paprika i terninger.\n3. Lag en enkel guacamole ved å mose avokado med limesaft og salt.\n4. Varm tortillaene i en tørr panne eller i ovnen på 180°C i 2 minutter.\n5. Fyll tortillaene med laks, grønnsaker, mais og en klatt rømme.\n6. Server med limebåter ved siden av.",
+    isKidFriendly: false,
   },
   {
     id: -9,
@@ -221,6 +230,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Hardkok eggene i 10 minutter. Avkjøl i kaldt vann og skrell dem. Skjær i båter.\n2. Pill rekene hvis de ikke allerede er ferdigpillede.\n3. Skjær tomat og agurk i skiver. Riv salaten i biter.\n4. Bland majones med sitronsaft og hakket dill til en dressing.\n5. Legg salat, tomat, agurk, egg og reker i en bolle eller på et fat.\n6. Dryss over dressingen og server med ferskt brød.",
+    isKidFriendly: false,
   },
   {
     id: -10,
@@ -243,6 +253,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Kok potetene i lettsaltet vann i ca. 20 minutter til de er møre. La dem avkjøle litt, skjær i skiver.\n2. Finhakk rødløken. Bland poteter, rødløk, rømme og dill til en potetsalat. Smak til med salt og pepper.\n3. Krydre ørretfiletene med salt og pepper.\n4. Varm smør i en stekepanne på middels-høy varme.\n5. Stek ørreten med skinnsiden ned i 3–4 minutter, snu og stek 2–3 minutter til.\n6. Press sitronsaft over den ferdigstekte fisken og server med potetsalaten.",
+    isKidFriendly: false,
   },
 
   // === KJØTT (15 oppskrifter) ===
@@ -268,6 +279,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett på risen etter anvisning på pakken.\n2. Skjær kyllingfiletene i biter. Skjær paprika i strimler og finhakk løk og hvitløk.\n3. Varm olivenolje i en gryte og brun kyllingen i 3–4 minutter.\n4. Tilsett løk, hvitløk og paprika. Fres i 3 minutter.\n5. Hell i hermetiske tomater og la det småkoke i 15 minutter.\n6. Rør inn fløten og la det varme opp. Smak til med salt og pepper.\n7. Server gryten over ris.",
+    isKidFriendly: false,
   },
   {
     id: -12,
@@ -291,6 +303,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Finhakk løken og brun kjøttdeigen i en stekepanne på høy varme.\n2. Tilsett tacokrydder og vann etter anvisning på pakken. La det småkoke i 5 minutter.\n3. Skjær tomat, paprika og salat i biter. Riv osten.\n4. Varm tortillaene i en tørr panne eller i mikroen.\n5. Sett alt frem i skåler på bordet.\n6. La alle fylle sine egne tortillaer med kjøttdeig, grønnsaker, ost og rømme.",
+    isKidFriendly: true,
   },
   {
     id: -13,
@@ -315,6 +328,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Finhakk løk, hvitløk og gulrot.\n2. Varm olivenolje i en stor gryte og brun kjøttdeigen godt.\n3. Tilsett løk, hvitløk og gulrot. Fres i 3–4 minutter.\n4. Rør inn tomatpuré, hell over hermetiske tomater og la sausen småkoke i 20–25 minutter.\n5. Kok pastaen etter anvisning på pakken.\n6. Smak til sausen med salt og pepper.\n7. Server bolognesen over pastaen med revet ost på toppen.",
+    isKidFriendly: true,
   },
   {
     id: -14,
@@ -338,6 +352,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett på risen etter anvisning på pakken.\n2. Skjær kyllingen i biter. Finhakk løk, hvitløk og ingefær.\n3. Varm olivenolje i en gryte og brun kyllingbitene godt. Ta dem ut.\n4. Fres løk, hvitløk og ingefær i 2–3 minutter i samme gryte.\n5. Tilsett tikka masala-krydder og rør i ett minutt. Hell i hermetiske tomater.\n6. Legg kyllingen tilbake og la det småkoke i 15 minutter.\n7. Rør inn fløten og smak til med salt. Server over ris.",
+    isKidFriendly: false,
   },
   {
     id: -15,
@@ -363,6 +378,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett ovnen på 200°C. Finhakk løk og hvitløk.\n2. Brun kjøttdeig med løk og hvitløk. Tilsett hermetiske tomater og tomatpuré. La kjøttsausen småkoke i 15 minutter.\n3. Lag hvit saus: Smelt smør, rør inn mel og tilsett melk litt etter litt mens du visper. Kok til sausen tykner.\n4. Legg lag i en ildfast form: kjøttsaus, lasagneplater, hvit saus. Gjenta 2–3 ganger.\n5. Avslutt med hvit saus og revet ost på toppen.\n6. Stek i ovnen i 30–35 minutter til lasagnen er gyllen og boblende.\n7. La den hvile i 10 minutter før servering.",
+    isKidFriendly: true,
   },
   {
     id: -16,
@@ -382,6 +398,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Skjær kålen i grove biter. Skjær lammekjøttet i passende stykker.\n2. Legg vekselvis lag med kål og kjøtt i en stor gryte. Dryss mel, salt og hele pepperkorn mellom lagene.\n3. Tilsett vann til det nesten dekker innholdet.\n4. Kok opp og la det småkoke under lokk i 1,5–2 timer til kjøttet er mørt.\n5. Skrell potetene og kok dem separat i lettsaltet vann.\n6. Server fårikålen med kokte poteter.",
+    isKidFriendly: false,
   },
   {
     id: -17,
@@ -402,6 +419,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Skrell potetene og sett dem på å koke i lettsaltet vann.\n2. Krydre svinekoteletene med salt og pepper.\n3. Varm smør i en stekepanne og stek koteletene i 4–5 minutter på hver side til de er gjennomstekte.\n4. Finhakk løken og fres den i en gryte. Tilsett surkålen og varm den opp.\n5. Server koteletene med surkål og kokte poteter.",
+    isKidFriendly: false,
   },
   {
     id: -18,
@@ -425,6 +443,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Kok nudlene etter anvisning på pakken. Hell av vannet.\n2. Skjær kyllingen i strimler. Skjær alle grønnsakene i tynne strimler.\n3. Varm olivenolje i en wok på høy varme. Stek kyllingen i 3–4 minutter til den er gyllenbrun. Ta ut.\n4. Wok grønnsakene med hvitløk og ingefær i 2–3 minutter.\n5. Tilsett kyllingen og nudlene tilbake i woken.\n6. Hell over soyasaus og sesamolje. Bland alt godt og server umiddelbart.",
+    isKidFriendly: false,
   },
   {
     id: -19,
@@ -449,6 +468,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Bland kjøttdeig med finhakket løk, egg, mel, melk, salt og pepper. Form til kjøttkaker.\n2. Brun kjøttkakene i smør i en stekepanne på middels varme, ca. 3 minutter på hver side. Ta dem ut.\n3. Lag brun saus i samme panne: Tilsett litt mel, rør godt og hell i kjøttkraft. Kok opp og rør til sausen tykner.\n4. Legg kjøttkakene tilbake i sausen og la det småkoke i 10 minutter.\n5. Kok potetene i lettsaltet vann. Varm opp kålstuingen.\n6. Server kjøttkaker i brun saus med poteter og kålstuing.",
+    isKidFriendly: false,
   },
   {
     id: -20,
@@ -472,6 +492,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett på risen etter anvisning på pakken.\n2. Skjær biffkjøttet i tynne strimler. Skjær sopp i skiver, finhakk løk og hvitløk.\n3. Varm smør i en stor stekepanne på høy varme. Brun kjøttet raskt i 2 minutter. Ta det ut.\n4. Stek sopp, løk og hvitløk i samme panne i 3–4 minutter.\n5. Rør inn tomatpuré og tilsett rømme. La sausen varme opp.\n6. Legg kjøttet tilbake og la det småkoke i 5 minutter. Smak til med salt og pepper.\n7. Server over ris.",
+    isKidFriendly: false,
   },
   {
     id: -21,
@@ -493,6 +514,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett ovnen på 200°C. Kok pastaen etter anvisning på pakken.\n2. Legg kyllingfiletene i en ildfast form og krydre med salt og pepper.\n3. Fordel pesto over kyllingfiletene.\n4. Skjær tomatene i skiver og legg dem oppå. Fordel mozzarella i biter over.\n5. Stek i ovnen i 20–25 minutter til kyllingen er gjennomstekt og osten er smeltet og gyllen.\n6. Server med pasta.",
+    isKidFriendly: false,
   },
   {
     id: -22,
@@ -516,6 +538,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett ovnen på 250°C. Løs opp gjæren i 2 dl lunkent vann.\n2. Bland mel, salt, olivenolje og gjærvann. Kna deigen i 5–8 minutter til den er smidig. La den heve i 20 minutter.\n3. Mos hermetiske tomater med litt salt til en tomatsaus.\n4. Kjevle ut deigen på et bakepapirkledd stekebrett.\n5. Fordel tomatsaus over bunnen. Legg på skinke, sopp, paprika og løk.\n6. Strø rikelig med revet ost over.\n7. Stek i ovnen i 12–15 minutter til bunnen er sprø og osten er gyllen.",
+    isKidFriendly: true,
   },
   {
     id: -23,
@@ -540,6 +563,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Skjær lammekjøttet i grove biter. Krydre med salt og pepper.\n2. Varm olivenolje i en stor gryte og brun kjøttet godt på alle sider. Ta det ut.\n3. Skjær gulrot, løk, poteter og sellerirot i grove biter. Fres grønnsakene med hvitløk i 3 minutter.\n4. Rør inn tomatpuré og legg kjøttet tilbake. Hell over kjøttkraft.\n5. Kok opp og la gryten småkoke under lokk i 60–70 minutter til kjøttet er mørt.\n6. Smak til med salt og pepper og server.",
+    isKidFriendly: false,
   },
   {
     id: -24,
@@ -563,6 +587,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Kok risen etter anvisning på pakken.\n2. Brun kjøttdeigen med finhakket løk. Tilsett tacokrydder og vann, og la det småkoke i 5 minutter.\n3. Varm bønnene i en kjele. Skjær tomater i terninger og riv osten.\n4. Varm tortillaene i en tørr panne i ca. 30 sekunder på hver side.\n5. Fyll hver tortilla med ris, kjøttdeig, bønner, mais, tomat, ost og en klatt rømme.\n6. Brett tortillaen sammen ved å brette inn sidene og rulle den stramt.\n7. Server umiddelbart eller stek burritorullen i pannen for sprø overflate.",
+    isKidFriendly: false,
   },
   {
     id: -25,
@@ -586,6 +611,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett på risen etter anvisning på pakken.\n2. Skjær kyllingen i biter. Skjær paprika, squash og brokkoli i passende biter.\n3. Varm olivenolje i en gryte. Fres karripastaen i 1 minutt til den dufter.\n4. Tilsett kyllingen og stek i 3–4 minutter.\n5. Hell i kokosmelk og tilsett grønnsakene. La det småkoke i 10–12 minutter.\n6. Smak til med soyasaus og server over ris.",
+    isKidFriendly: false,
   },
 
   // === VEGETAR (15 oppskrifter) ===
@@ -612,6 +638,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Skrell og skjær gulrot, poteter og sellerirot i terninger. Finhakk løk og hvitløk.\n2. Varm olivenolje i en stor gryte. Fres løk og hvitløk i 2 minutter.\n3. Tilsett rotgrønnsakene og hell over grønnsakkraft. Kok opp.\n4. La det småkoke i 15 minutter til grønnsakene er nesten møre.\n5. Tilsett brokkolibuketter og kok i 5 minutter til.\n6. Smak til med salt og pepper. Server med ferskt brød.",
+    isKidFriendly: false,
   },
   {
     id: -27,
@@ -633,6 +660,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Kok pastaen i rikelig saltet vann etter anvisning på pakken.\n2. Halver cherrytomatene. Skjær mozzarellaen i terninger.\n3. Varm olivenolje i en panne og fres finhakket hvitløk i 30 sekunder.\n4. Tilsett tomatene og stek i 2–3 minutter til de er myke.\n5. Hell av pastaen og bland den med pestoen.\n6. Topp med tomater og mozzarella. Krydre med pepper og server.",
+    isKidFriendly: true,
   },
   {
     id: -28,
@@ -656,6 +684,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Skyll og la bønnene renne av. Varm dem i en panne med tacokrydder og litt vann i 5 minutter.\n2. Skjær tomat, paprika og løk i biter. Mos avokado med limesaft og salt.\n3. Riv salaten i strimler.\n4. Varm tortillaene i en tørr panne eller i ovnen på 180°C.\n5. Fyll tortillaene med bønner, grønnsaker, mais og guacamole.\n6. Server med limebåter.",
+    isKidFriendly: false,
   },
   {
     id: -29,
@@ -679,6 +708,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Varm grønnsakkraften i en kjele. Hold den varm gjennom hele tillagningen.\n2. Finhakk løk og hvitløk. Skjær soppen i skiver.\n3. Varm olivenolje og litt smør i en vid gryte. Fres løk og hvitløk i 2 minutter.\n4. Tilsett risen og rør i 1 minutt til den er glassaktig.\n5. Tilsett varm kraft en øse om gangen, og rør jevnlig. Vent til væsken er absorbert før du tilsetter mer. Dette tar ca. 18–20 minutter.\n6. Stek soppen i en separat panne i smør. Rør soppen inn i risottoen mot slutten.\n7. Rør inn revet ost og smak til med salt og pepper.",
+    isKidFriendly: false,
   },
   {
     id: -30,
@@ -703,6 +733,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Finhakk løk, hvitløk og ingefær. Skjær gulrøttene i småbiter.\n2. Varm olivenolje i en gryte. Fres løk, hvitløk og ingefær i 2–3 minutter.\n3. Tilsett karripulver og rør i ett minutt.\n4. Skyll linsene og tilsett dem sammen med gulrot, hermetiske tomater og 4 dl vann.\n5. Kok opp og la suppen småkoke i 20 minutter til linsene er møre.\n6. Rør inn kokosmelk og smak til med salt.\n7. Server med ferskt brød.",
+    isKidFriendly: false,
   },
   {
     id: -31,
@@ -725,6 +756,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Kok pastaen i rikelig saltet vann etter anvisning på pakken. Spar 1 dl av kokevannet.\n2. Varm olivenolje i en stor panne. Fres finhakket hvitløk i 30 sekunder.\n3. Tilsett spinaten og la den falle sammen i 1–2 minutter.\n4. Rør inn ricotta og litt av kokevannet til en krémete saus.\n5. Bland inn den kokte pastaen. Press over sitronsaft.\n6. Server med revet ost og pepper på toppen.",
+    isKidFriendly: false,
   },
   {
     id: -32,
@@ -748,6 +780,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Press væsken ut av tofuen og skjær den i terninger. Kok nudlene etter anvisning.\n2. Skjær alle grønnsakene i tynne strimler.\n3. Varm olivenolje i en wok på høy varme. Stek tofuen i 4–5 minutter til den er gyllen. Ta den ut.\n4. Wok grønnsakene med hvitløk og ingefær i 3 minutter.\n5. Tilsett nudler og tofu tilbake i woken.\n6. Hell over soyasaus og sesamolje. Bland godt og server.",
+    isKidFriendly: false,
   },
   {
     id: -33,
@@ -771,6 +804,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett ovnen på 200°C. Stikk hull i søtpotetene med en gaffel og bak dem i ovnen i 40–45 minutter.\n2. Finhakk løk, hvitløk og paprika.\n3. Varm olivenolje i en gryte. Fres løk, hvitløk og paprika i 3 minutter.\n4. Tilsett spisskummen og chiliflak. Rør i ett minutt.\n5. Hell i hermetiske tomater og bønner. La det småkoke i 15 minutter.\n6. Skjær de bakte søtpotetene åpne og fyll dem med bønnechili.\n7. Smak til med salt og server.",
+    isKidFriendly: false,
   },
   {
     id: -34,
@@ -794,6 +828,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Skjær paprika og sopp i småbiter.\n2. Visp sammen egg og melk med salt og pepper.\n3. Smelt smør i en stekepanne på middels varme. Stek paprika og sopp i 2–3 minutter.\n4. Hell eggeblandingen over grønnsakene i pannen.\n5. La omeletten stivne på lav varme i 3–4 minutter. Legg spinat og revet ost på den ene halvdelen.\n6. Brett omeletten sammen og stek i 1–2 minutter til.\n7. Server med brød.",
+    isKidFriendly: false,
   },
   {
     id: -35,
@@ -817,6 +852,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett på risen etter anvisning på pakken.\n2. Del blomkålen i buketter. Finhakk løk, hvitløk og ingefær.\n3. Varm olivenolje i en gryte. Fres løk, hvitløk og ingefær i 2–3 minutter.\n4. Tilsett tikka masala-krydder og rør i ett minutt.\n5. Hell i hermetiske tomater og kokosmelk. Tilsett blomkålbukettene.\n6. La det småkoke i 15–20 minutter til blomkålen er mør.\n7. Smak til med salt og server over ris.",
+    isKidFriendly: false,
   },
   {
     id: -36,
@@ -842,6 +878,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett ovnen på 200°C. Finhakk løk og hvitløk. Skjær squash i terninger.\n2. Fres løk, hvitløk og squash i olivenolje. Tilsett hermetiske tomater og spinat. La det småkoke i 10 minutter.\n3. Lag hvit saus: Smelt smør, rør inn mel og tilsett melk litt etter litt. Kok til den tykner.\n4. Legg lag i en smurt ildfast form: grønnsakssaus, lasagneplater, hvit saus. Gjenta 2–3 ganger.\n5. Avslutt med hvit saus og revet ost.\n6. Stek i ovnen i 30–35 minutter til lasagnen er gyllen.\n7. La den hvile i 10 minutter før servering.",
+    isKidFriendly: false,
   },
   {
     id: -37,
@@ -864,6 +901,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Skyll quinoaen godt i kaldt vann. Kok den i lettsaltet vann i ca. 15 minutter. La den avkjøle.\n2. Skjær avokado, tomat og agurk i terninger. Finhakk rødløken.\n3. Bland den avkjølte quinoaen med alle grønnsakene i en stor bolle.\n4. Lag dressing av sitronsaft, olivenolje, salt og pepper.\n5. Hell dressingen over salaten og bland godt.\n6. Server som hovedrett eller som tilbehør.",
+    isKidFriendly: false,
   },
   {
     id: -38,
@@ -884,6 +922,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Visp sammen egg, melk, mel, sukker og salt til en klumpfri røre.\n2. La røren hvile i 10 minutter.\n3. Smelt litt smør i en stekepanne på middels varme.\n4. Hell et tynt lag røre i pannen og stek pannekaken i ca. 2 minutter.\n5. Snu pannekaken og stek den i 1 minutt til den er gyllenbrun.\n6. Gjenta til røren er brukt opp.\n7. Server pannekakene med syltetøy, sukker eller andre ønskede tilbehør.",
+    isKidFriendly: true,
   },
   {
     id: -39,
@@ -907,6 +946,7 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Sett på risen etter anvisning på pakken.\n2. Skjær alle grønnsakene i passende biter.\n3. Varm olivenolje i en gryte. Fres karripastaen og finhakket hvitløk i 1 minutt.\n4. Hell i kokosmelken og rør godt.\n5. Tilsett grønnsakene og la det småkoke i 10–12 minutter til de er møre.\n6. Smak til med soyasaus og server over ris.",
+    isKidFriendly: false,
   },
   {
     id: -40,
@@ -928,5 +968,458 @@ export const matpratRecipes: MatpratRecipe[] = [
     ],
     instructions:
       "1. Kok pastaen i rikelig saltet vann etter anvisning på pakken. Spar 1 dl av kokevannet.\n2. Visp sammen egg, revet ost, fløte og rikelig med pepper i en bolle.\n3. Varm olivenolje i en stor panne og fres finhakket hvitløk i 30 sekunder.\n4. Hell den varme, avsilte pastaen rett i pannen. Ta pannen av varmen.\n5. Hell eggblandingen over pastaen og rør raskt, slik at egget ikke stivner men danner en krémete saus.\n6. Tilsett litt kokevatn om sausen er for tykk. Server umiddelbart med ekstra ost og pepper.",
+    isKidFriendly: false,
+  },
+
+  // === NYE OPPSKRIFTER (-41 til -60) ===
+  {
+    id: -41,
+    name: "Pølser med lompe og ketchup",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 15,
+    ingredients: [
+      { name: "grillpølser", quantity: 8, unit: "stk" },
+      { name: "lomper", quantity: 8, unit: "stk" },
+      { name: "ketchup", quantity: 3, unit: "ss" },
+      { name: "sennep", quantity: 2, unit: "ss" },
+      { name: "stekt løk", quantity: 1, unit: "dl" },
+      { name: "potetstappe", quantity: 4, unit: "dl" },
+    ],
+    instructions:
+      "1. Kok eller stek pølsene i en panne med litt vann i ca. 5 minutter.\n2. Varm lompene i en tørr stekepanne i ca. 30 sekunder på hver side.\n3. Varm eventuelt potetstappe i en kjele.\n4. Legg en pølse på hver lompe og topp med ketchup, sennep og stekt løk.\n5. Server med potetstappe ved siden av.",
+    isKidFriendly: true,
+  },
+  {
+    id: -42,
+    name: "Fiskekaker med poteter",
+    isFishMeal: true,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 30,
+    ingredients: [
+      { name: "fiskekaker", quantity: 600, unit: "g" },
+      { name: "poteter", quantity: 6, unit: "stk" },
+      { name: "gulrot", quantity: 3, unit: "stk" },
+      { name: "smør", quantity: 2, unit: "ss" },
+      { name: "løk", quantity: 1, unit: "stk" },
+      { name: "hvit saus", quantity: 3, unit: "dl" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Skrell potetene og kok dem i lettsaltet vann i ca. 20 minutter.\n2. Skrell gulrøttene og kok dem hele eller delt i to i 10–15 minutter.\n3. Stek fiskekakene i smør på middels varme i 3–4 minutter på hver side.\n4. Varm hvit saus i en kjele.\n5. Server fiskekakene med poteter, gulrøtter og hvit saus.",
+    isKidFriendly: true,
+  },
+  {
+    id: -43,
+    name: "Kjøttboller i tomatsaus",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 40,
+    ingredients: [
+      { name: "kjøttdeig", quantity: 500, unit: "g" },
+      { name: "løk", quantity: 1, unit: "stk" },
+      { name: "egg", quantity: 1, unit: "stk" },
+      { name: "brødsmuler", quantity: 0.5, unit: "dl" },
+      { name: "melk", quantity: 0.5, unit: "dl" },
+      { name: "hermetiske tomater", quantity: 1, unit: "pk" },
+      { name: "tomatpuré", quantity: 2, unit: "ss" },
+      { name: "hvitløk", quantity: 2, unit: "fedd" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Bland kjøttdeig med finhakket løk, egg, brødsmuler, melk, salt og pepper. Form til boller.\n2. Brun kjøttbollene i en stekepanne med litt olje på middels varme.\n3. Fres hvitløk i en gryte i 30 sekunder. Tilsett hermetiske tomater og tomatpuré.\n4. La tomatsausen småkoke i 10 minutter.\n5. Legg kjøttbollene i sausen og la det småkoke i 15 minutter.\n6. Server med pasta eller ris.",
+    isKidFriendly: true,
+  },
+  {
+    id: -44,
+    name: "Tomatsuppe med makaroni",
+    isFishMeal: false,
+    isVegetarian: true,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 25,
+    ingredients: [
+      { name: "hermetiske tomater", quantity: 2, unit: "pk" },
+      { name: "makaroni", quantity: 200, unit: "g" },
+      { name: "løk", quantity: 1, unit: "stk" },
+      { name: "hvitløk", quantity: 1, unit: "fedd" },
+      { name: "grønnsakkraft", quantity: 4, unit: "dl" },
+      { name: "fløte", quantity: 1, unit: "dl" },
+      { name: "smør", quantity: 1, unit: "ss" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Finhakk løk og hvitløk. Fres dem i smør i en gryte i 2 minutter.\n2. Tilsett hermetiske tomater og grønnsakkraft. Kok opp og la det småkoke i 10 minutter.\n3. Bruk en stavmikser og mos suppen til den er jevn.\n4. Kok makaronien i suppen i ca. 8–10 minutter til den er mør.\n5. Rør inn fløte og smak til med salt og pepper.\n6. Server varm.",
+    isKidFriendly: true,
+  },
+  {
+    id: -45,
+    name: "Spagetti med kjøttsaus",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Italiensk",
+    prepTimeMinutes: 35,
+    ingredients: [
+      { name: "spagetti", quantity: 400, unit: "g" },
+      { name: "kjøttdeig", quantity: 400, unit: "g" },
+      { name: "hermetiske tomater", quantity: 1, unit: "pk" },
+      { name: "tomatpuré", quantity: 2, unit: "ss" },
+      { name: "løk", quantity: 1, unit: "stk" },
+      { name: "hvitløk", quantity: 2, unit: "fedd" },
+      { name: "olivenolje", quantity: 1, unit: "ss" },
+      { name: "ost", quantity: 50, unit: "g" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Finhakk løk og hvitløk. Varm olivenolje i en gryte og brun kjøttdeigen.\n2. Tilsett løk og hvitløk og fres i 2 minutter.\n3. Rør inn tomatpuré og hermetiske tomater. La sausen småkoke i 15–20 minutter.\n4. Kok spagettien etter anvisning på pakken.\n5. Smak til sausen med salt og pepper.\n6. Server spagettien med kjøttsaus og revet ost.",
+    isKidFriendly: true,
+  },
+  {
+    id: -46,
+    name: "Bakt potet med rømme",
+    isFishMeal: false,
+    isVegetarian: true,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 50,
+    ingredients: [
+      { name: "store poteter", quantity: 4, unit: "stk" },
+      { name: "rømme", quantity: 2, unit: "dl" },
+      { name: "smør", quantity: 2, unit: "ss" },
+      { name: "ost", quantity: 100, unit: "g" },
+      { name: "gressløk", quantity: 2, unit: "ss" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Sett ovnen på 200°C. Vask potetene godt og stikk hull med en gaffel.\n2. Bak potetene i ovnen i 40–45 minutter til de er gjennomstekte.\n3. Skjær et kryss i toppen av hver potet og klem den forsiktig åpen.\n4. Legg en klatt smør og rømme i hver potet.\n5. Strø over revet ost og hakket gressløk.\n6. Server med en enkel salat ved siden av.",
+    isKidFriendly: true,
+  },
+  {
+    id: -47,
+    name: "Kyllingnuggets med ris",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 30,
+    ingredients: [
+      { name: "kyllingfilet", quantity: 600, unit: "g" },
+      { name: "mel", quantity: 1, unit: "dl" },
+      { name: "egg", quantity: 2, unit: "stk" },
+      { name: "brødsmuler", quantity: 2, unit: "dl" },
+      { name: "ris", quantity: 3, unit: "dl" },
+      { name: "olivenolje", quantity: 3, unit: "ss" },
+      { name: "ketchup", quantity: 3, unit: "ss" },
+      { name: "salt", quantity: 1, unit: "ts" },
+    ],
+    instructions:
+      "1. Sett på risen etter anvisning på pakken.\n2. Skjær kyllingfiletene i biter. Krydre med salt.\n3. Vend kyllingbitene først i mel, deretter i oppvispt egg, og til slutt i brødsmuler.\n4. Varm olivenolje i en stekepanne og stek nuggets i 3–4 minutter på hver side til de er gylne og gjennomstekte.\n5. Server med ris og ketchup.",
+    isKidFriendly: true,
+  },
+  {
+    id: -48,
+    name: "Fiskepinner med potetmos",
+    isFishMeal: true,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 25,
+    ingredients: [
+      { name: "fiskepinner", quantity: 12, unit: "stk" },
+      { name: "poteter", quantity: 6, unit: "stk" },
+      { name: "melk", quantity: 1, unit: "dl" },
+      { name: "smør", quantity: 2, unit: "ss" },
+      { name: "erter", quantity: 2, unit: "dl" },
+      { name: "ketchup", quantity: 3, unit: "ss" },
+      { name: "salt", quantity: 1, unit: "ts" },
+    ],
+    instructions:
+      "1. Sett ovnen på 220°C. Legg fiskepinnene på et stekebrett med bakepapir.\n2. Stek fiskepinnene i ovnen i 12–15 minutter, snu dem halvveis.\n3. Skrell potetene og kok dem i lettsaltet vann i 20 minutter.\n4. Mos potetene med melk og smør til en jevn potetmos. Smak til med salt.\n5. Kok ertene i 3 minutter.\n6. Server fiskepinnene med potetmos, erter og ketchup.",
+    isKidFriendly: true,
+  },
+  {
+    id: -49,
+    name: "Pasta med pølsebiter",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 20,
+    ingredients: [
+      { name: "pasta", quantity: 400, unit: "g" },
+      { name: "grillpølser", quantity: 4, unit: "stk" },
+      { name: "fløte", quantity: 1.5, unit: "dl" },
+      { name: "ketchup", quantity: 3, unit: "ss" },
+      { name: "ost", quantity: 50, unit: "g" },
+      { name: "smør", quantity: 1, unit: "ss" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Kok pastaen etter anvisning på pakken.\n2. Skjær pølsene i biter og stek dem i smør til de er gyllne.\n3. Tilsett fløte og ketchup i pannen og la det småkoke i 2–3 minutter.\n4. Bland den kokte pastaen inn i sausen.\n5. Server med revet ost på toppen.",
+    isKidFriendly: true,
+  },
+  {
+    id: -50,
+    name: "Quesadilla med kylling",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Meksikansk",
+    prepTimeMinutes: 20,
+    ingredients: [
+      { name: "kyllingfilet", quantity: 400, unit: "g" },
+      { name: "tortilla", quantity: 8, unit: "stk" },
+      { name: "ost", quantity: 200, unit: "g" },
+      { name: "paprika", quantity: 1, unit: "stk" },
+      { name: "mais", quantity: 1, unit: "pk" },
+      { name: "rømme", quantity: 1, unit: "dl" },
+      { name: "tacokrydder", quantity: 1, unit: "ss" },
+      { name: "olivenolje", quantity: 1, unit: "ss" },
+    ],
+    instructions:
+      "1. Skjær kyllingen i små biter og stek i olivenolje med tacokrydder i 5–6 minutter.\n2. Skjær paprika i strimler. Riv osten.\n3. Legg en tortilla i en tørr stekepanne. Fordel kylling, paprika, mais og ost på den ene halvdelen.\n4. Brett tortillaen sammen og stek på middels varme i 2–3 minutter på hver side til osten smelter.\n5. Gjenta med resten av tortillaene.\n6. Server med rømme.",
+    isKidFriendly: true,
+  },
+  {
+    id: -51,
+    name: "Bakt potet med chili con carne",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 50,
+    ingredients: [
+      { name: "store poteter", quantity: 4, unit: "stk" },
+      { name: "kjøttdeig", quantity: 400, unit: "g" },
+      { name: "hermetiske bønner", quantity: 1, unit: "pk" },
+      { name: "hermetiske tomater", quantity: 1, unit: "pk" },
+      { name: "løk", quantity: 1, unit: "stk" },
+      { name: "hvitløk", quantity: 2, unit: "fedd" },
+      { name: "chiliflak", quantity: 1, unit: "ts" },
+      { name: "spisskummen", quantity: 1, unit: "ts" },
+      { name: "rømme", quantity: 1, unit: "dl" },
+      { name: "salt", quantity: 1, unit: "ts" },
+    ],
+    instructions:
+      "1. Sett ovnen på 200°C. Vask potetene og stikk hull med en gaffel. Bak i 40–45 minutter.\n2. Finhakk løk og hvitløk. Brun kjøttdeigen i en gryte.\n3. Tilsett løk, hvitløk, chiliflak og spisskummen. Fres i 2 minutter.\n4. Hell i hermetiske tomater og bønner. La det småkoke i 15 minutter.\n5. Skjær potetene åpne og fyll med chili con carne.\n6. Topp med rømme og server.",
+    isKidFriendly: false,
+  },
+  {
+    id: -52,
+    name: "Elggryte med tyttebær",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 90,
+    ingredients: [
+      { name: "elgkjøtt", quantity: 600, unit: "g" },
+      { name: "bacon", quantity: 100, unit: "g" },
+      { name: "løk", quantity: 2, unit: "stk" },
+      { name: "gulrot", quantity: 2, unit: "stk" },
+      { name: "sopp", quantity: 200, unit: "g" },
+      { name: "kjøttkraft", quantity: 4, unit: "dl" },
+      { name: "fløte", quantity: 1, unit: "dl" },
+      { name: "tyttebærsyltetøy", quantity: 3, unit: "ss" },
+      { name: "smør", quantity: 2, unit: "ss" },
+      { name: "salt", quantity: 1, unit: "ts" },
+    ],
+    instructions:
+      "1. Skjær elgkjøttet i grove biter. Krydre med salt og pepper.\n2. Brun kjøttet i smør i en stor gryte. Ta det ut.\n3. Stek bacon, løk og gulrot i samme gryte i 3–4 minutter.\n4. Legg kjøttet tilbake og hell over kjøttkraft. Kok opp.\n5. La gryten småkoke under lokk i 60–70 minutter til kjøttet er mørt.\n6. Tilsett sopp og fløte de siste 10 minuttene.\n7. Server med kokte poteter og tyttebærsyltetøy.",
+    isKidFriendly: false,
+  },
+  {
+    id: -53,
+    name: "Pinnekjøtt med kålrabistappe",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 120,
+    ingredients: [
+      { name: "pinnekjøtt", quantity: 1200, unit: "g" },
+      { name: "kålrabi", quantity: 1, unit: "stk" },
+      { name: "poteter", quantity: 4, unit: "stk" },
+      { name: "smør", quantity: 3, unit: "ss" },
+      { name: "melk", quantity: 1, unit: "dl" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Legg pinnekjøttet i vann og la det utvanne i 24–30 timer (bytt vann et par ganger).\n2. Legg bjørkepinner i bunnen av en stor gryte. Legg pinnekjøttet oppå.\n3. Tilsett vann til det når opp til pinnene. Kok opp og la det dampe under lokk i ca. 2–3 timer.\n4. Skrell og kok kålrabi og poteter. Mos dem sammen med smør og melk.\n5. Server pinnekjøttet med kålrabistappen.",
+    isKidFriendly: false,
+  },
+  {
+    id: -54,
+    name: "Ribbe med surkål",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 120,
+    ingredients: [
+      { name: "svineribbe", quantity: 1500, unit: "g" },
+      { name: "surkål", quantity: 500, unit: "g" },
+      { name: "poteter", quantity: 6, unit: "stk" },
+      { name: "medisterpølse", quantity: 400, unit: "g" },
+      { name: "salt", quantity: 2, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+      { name: "vann", quantity: 2, unit: "dl" },
+    ],
+    instructions:
+      "1. Sett ovnen på 220°C. Skjær rutemønster i svoren på ribben.\n2. Gni inn salt og pepper. Legg ribben med svoren ned i en langpanne med vann.\n3. Stek på 220°C i 30 minutter, snu deretter ribben med svoren opp.\n4. Senk temperaturen til 170°C og stek i ca. 1,5 time til.\n5. Øk til 250°C de siste 10 minuttene for sprø svor.\n6. Kok poteter og varm surkål og medisterpølse.\n7. Server ribben med surkål, poteter og medisterpølse.",
+    isKidFriendly: false,
+  },
+  {
+    id: -55,
+    name: "Stekt sild med poteter",
+    isFishMeal: true,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 30,
+    ingredients: [
+      { name: "sild", quantity: 600, unit: "g" },
+      { name: "poteter", quantity: 6, unit: "stk" },
+      { name: "mel", quantity: 1, unit: "dl" },
+      { name: "smør", quantity: 3, unit: "ss" },
+      { name: "løk", quantity: 1, unit: "stk" },
+      { name: "rømme", quantity: 1, unit: "dl" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Skrell potetene og kok dem i lettsaltet vann i ca. 20 minutter.\n2. Rens silden og vend den i mel med salt og pepper.\n3. Stek silden i smør på middels varme i 3–4 minutter på hver side.\n4. Skjær løken i ringer og stek dem gylne i smør.\n5. Server silden med kokte poteter, stekt løk og en klatt rømme.",
+    isKidFriendly: false,
+  },
+  {
+    id: -56,
+    name: "Lapskaus",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 45,
+    ingredients: [
+      { name: "kjøttdeig", quantity: 400, unit: "g" },
+      { name: "poteter", quantity: 6, unit: "stk" },
+      { name: "gulrot", quantity: 3, unit: "stk" },
+      { name: "kålrot", quantity: 0.5, unit: "stk" },
+      { name: "løk", quantity: 1, unit: "stk" },
+      { name: "kjøttkraft", quantity: 5, unit: "dl" },
+      { name: "smør", quantity: 1, unit: "ss" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Skrell og skjær poteter, gulrøtter og kålrot i terninger. Finhakk løken.\n2. Brun kjøttdeigen i smør i en stor gryte.\n3. Tilsett løk og fres i 2 minutter.\n4. Legg i alle grønnsakene og hell over kjøttkraft.\n5. Kok opp og la det småkoke i 25–30 minutter til grønnsakene er møre.\n6. Smak til med salt og pepper. Server med flatbrød.",
+    isKidFriendly: true,
+  },
+  {
+    id: -57,
+    name: "Karbonader med løk",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 30,
+    ingredients: [
+      { name: "kjøttdeig", quantity: 500, unit: "g" },
+      { name: "løk", quantity: 2, unit: "stk" },
+      { name: "egg", quantity: 1, unit: "stk" },
+      { name: "brødsmuler", quantity: 0.5, unit: "dl" },
+      { name: "melk", quantity: 0.5, unit: "dl" },
+      { name: "smør", quantity: 2, unit: "ss" },
+      { name: "poteter", quantity: 6, unit: "stk" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Bland kjøttdeig med egg, brødsmuler, melk, salt og pepper. Form til flate karbonader.\n2. Stek karbonadene i smør på middels varme i 4–5 minutter på hver side.\n3. Skjær løkene i tykke ringer og stek dem gylne i smør.\n4. Kok potetene i lettsaltet vann.\n5. Server karbonadene med stekt løk og kokte poteter.",
+    isKidFriendly: false,
+  },
+  {
+    id: -58,
+    name: "Bacalao",
+    isFishMeal: true,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 60,
+    ingredients: [
+      { name: "klippfisk", quantity: 600, unit: "g" },
+      { name: "poteter", quantity: 6, unit: "stk" },
+      { name: "løk", quantity: 2, unit: "stk" },
+      { name: "hvitløk", quantity: 3, unit: "fedd" },
+      { name: "hermetiske tomater", quantity: 1, unit: "pk" },
+      { name: "olivenolje", quantity: 3, unit: "ss" },
+      { name: "paprika", quantity: 1, unit: "stk" },
+      { name: "svarte oliven", quantity: 1, unit: "dl" },
+      { name: "salt", quantity: 0.5, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Utvann klippfisken i kaldt vann i 24–48 timer. Bytt vann flere ganger.\n2. Sett ovnen på 200°C. Skrell og skjær potetene i skiver.\n3. Finhakk løk og hvitløk. Skjær paprika i strimler.\n4. Legg potetskiver i bunnen av en ildfast form. Legg klippfiskbiter oppå.\n5. Fordel løk, hvitløk, paprika og oliven over. Hell på hermetiske tomater og olivenolje.\n6. Bak i ovnen i 35–40 minutter til potetene er møre.\n7. Server direkte fra formen.",
+    isKidFriendly: false,
+  },
+  {
+    id: -59,
+    name: "Fiskesuppe med rundstykker",
+    isFishMeal: true,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Norsk",
+    prepTimeMinutes: 35,
+    ingredients: [
+      { name: "torsk", quantity: 400, unit: "g" },
+      { name: "laks", quantity: 200, unit: "g" },
+      { name: "poteter", quantity: 3, unit: "stk" },
+      { name: "gulrot", quantity: 2, unit: "stk" },
+      { name: "fløte", quantity: 2, unit: "dl" },
+      { name: "smør", quantity: 2, unit: "ss" },
+      { name: "rundstykker", quantity: 4, unit: "stk" },
+      { name: "dill", quantity: 2, unit: "ss" },
+      { name: "salt", quantity: 1, unit: "ts" },
+      { name: "pepper", quantity: 0.5, unit: "ts" },
+    ],
+    instructions:
+      "1. Skrell og skjær poteter og gulrøtter i terninger.\n2. Smelt smør i en gryte og tilsett poteter og gulrot. Hell over vann så det dekker.\n3. Kok i 10 minutter til grønnsakene er nesten møre.\n4. Skjær fisken i biter og legg den i gryta. Kok forsiktig i 5–7 minutter.\n5. Tilsett fløte og varm opp uten å koke. Smak til med salt og pepper.\n6. Varm rundstykkene i ovnen på 180°C i 5 minutter.\n7. Server suppen med fersk dill og varme rundstykker.",
+    isKidFriendly: true,
+  },
+  {
+    id: -60,
+    name: "Spaghetti carbonara med bacon",
+    isFishMeal: false,
+    isVegetarian: false,
+    isVegan: false,
+    cuisine: "Italiensk",
+    prepTimeMinutes: 25,
+    ingredients: [
+      { name: "spagetti", quantity: 400, unit: "g" },
+      { name: "bacon", quantity: 200, unit: "g" },
+      { name: "egg", quantity: 4, unit: "stk" },
+      { name: "ost", quantity: 100, unit: "g" },
+      { name: "fløte", quantity: 0.5, unit: "dl" },
+      { name: "hvitløk", quantity: 2, unit: "fedd" },
+      { name: "olivenolje", quantity: 1, unit: "ss" },
+      { name: "salt", quantity: 0.5, unit: "ts" },
+      { name: "pepper", quantity: 1, unit: "ts" },
+    ],
+    instructions:
+      "1. Kok spagettien i rikelig saltet vann etter anvisning. Spar 1 dl kokvann.\n2. Stek baconet sprøtt i olivenolje med finhakket hvitløk.\n3. Visp sammen egg, revet ost, fløte og rikelig pepper i en bolle.\n4. Hell den varme, avsilte pastaen rett i pannen med baconet. Ta pannen av varmen.\n5. Hell eggblandingen over og rør raskt så egget ikke stivner.\n6. Tilsett litt kokvann om sausen er for tykk.\n7. Server umiddelbart med ekstra ost og pepper.",
+    isKidFriendly: false,
   },
 ];

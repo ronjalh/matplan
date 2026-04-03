@@ -27,9 +27,17 @@ export function OnboardingWizard({ userName }: { userName: string }) {
         {/* Skip + Progress */}
         <div className="flex items-center justify-between">
           <div className="flex gap-1 flex-1">
-            {steps.map((_, i) => (
-              <div key={i} className={`h-1 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`} />
-            ))}
+            {quickMode ? (
+              // In quick mode: show 2 steps, both filled (this is the last step)
+              <>
+                <div className="h-1 flex-1 rounded-full bg-primary" />
+                <div className="h-1 flex-1 rounded-full bg-primary" />
+              </>
+            ) : (
+              steps.map((_, i) => (
+                <div key={i} className={`h-1 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`} />
+              ))
+            )}
           </div>
           <form action={skipOnboarding} className="ml-4">
             <Button type="submit" variant="ghost" size="sm" className="text-xs text-muted-foreground">
