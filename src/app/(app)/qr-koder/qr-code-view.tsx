@@ -82,7 +82,10 @@ export function QrCodeView({ codes }: { codes: QrCodeItem[] }) {
   );
 }
 
-type QrVariant = "vanlig" | "panda" | "katt" | "elprint" | "propulse";
+type QrVariant = "vanlig" | "panda" | "katt" | "elprint" | "propulse" | "eget";
+
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"];
+const MAX_IMAGE_SIZE = 1024 * 1024; // 1 MB
 
 function renderLogoQr(
   canvas: HTMLCanvasElement,
@@ -141,8 +144,12 @@ function QrCard({ code }: { code: QrCodeItem }) {
   const catRef = useRef<HTMLCanvasElement>(null);
   const elprintRef = useRef<HTMLCanvasElement>(null);
   const propulseRef = useRef<HTMLCanvasElement>(null);
+  const customRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [variant, setVariant] = useState<QrVariant>("vanlig");
   const [deleting, setDeleting] = useState(false);
+  const [customImage, setCustomImage] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   useEffect(() => {
     if (plainRef.current) {
@@ -156,9 +163,48 @@ function QrCard({ code }: { code: QrCodeItem }) {
     if (propulseRef.current) renderImageQr(propulseRef.current, code.url, "/propulse_til_qr.png");
   }, [code.url]);
 
+  useEffect(() => {
+    if (customImage && customRef.current) {
+      renderImageQr(customRef.current, code.url, customImage);
+    }
+  }, [customImage, code.url]);
+
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    setImageError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate type
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setImageError("Kun PNG, JPG, GIF og WebP er støttet.");
+      return;
+    }
+    // Validate size
+    if (file.size > MAX_IMAGE_SIZE) {
+      setImageError("Bildet er for stort (maks 1 MB).");
+      return;
+    }
+
+    // Read as data URL — stays in browser, never sent to server
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Verify it actually loads as an image
+      const img = new Image();
+      img.onload = () => {
+        setCustomImage(reader.result as string);
+        setVariant("eget");
+      };
+      img.onerror = () => {
+        setImageError("Kunne ikke lese bildet. Prøv et annet.");
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
   function handleDownload() {
     const refs: Record<QrVariant, React.RefObject<HTMLCanvasElement | null>> = {
-      vanlig: plainRef, panda: pandaRef, katt: catRef, elprint: elprintRef, propulse: propulseRef,
+      vanlig: plainRef, panda: pandaRef, katt: catRef, elprint: elprintRef, propulse: propulseRef, eget: customRef,
     };
     const canvas = refs[variant].current;
     if (!canvas) return;
@@ -182,6 +228,7 @@ function QrCard({ code }: { code: QrCodeItem }) {
     { key: "katt", label: "Katt" },
     { key: "elprint", label: "Elprint" },
     { key: "propulse", label: "Propulse" },
+    { key: "eget", label: "Eget bilde" },
   ];
 
   return (
@@ -192,7 +239,13 @@ function QrCard({ code }: { code: QrCodeItem }) {
           {variants.map((v) => (
             <button
               key={v.key}
-              onClick={() => setVariant(v.key)}
+              onClick={() => {
+                if (v.key === "eget" && !customImage) {
+                  fileInputRef.current?.click();
+                } else {
+                  setVariant(v.key);
+                }
+              }}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                 variant === v.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
               }`}
@@ -200,14 +253,43 @@ function QrCard({ code }: { code: QrCodeItem }) {
               {v.label}
             </button>
           ))}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/gif,image/webp"
+            className="hidden"
+            onChange={handleImageUpload}
+          />
         </div>
+        {imageError && (
+          <p className="text-xs text-destructive text-center">{imageError}</p>
+        )}
         <div className="flex justify-center">
           <canvas ref={plainRef} className={`rounded-md ${variant === "vanlig" ? "" : "hidden"}`} />
           <canvas ref={pandaRef} className={`rounded-md ${variant === "panda" ? "" : "hidden"}`} />
           <canvas ref={catRef} className={`rounded-md ${variant === "katt" ? "" : "hidden"}`} />
           <canvas ref={elprintRef} className={`rounded-md ${variant === "elprint" ? "" : "hidden"}`} />
           <canvas ref={propulseRef} className={`rounded-md ${variant === "propulse" ? "" : "hidden"}`} />
+          <canvas ref={customRef} className={`rounded-md ${variant === "eget" ? "" : "hidden"}`} />
+          {variant === "eget" && !customImage && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-[200px] h-[200px] rounded-md border-2 border-dashed border-border flex items-center justify-center text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer"
+            >
+              Klikk for å velge bilde
+            </button>
+          )}
         </div>
+        {variant === "eget" && customImage && (
+          <div className="flex justify-center">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="text-xs text-muted-foreground hover:text-primary cursor-pointer"
+            >
+              Bytt bilde
+            </button>
+          </div>
+        )}
         <div className="space-y-1">
           <h3 className="font-medium text-sm truncate">{code.name}</h3>
           <a
