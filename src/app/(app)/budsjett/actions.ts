@@ -96,6 +96,12 @@ export async function deleteCategory(categoryId: number) {
 export async function addExpense(categoryId: number, date: string, description: string, amountKr: number) {
   const householdId = await getHouseholdId();
 
+  // Verify category belongs to household
+  const cat = await db.query.budgetCategories.findFirst({
+    where: and(eq(budgetCategories.id, categoryId), eq(budgetCategories.householdId, householdId)),
+  });
+  if (!cat) return { success: false, error: "Kategori ikke funnet" };
+
   await db.insert(budgetEntries).values({
     householdId,
     categoryId,
@@ -175,6 +181,12 @@ const SIFO_BUDGETS: Record<string, { name: string; limit: number; color: string 
 
 export async function importShoppingListAsExpense(shoppingListId: number, categoryId: number) {
   const householdId = await getHouseholdId();
+
+  // Verify category belongs to household
+  const cat = await db.query.budgetCategories.findFirst({
+    where: and(eq(budgetCategories.id, categoryId), eq(budgetCategories.householdId, householdId)),
+  });
+  if (!cat) return { success: false, error: "Kategori ikke funnet" };
 
   // Get shopping list with items
   const list = await db.query.shoppingLists.findFirst({

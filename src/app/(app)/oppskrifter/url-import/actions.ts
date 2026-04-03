@@ -25,6 +25,14 @@ export async function importFromUrl(url: string) {
   });
   if (existing) return { success: false, error: "Denne oppskriften er allerede importert" };
 
+  // Validate URL format
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return { success: false, error: "Kun HTTPS-URLer er støttet." };
+  } catch {
+    return { success: false, error: "Ugyldig URL." };
+  }
+
   // Fetch and parse
   const recipe = await importRecipeFromUrl(url);
   if (!recipe) return { success: false, error: "Kunne ikke finne oppskrift på denne siden. Prøv en annen URL." };

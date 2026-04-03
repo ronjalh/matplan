@@ -16,10 +16,33 @@ export interface ImportedRecipe {
 }
 
 /**
+ * Validate URL to prevent SSRF attacks.
+ * Only allows https:// URLs to public hostnames.
+ */
+function isAllowedUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return false;
+    const hostname = parsed.hostname.toLowerCase();
+    // Block private/reserved IPs and localhost
+    if (/^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.|localhost$|::1|\[::1\])/.test(hostname)) return false;
+    // Block common cloud metadata endpoints
+    if (hostname === "169.254.169.254" || hostname === "metadata.google.internal") return false;
+    // Must have a dot (no bare hostnames like "internal-service")
+    if (!hostname.includes(".")) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Fetch and parse a recipe from a URL.
  * Supports any site with schema.org/Recipe JSON-LD (most recipe sites serve it to Googlebot).
  */
 export async function importRecipeFromUrl(url: string): Promise<ImportedRecipe | null> {
+  if (!isAllowedUrl(url)) return null;
+
   // Fetch with Googlebot UA to get SSR/JSON-LD version
   const res = await fetch(url, {
     headers: {
