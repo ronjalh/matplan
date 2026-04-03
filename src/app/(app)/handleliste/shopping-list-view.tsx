@@ -323,7 +323,7 @@ export function ShoppingListView({
           <Unlink className="w-4 h-4" />
         </Button>
         <Button variant="outline" size="sm" onClick={() => setAddingToCalendar(!addingToCalendar)} className="gap-1">
-          <CalendarPlus className="w-4 h-4" /> Handletur
+          <CalendarPlus className="w-4 h-4" /> <span className="hidden sm:inline">Handletur</span>
         </Button>
         <Button variant="ghost" size="sm" onClick={handleDelete} className="text-muted-foreground hover:text-destructive">
           <Trash2 className="w-4 h-4" />
@@ -583,66 +583,69 @@ function ShoppingItem({
 
   return (
     <li className="group">
-      <div className="flex items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-muted transition-colors">
-        <button onClick={() => onToggle(item.id, !item.checked)} className="shrink-0 cursor-pointer">
+      <div className="flex items-start gap-3 rounded-md px-2 py-2 text-sm hover:bg-muted transition-colors">
+        <button onClick={() => onToggle(item.id, !item.checked)} className="shrink-0 cursor-pointer mt-0.5">
           {item.checked ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-muted-foreground" />}
         </button>
-        <span className={`flex-1 min-w-0 ${item.checked ? "text-muted-foreground line-through" : ""}`}>
-          {editingQty ? (
-            <span className="inline-flex items-center gap-1">
-              <Input
-                type="number"
-                step="any"
-                min="0.1"
-                value={qtyInput}
-                onChange={(e) => setQtyInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") handleSaveQty(); if (e.key === "Escape") setEditingQty(false); }}
-                onBlur={handleSaveQty}
-                className="w-16 h-6 text-xs inline"
-                autoFocus
-              />
-              {item.unit} {item.name}
-            </span>
-          ) : (
-            <span>
-              <button
-                onClick={() => !item.checked && setEditingQty(true)}
-                className="hover:text-primary cursor-pointer"
-                title="Klikk for å endre mengde"
-              >
-                {item.quantity} {item.unit}
-              </button>
-              {" "}{item.name}
-            </span>
-          )}
-        </span>
-        {!item.checked && (
-          <div className="flex items-center gap-1.5 shrink-0">
-            {showPrices && (
-              item.estimatedPriceOre ? (
-                <span className={`text-xs ${item.estimatedPriceOre > 25000 ? "text-[var(--color-warning)]" : "text-muted-foreground"}`}>
-                  {item.estimatedPriceOre > 25000 && "⚠ "}
-                  {formatKr(item.estimatedPriceOre)}
-                  {item.priceSource && (
-                    <span className="text-[10px] ml-1 opacity-70">
-                      {item.priceSource}{item.priceStore ? ` — ${item.priceStore}` : ""}
-                    </span>
-                  )}
+        <div className={`flex-1 min-w-0 ${item.checked ? "text-muted-foreground line-through" : ""}`}>
+          <div className="flex items-center justify-between gap-2">
+            <span className="truncate">
+              {editingQty ? (
+                <span className="inline-flex items-center gap-1">
+                  <Input
+                    type="number"
+                    step="any"
+                    min="0.1"
+                    value={qtyInput}
+                    onChange={(e) => setQtyInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSaveQty(); if (e.key === "Escape") setEditingQty(false); }}
+                    onBlur={handleSaveQty}
+                    className="w-16 h-6 text-xs inline"
+                    autoFocus
+                  />
+                  {item.unit} {item.name}
                 </span>
               ) : (
-                <span className="text-xs text-muted-foreground/50">Ingen pris</span>
-              )
+                <span>
+                  <button
+                    onClick={() => !item.checked && setEditingQty(true)}
+                    className="hover:text-primary cursor-pointer"
+                    title="Klikk for å endre mengde"
+                  >
+                    {item.quantity} {item.unit}
+                  </button>
+                  {" "}{item.name}
+                </span>
+              )}
+            </span>
+            {!item.checked && (
+              <div className="flex items-center gap-1 shrink-0">
+                {showPrices && item.estimatedPriceOre ? (
+                  <span className={`text-xs whitespace-nowrap ${item.estimatedPriceOre > 25000 ? "text-[var(--color-warning)]" : "text-muted-foreground"}`}>
+                    {item.estimatedPriceOre > 25000 && "⚠ "}
+                    {formatKr(item.estimatedPriceOre)}
+                  </span>
+                ) : showPrices ? (
+                  <span className="text-xs text-muted-foreground/50 whitespace-nowrap">Ingen pris</span>
+                ) : null}
+                {showPrices && (
+                  <button onClick={() => setEditing(true)} className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-muted-foreground hover:text-primary">
+                    <Pencil className="w-3 h-3" />
+                  </button>
+                )}
+                <button onClick={() => onRemove(item.id)} className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-muted-foreground hover:text-destructive">
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
             )}
-            {showPrices && (
-              <button onClick={() => setEditing(true)} className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-muted-foreground hover:text-primary">
-                <Pencil className="w-3 h-3" />
-              </button>
-            )}
-            <button onClick={() => onRemove(item.id)} className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-muted-foreground hover:text-destructive">
-              <Trash2 className="w-3 h-3" />
-            </button>
           </div>
-        )}
+          {/* Product details on second line */}
+          {showPrices && !item.checked && item.priceSource && (
+            <p className="text-[10px] text-muted-foreground/60 truncate">
+              {item.priceSource}{item.priceStore ? ` — ${item.priceStore}` : ""}
+            </p>
+          )}
+        </div>
       </div>
     </li>
   );
