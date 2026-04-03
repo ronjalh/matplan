@@ -8,6 +8,7 @@ import {
   Wallet,
   Sprout,
   Heart,
+  QrCode,
   Settings,
 } from "lucide-react";
 import Link from "next/link";
@@ -31,6 +32,7 @@ const navItems = [
   { title: "Budsjett", url: "/budsjett", icon: Wallet },
   { title: "Sesong", url: "/sesong", icon: Sprout },
   { title: "Inspirasjon", url: "/inspirasjon", icon: Heart },
+  { title: "QR-koder", url: "/qr-koder", icon: QrCode },
 ];
 
 export function AppSidebar() {

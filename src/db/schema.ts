@@ -367,3 +367,17 @@ export const sharedLinks = pgTable("shared_links", {
   expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
+
+// ============================================================================
+// QR Codes (per household)
+// ============================================================================
+
+export const qrCodes = pgTable("qr_codes", {
+  id: serial("id").primaryKey(),
+  householdId: integer("household_id")
+    .notNull()
+    .references(() => households.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
