@@ -67,14 +67,24 @@ instructions: |
   | isbergsalat | isbergsalat | Isbergsalat stykk kr 29,90 |
   | babyspinat | babyspinat | Babyspinat 65g kr 22,90 |
 
+  ## Grocery Simulator (april 2026)
+  `src/price-api/grocery-simulator.test.ts` tester:
+  - 81 ingredienser fra matprat-oppskriftene (79% mapped)
+  - 593 vanlige norske matvarer i 14 kategorier (39% mapped)
+  - Mange "unmapped" items er self-mapping (input == output) og fungerer fint
+  - Kjør med `npx vitest run src/price-api/grocery-simulator.test.ts --reporter=verbose`
+
+  Refinements-filen har nå 409 entries (fra ~300 opprinnelig).
+
   ## Prosess for å endre refinements
   1. ALLTID kjør `npm test` FØRST for å se baseline
-  2. Test ny query mot Kassalapp API med curl
-  3. Verifiser at den returnerer ≥1 relevant resultat
-  4. Oppdater refinement OG tilhørende test
-  5. Kjør `npm test` igjen — ALLE tester må passere
-  6. Deploy og verifiser i produksjon med ny handleliste
-  7. Hvis success rate SYNKER — revert umiddelbart
+  2. Kjør grocery-simulator for å se current coverage
+  3. Test ny query mot Kassalapp API med curl
+  4. Verifiser at den returnerer ≥1 relevant resultat
+  5. Oppdater refinement OG tilhørende test
+  6. Kjør `npm test` igjen — ALLE tester må passere
+  7. Deploy og verifiser i produksjon med ny handleliste
+  8. Hvis success rate SYNKER — revert umiddelbart
 
   ## Rules
   - ALDRI anta at "fersk"/"løsvekt" fungerer — test mot API

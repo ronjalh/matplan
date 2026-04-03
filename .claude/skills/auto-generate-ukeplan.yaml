@@ -1,0 +1,48 @@
+name: auto-generate-ukeplan
+description: Auto-generate weekly meal plan from own recipes and/or matprat suggestions
+version: 1.0.0
+tags: [meal-plan, auto-generate, matprat, calendar]
+
+instructions: |
+  # Auto-generer ukesplan
+
+  ## Arkitektur
+  - **Core algorithm**: `src/lib/meal-plan/auto-generate.ts` — `generateWeekPlan()`
+  - **UI component**: `src/app/(app)/kalender/auto-plan.tsx` — `<AutoPlan />`
+  - **Static data**: `src/data/matprat-recipes.ts` — 40 curated Norwegian dinners with ingredients
+  - **Integration**: `week-view.tsx` renders AutoPlan when "Generer" is clicked
+
+  ## Recipe Sources
+  - **Mine oppskrifter**: User's own recipes from DB (positive IDs)
+  - **Norske middager**: 40 static matprat-style recipes (negative IDs: -1 to -40)
+  - **Begge**: Combined pool
+
+  ## Negative ID Convention
+  Matprat recipes use negative IDs to distinguish from DB recipes.
+  When adding to calendar:
+  - Positive ID → `addMeal(date, "middag", recipeId, null, isFishMeal)`
+  - Negative ID → `addMeal(date, "middag", null, recipeName, isFishMeal)` (free text)
+
+  ## isFishMeal on mealPlan
+  The `mealPlan` table has `isFishMeal` boolean (added for matprat support).
+  Fish tracker checks BOTH `recipeIsFishMeal` (joined recipe) AND `mealIsFishMeal`.
+
+  ## Shopping List Integration
+  `generateShoppingList()` handles freeText meals by looking up ingredients
+  from `matpratRecipes` by name match. Each matprat recipe has 5-12 ingredients
+  with quantities for 4 servings.
+
+  ## Import to Own Recipes
+  `importSuggestionAsRecipe(mealId)` converts a freeText matprat meal into
+  a proper DB recipe, linking the meal to the new recipe.
+
+  ## Algorithm Details
+  - Targets 2-3 fish meals/week (spread across days)
+  - Respects dietary preferences (vegetarian/vegan/pescetarian)
+  - Prefers unique recipes, allows repeats when pool is small
+  - Warns about insufficient recipes or fish
+  - Skips days with existing middag
+
+  ## Tests
+  - `src/lib/meal-plan/auto-generate.test.ts` — 10 tests
+  - Covers: 7-meal gen, fish targeting, uniqueness, diet filters, warnings
