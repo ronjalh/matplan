@@ -83,24 +83,51 @@ export function QrCodeView({ codes }: { codes: QrCodeItem[] }) {
 }
 
 function QrCard({ code }: { code: QrCodeItem }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const plainRef = useRef<HTMLCanvasElement>(null);
+  const pandaRef = useRef<HTMLCanvasElement>(null);
+  const [variant, setVariant] = useState<"vanlig" | "panda">("vanlig");
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    if (canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, code.url, {
+    // Render plain QR
+    if (plainRef.current) {
+      QRCode.toCanvas(plainRef.current, code.url, {
         width: 200,
         margin: 2,
         color: { dark: "#2D3436", light: "#FFFFFF" },
       });
     }
+    // Render panda QR
+    if (pandaRef.current) {
+      QRCode.toCanvas(pandaRef.current, code.url, {
+        width: 200,
+        margin: 2,
+        errorCorrectionLevel: "H",
+        color: { dark: "#2D3436", light: "#FFFFFF" },
+      }, () => {
+        const canvas = pandaRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        const size = Math.floor(canvas.width * 0.22);
+        const x = Math.floor((canvas.width - size) / 2);
+        const y = Math.floor((canvas.height - size) / 2);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.arc(x + size / 2, y + size / 2, size / 2 + 3, 0, Math.PI * 2);
+        ctx.fill();
+        drawPixelPanda(ctx, x, y, size);
+      });
+    }
   }, [code.url]);
 
   function handleDownload() {
-    if (!canvasRef.current) return;
+    const canvas = variant === "panda" ? pandaRef.current : plainRef.current;
+    if (!canvas) return;
     const link = document.createElement("a");
-    link.download = `${code.name.replace(/[^a-zA-Z0-9æøåÆØÅ -]/g, "")}.png`;
-    link.href = canvasRef.current.toDataURL("image/png");
+    const suffix = variant === "panda" ? "-panda" : "";
+    link.download = `${code.name.replace(/[^a-zA-Z0-9æøåÆØÅ -]/g, "")}${suffix}.png`;
+    link.href = canvas.toDataURL("image/png");
     link.click();
   }
 
@@ -114,8 +141,28 @@ function QrCard({ code }: { code: QrCodeItem }) {
   return (
     <Card className="overflow-hidden">
       <CardContent className="pt-4 space-y-3">
+        {/* Variant tabs */}
+        <div className="flex gap-1 justify-center">
+          <button
+            onClick={() => setVariant("vanlig")}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+              variant === "vanlig" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            }`}
+          >
+            Vanlig
+          </button>
+          <button
+            onClick={() => setVariant("panda")}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+              variant === "panda" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            }`}
+          >
+            Panda
+          </button>
+        </div>
         <div className="flex justify-center">
-          <canvas ref={canvasRef} className="rounded-md" />
+          <canvas ref={plainRef} className={`rounded-md ${variant === "vanlig" ? "" : "hidden"}`} />
+          <canvas ref={pandaRef} className={`rounded-md ${variant === "panda" ? "" : "hidden"}`} />
         </div>
         <div className="space-y-1">
           <h3 className="font-medium text-sm truncate">{code.name}</h3>
@@ -146,4 +193,35 @@ function QrCard({ code }: { code: QrCodeItem }) {
       </CardContent>
     </Card>
   );
+}
+
+/**
+ * Draw a tiny pixel-art panda face on a canvas context.
+ * 10x10 grid scaled to fit `size` pixels at position (x, y).
+ */
+function drawPixelPanda(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
+  const grid = 10;
+  const px = size / grid;
+  // _ = transparent, B = black, W = white, P = pink
+  const rows = [
+    "_BB____BB_",
+    "BBBB__BBBB",
+    "_BWWBBWWB_",
+    "_WWWWWWWW_",
+    "_WBBWWBBW_",
+    "_WWWWWWWW_",
+    "__WWBBWW__",
+    "__WPWWPW__",
+    "___WWWW___",
+    "____WW____",
+  ];
+  const colors: Record<string, string> = { B: "#3D3028", W: "#FFF9F5", P: "#FFB5C5" };
+  for (let r = 0; r < rows.length; r++) {
+    for (let c = 0; c < rows[r].length; c++) {
+      const ch = rows[r][c];
+      if (ch === "_") continue;
+      ctx.fillStyle = colors[ch];
+      ctx.fillRect(x + c * px, y + r * px, Math.ceil(px), Math.ceil(px));
+    }
+  }
 }
