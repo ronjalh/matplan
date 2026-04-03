@@ -25,6 +25,7 @@ import { AddEventDialog } from "./add-event-dialog";
 import { EditEventDialog } from "./edit-event-dialog";
 import { AutoPlan } from "./auto-plan";
 import Link from "next/link";
+import { matpratRecipes } from "@/data/matprat-recipes";
 import {
   formatShortDate,
   getISOWeekNumber,
@@ -323,6 +324,17 @@ export function WeekView({ days, meals, events, allRecipes, showFish = true, die
                   if (meal.recipeId) {
                     return <Link key={key} href={`/oppskrifter/${meal.recipeId}`} className="block">{mealContent}</Link>;
                   }
+
+                  // Check if freeText matches a matprat recipe — link to its detail page
+                  if (meal.freeText) {
+                    const matprat = matpratRecipes.find(
+                      (r) => r.name.toLowerCase() === meal.freeText!.toLowerCase()
+                    );
+                    if (matprat) {
+                      return <Link key={key} href={`/oppskrifter/utvalgt/${matprat.id}`} className="block">{mealContent}</Link>;
+                    }
+                  }
+
                   return mealContent;
                 }
 

@@ -366,6 +366,47 @@ export async function addItem(listId: number, name: string, quantity: number, un
   return { success: true };
 }
 
+export async function fetchPricesForList(listId: number) {
+  const householdId = await getHouseholdId();
+  const list = await db.query.shoppingLists.findFirst({
+    where: and(eq(shoppingLists.id, listId), eq(shoppingLists.householdId, householdId)),
+  });
+  if (!list) return { success: false, error: "Ikke tilgang" };
+
+  const items = await db.query.shoppingListItems.findMany({
+    where: eq(shoppingListItems.shoppingListId, listId),
+  });
+
+  // Only fetch for items without a price
+  const needPrice = items.filter((i) => !i.estimatedPriceOre);
+  if (needPrice.length === 0) return { success: true, updated: 0 };
+
+  let updated = 0;
+  const batchSize = 10;
+  for (let i = 0; i < needPrice.length; i += batchSize) {
+    const batch = needPrice.slice(i, i + batchSize);
+    await Promise.allSettled(
+      batch.map(async (item) => {
+        const result = await findBestPrice(item.name);
+        if (result) {
+          await db
+            .update(shoppingListItems)
+            .set({
+              estimatedPriceOre: result.priceOre,
+              priceSource: result.product.name,
+              priceStore: result.product.store.name,
+            })
+            .where(eq(shoppingListItems.id, item.id));
+          updated++;
+        }
+      })
+    );
+  }
+
+  revalidatePath("/handleliste");
+  return { success: true, updated };
+}
+
 export async function removeItem(itemId: number) {
   if (!(await verifyItemOwnership(itemId))) return { success: false, error: "Ikke tilgang" };
   await db.delete(shoppingListItems).where(eq(shoppingListItems.id, itemId));

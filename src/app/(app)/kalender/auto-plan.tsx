@@ -126,7 +126,7 @@ export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }
               source === "matprat" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
             }`}
           >
-            Norske middager
+            Utvalgte middager
           </button>
           <button
             onClick={() => changeSource("begge")}

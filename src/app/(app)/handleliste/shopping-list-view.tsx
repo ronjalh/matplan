@@ -16,6 +16,7 @@ import {
   addItem,
   removeItem,
   addShoppingTrip,
+  fetchPricesForList,
 } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,8 +84,40 @@ export function ShoppingListView({
   const [newItemName, setNewItemName] = useState("");
   const [newItemQty, setNewItemQty] = useState("");
   const [newItemUnit, setNewItemUnit] = useState("stk");
-  const [showPrices, setShowPrices] = useState(false);
-  const [autoPrices, setAutoPrices] = useState(false);
+  const [showPrices, setShowPrices] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem("matplan-show-prices");
+    return stored !== null ? stored === "true" : true;
+  });
+  const [autoPrices, setAutoPrices] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem("matplan-auto-prices");
+    return stored !== null ? stored === "true" : true;
+  });
+  const [fetchingPrices, setFetchingPrices] = useState(false);
+
+  function toggleShowPrices() {
+    const next = !showPrices;
+    setShowPrices(next);
+    localStorage.setItem("matplan-show-prices", String(next));
+  }
+
+  async function toggleAutoPrices() {
+    const next = !autoPrices;
+    setAutoPrices(next);
+    localStorage.setItem("matplan-auto-prices", String(next));
+
+    // If turning ON and there are items without prices, fetch them
+    if (next && list) {
+      const itemsWithoutPrice = list.items.filter((i) => !i.estimatedPriceOre && !i.checked);
+      if (itemsWithoutPrice.length > 0) {
+        setFetchingPrices(true);
+        await fetchPricesForList(list.id);
+        setFetchingPrices(false);
+        router.refresh();
+      }
+    }
+  }
 
   async function handleGenerate() {
     if (generating) return;
@@ -348,7 +381,7 @@ export function ShoppingListView({
         </div>
         <div className="flex items-center gap-1">
           <button
-            onClick={() => setShowPrices(!showPrices)}
+            onClick={toggleShowPrices}
             className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors cursor-pointer ${showPrices ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
             title={showPrices ? "Skjul priser" : "Vis priser"}
           >
@@ -356,12 +389,13 @@ export function ShoppingListView({
             Priser
           </button>
           <button
-            onClick={() => setAutoPrices(!autoPrices)}
+            onClick={toggleAutoPrices}
+            disabled={fetchingPrices}
             className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors cursor-pointer ${autoPrices ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
-            title={autoPrices ? "Slå av auto-priser ved generering" : "Slå på auto-priser ved generering"}
+            title={autoPrices ? "Slå av auto-priser ved generering" : "Slå på auto-priser — henter priser for varer uten pris"}
           >
-            {autoPrices ? <Zap className="w-3.5 h-3.5" /> : <ZapOff className="w-3.5 h-3.5" />}
-            Auto-pris
+            {fetchingPrices ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : autoPrices ? <Zap className="w-3.5 h-3.5" /> : <ZapOff className="w-3.5 h-3.5" />}
+            {fetchingPrices ? "Henter..." : "Auto-pris"}
           </button>
         </div>
       </div>
