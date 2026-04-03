@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ShoppingCart, Loader2, Trash2, Share2, Square, CheckSquare,
-  Pencil, Check, X, Plus, CalendarPlus,
+  Pencil, Check, X, Plus, CalendarPlus, Eye, EyeOff, Zap, ZapOff,
 } from "lucide-react";
 
 interface ShoppingListItem {
@@ -83,13 +83,15 @@ export function ShoppingListView({
   const [newItemName, setNewItemName] = useState("");
   const [newItemQty, setNewItemQty] = useState("");
   const [newItemUnit, setNewItemUnit] = useState("stk");
+  const [showPrices, setShowPrices] = useState(false);
+  const [autoPrices, setAutoPrices] = useState(false);
 
   async function handleGenerate() {
     if (generating) return;
     setGenerating(true);
     setError(null);
     try {
-      const result = await generateShoppingList();
+      const result = await generateShoppingList(undefined, !autoPrices);
       if (!result.success) {
         setError(result.error ?? "Noe gikk galt");
       }
@@ -330,19 +332,37 @@ export function ShoppingListView({
         </div>
       )}
 
-      {/* Stats */}
+      {/* Stats + toggles */}
       <div className="flex items-center justify-between text-sm">
         <div className="space-y-0.5">
           <div className="text-muted-foreground">
             <span className="font-medium text-foreground">{checkedCount}</span> av {totalItems} huket av
           </div>
-          {totalPriceOre > 0 && (
+          {showPrices && totalPriceOre > 0 && (
             <div>
               <span className="font-semibold">{formatKr(totalPriceOre)}</span>
               <span className="text-muted-foreground"> estimert</span>
               {itemsWithoutPrice > 0 && <span className="text-muted-foreground"> ({itemsWithoutPrice} uten pris)</span>}
             </div>
           )}
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setShowPrices(!showPrices)}
+            className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors cursor-pointer ${showPrices ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            title={showPrices ? "Skjul priser" : "Vis priser"}
+          >
+            {showPrices ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            Priser
+          </button>
+          <button
+            onClick={() => setAutoPrices(!autoPrices)}
+            className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors cursor-pointer ${autoPrices ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            title={autoPrices ? "Slå av auto-priser ved generering" : "Slå på auto-priser ved generering"}
+          >
+            {autoPrices ? <Zap className="w-3.5 h-3.5" /> : <ZapOff className="w-3.5 h-3.5" />}
+            Auto-pris
+          </button>
         </div>
       </div>
 
@@ -368,6 +388,7 @@ export function ShoppingListView({
                   onToggle={handleToggle}
                   onRemove={removeItem}
                   formatKr={formatKr}
+                  showPrices={showPrices}
                 />
               ))}
             </ul>
@@ -392,6 +413,7 @@ export function ShoppingListView({
                     onToggle={handleToggle}
                     onRemove={removeItem}
                     formatKr={formatKr}
+                    showPrices={showPrices}
                   />
                 ))}
               </ul>
@@ -444,11 +466,13 @@ function ShoppingItem({
   onToggle,
   onRemove,
   formatKr,
+  showPrices = true,
 }: {
   item: ShoppingListItem;
   onToggle: (id: number, checked: boolean) => void;
   onRemove: (id: number) => void;
   formatKr: (ore: number) => string;
+  showPrices?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [editingQty, setEditingQty] = useState(false);
@@ -548,22 +572,26 @@ function ShoppingItem({
         </span>
         {!item.checked && (
           <div className="flex items-center gap-1.5 shrink-0">
-            {item.estimatedPriceOre ? (
-              <span className={`text-xs ${item.estimatedPriceOre > 25000 ? "text-[var(--color-warning)]" : "text-muted-foreground"}`}>
-                {item.estimatedPriceOre > 25000 && "⚠ "}
-                {formatKr(item.estimatedPriceOre)}
-                {item.priceSource && (
-                  <span className="text-[10px] ml-1 opacity-70">
-                    {item.priceSource}{item.priceStore ? ` — ${item.priceStore}` : ""}
-                  </span>
-                )}
-              </span>
-            ) : (
-              <span className="text-xs text-muted-foreground/50">Ingen pris</span>
+            {showPrices && (
+              item.estimatedPriceOre ? (
+                <span className={`text-xs ${item.estimatedPriceOre > 25000 ? "text-[var(--color-warning)]" : "text-muted-foreground"}`}>
+                  {item.estimatedPriceOre > 25000 && "⚠ "}
+                  {formatKr(item.estimatedPriceOre)}
+                  {item.priceSource && (
+                    <span className="text-[10px] ml-1 opacity-70">
+                      {item.priceSource}{item.priceStore ? ` — ${item.priceStore}` : ""}
+                    </span>
+                  )}
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground/50">Ingen pris</span>
+              )
             )}
-            <button onClick={() => setEditing(true)} className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-muted-foreground hover:text-primary">
-              <Pencil className="w-3 h-3" />
-            </button>
+            {showPrices && (
+              <button onClick={() => setEditing(true)} className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-muted-foreground hover:text-primary">
+                <Pencil className="w-3 h-3" />
+              </button>
+            )}
             <button onClick={() => onRemove(item.id)} className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-muted-foreground hover:text-destructive">
               <Trash2 className="w-3 h-3" />
             </button>

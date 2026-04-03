@@ -16,6 +16,7 @@ import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getMonday, getWeekDays, toISODate, getISOWeekNumber } from "@/lib/date-utils";
 import { findBestPrice } from "@/price-api/kassalapp";
+import { matpratRecipes } from "@/data/matprat-recipes";
 
 async function getHouseholdId() {
   const session = await auth();
@@ -57,7 +58,7 @@ export async function getShoppingList(listId?: number) {
   return { ...list, items };
 }
 
-export async function generateShoppingList(weekStartDate?: string) {
+export async function generateShoppingList(weekStartDate?: string, skipPrices: boolean = false) {
   const householdId = await getHouseholdId();
 
   // Get week dates
@@ -70,6 +71,7 @@ export async function generateShoppingList(weekStartDate?: string) {
   const weekMeals = await db
     .select({
       recipeId: mealPlan.recipeId,
+      freeText: mealPlan.freeText,
       servingsOverride: mealPlan.servingsOverride,
       recipeServings: recipes.servings,
     })
@@ -83,14 +85,13 @@ export async function generateShoppingList(weekStartDate?: string) {
       )
     );
 
-  // Get ingredients for all recipes
-  const recipeIds = [...new Set(weekMeals.filter((m) => m.recipeId).map((m) => m.recipeId!))];
-
-  if (recipeIds.length === 0) {
+  if (weekMeals.length === 0) {
     return { success: false, error: "Ingen måltider planlagt denne uken" };
   }
 
-  // Fetch all ingredients for planned recipes
+  // Get ingredients for DB recipes
+  const recipeIds = [...new Set(weekMeals.filter((m) => m.recipeId).map((m) => m.recipeId!))];
+
   const allIngredients: {
     recipeId: number;
     quantity: number;
@@ -126,7 +127,6 @@ export async function generateShoppingList(weekStartDate?: string) {
 
   for (const ing of allIngredients) {
     const multiplier = recipeMultipliers.get(ing.recipeId) ?? 1;
-    // Extract just the ingredient name from originalText
     const name = extractIngredientName(ing.originalText ?? "", ing.quantity, ing.unit);
     const key = `${name.toLowerCase()}|${ing.unit}`;
 
@@ -139,6 +139,24 @@ export async function generateShoppingList(weekStartDate?: string) {
         quantity: ing.quantity * multiplier,
         unit: ing.unit,
       });
+    }
+  }
+
+  // Handle freeText meals (matprat suggestions) — look up ingredients from static data
+  const freeTextMeals = weekMeals.filter((m) => !m.recipeId && m.freeText);
+  for (const meal of freeTextMeals) {
+    const matprat = matpratRecipes.find(
+      (r) => r.name.toLowerCase() === meal.freeText!.toLowerCase()
+    );
+    if (!matprat) continue;
+    for (const ing of matprat.ingredients) {
+      const key = `${ing.name.toLowerCase()}|${ing.unit}`;
+      const existing = aggregated.get(key);
+      if (existing) {
+        existing.quantity += ing.quantity;
+      } else {
+        aggregated.set(key, { name: ing.name, quantity: ing.quantity, unit: ing.unit });
+      }
     }
   }
 
@@ -160,22 +178,24 @@ export async function generateShoppingList(weekStartDate?: string) {
   const items = Array.from(aggregated.values());
   const priceMap = new Map<string, { priceOre: number; productName: string; store: string }>();
 
-  // Fetch prices in parallel (max 10 at a time to respect rate limit)
-  const batchSize = 10;
-  for (let i = 0; i < items.length; i += batchSize) {
-    const batch = items.slice(i, i + batchSize);
-    await Promise.allSettled(
-      batch.map(async (item) => {
-        const result = await findBestPrice(item.name);
-        if (result) {
-          priceMap.set(item.name, {
-            priceOre: result.priceOre,
-            productName: result.product.name,
-            store: result.product.store.name,
-          });
-        }
-      })
-    );
+  if (!skipPrices) {
+    // Fetch prices in parallel (max 10 at a time to respect rate limit)
+    const batchSize = 10;
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize);
+      await Promise.allSettled(
+        batch.map(async (item) => {
+          const result = await findBestPrice(item.name);
+          if (result) {
+            priceMap.set(item.name, {
+              priceOre: result.priceOre,
+              productName: result.product.name,
+              store: result.product.store.name,
+            });
+          }
+        })
+      );
+    }
   }
 
   // Insert aggregated items with prices and product info
