@@ -36,16 +36,20 @@ export async function updateSettings(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, error: "Ikke logget inn" };
 
-  const priceProvider = formData.get("priceProvider") as "kassalapp" | "oda";
+  const priceProvider = formData.get("priceProvider") as string;
   const dietaryPreference = formData.get("dietaryPreference") as string;
   const theme = formData.get("theme") as string;
+
+  const validProviders = ["kassalapp", "oda"];
+  const validDiets = ["all", "vegetarian", "vegan", "pescetarian"];
+  const validThemes = ["system", "light", "dark"];
 
   await db
     .update(userSettings)
     .set({
-      priceProvider: priceProvider ?? "kassalapp",
-      dietaryPreference: (dietaryPreference as any) ?? "all",
-      theme: (theme as any) ?? "system",
+      priceProvider: (validProviders.includes(priceProvider) ? priceProvider : "kassalapp") as any,
+      dietaryPreference: (validDiets.includes(dietaryPreference) ? dietaryPreference : "all") as any,
+      theme: (validThemes.includes(theme) ? theme : "system") as any,
     })
     .where(eq(userSettings.userId, session.user.id));
 

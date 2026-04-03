@@ -3,6 +3,7 @@ import { sharedLinks, shoppingLists, shoppingListItems } from "@/db/schema";
 import { eq, and, gte } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { SharedShoppingList } from "./shared-list";
+import { ShoppingCart } from "lucide-react";
 
 export default async function SharedPage({
   params,
@@ -11,16 +12,32 @@ export default async function SharedPage({
 }) {
   const { token } = await params;
 
-  // Find valid shared link
-  const link = await db.query.sharedLinks.findFirst({
-    where: and(
-      eq(sharedLinks.token, token),
-      eq(sharedLinks.resourceType, "shoppingList"),
-      gte(sharedLinks.expiresAt, new Date())
-    ),
+  // Check if link ever existed (to distinguish revoked from invalid)
+  const anyLink = await db.query.sharedLinks.findFirst({
+    where: eq(sharedLinks.token, token),
   });
 
-  if (!link) notFound();
+  // Find valid (non-expired) shared link
+  const link = anyLink && anyLink.expiresAt >= new Date() ? anyLink : null;
+
+  if (!link) {
+    // Revoked or expired
+    if (anyLink) {
+      // Link existed but was revoked or expired
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="max-w-md text-center space-y-4">
+            <ShoppingCart className="w-12 h-12 mx-auto text-muted-foreground opacity-30" />
+            <h1 className="text-xl font-semibold">Lenken er ikke lenger gyldig</h1>
+            <p className="text-muted-foreground text-sm">
+              Personen som delte denne handlelisten har fjernet tilgangen, eller lenken har utl&oslash;pt.
+            </p>
+          </div>
+        </div>
+      );
+    }
+    notFound();
+  }
 
   // Get shopping list
   const list = await db.query.shoppingLists.findFirst({

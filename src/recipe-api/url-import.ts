@@ -16,24 +16,34 @@ export interface ImportedRecipe {
 }
 
 /**
- * Validate URL to prevent SSRF attacks.
- * Only allows https:// URLs to public hostnames.
+ * Allowed hostnames for recipe URL import.
+ * Only trusted Norwegian recipe sites to prevent SSRF and malicious content.
+ */
+const ALLOWED_HOSTS = [
+  "matprat.no",
+  "www.matprat.no",
+];
+
+/**
+ * Validate URL for recipe import.
+ * Only allows HTTPS URLs to trusted recipe sites.
  */
 function isAllowedUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
     if (parsed.protocol !== "https:") return false;
     const hostname = parsed.hostname.toLowerCase();
-    // Block private/reserved IPs and localhost
-    if (/^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.|localhost$|::1|\[::1\])/.test(hostname)) return false;
-    // Block common cloud metadata endpoints
-    if (hostname === "169.254.169.254" || hostname === "metadata.google.internal") return false;
-    // Must have a dot (no bare hostnames like "internal-service")
-    if (!hostname.includes(".")) return false;
-    return true;
+    return ALLOWED_HOSTS.includes(hostname);
   } catch {
     return false;
   }
+}
+
+/**
+ * Check if a URL is from an allowed host (for error messages).
+ */
+export function getAllowedHosts(): string[] {
+  return [...ALLOWED_HOSTS];
 }
 
 /**

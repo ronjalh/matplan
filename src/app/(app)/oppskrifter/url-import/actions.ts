@@ -25,17 +25,22 @@ export async function importFromUrl(url: string) {
   });
   if (existing) return { success: false, error: "Denne oppskriften er allerede importert" };
 
-  // Validate URL format
+  // Validate URL format and allowlist
   try {
     const parsed = new URL(url);
     if (parsed.protocol !== "https:") return { success: false, error: "Kun HTTPS-URLer er støttet." };
+    const hostname = parsed.hostname.toLowerCase();
+    const allowed = ["matprat.no", "www.matprat.no"];
+    if (!allowed.includes(hostname)) {
+      return { success: false, error: "For øyeblikket støtter vi kun import fra matprat.no. Flere sider kommer snart!" };
+    }
   } catch {
     return { success: false, error: "Ugyldig URL." };
   }
 
   // Fetch and parse
   const recipe = await importRecipeFromUrl(url);
-  if (!recipe) return { success: false, error: "Kunne ikke finne oppskrift på denne siden. Prøv en annen URL." };
+  if (!recipe) return { success: false, error: "Kunne ikke finne oppskrift på denne siden. Prøv en annen URL fra matprat.no." };
 
   // Save
   const [saved] = await db

@@ -456,6 +456,25 @@ export async function shareShoppingList(listId: number): Promise<{ success: true
   return { success: true, token };
 }
 
+export async function revokeSharedLinks(listId: number) {
+  const householdId = await getHouseholdId();
+  const list = await db.query.shoppingLists.findFirst({
+    where: and(eq(shoppingLists.id, listId), eq(shoppingLists.householdId, householdId)),
+  });
+  if (!list) return { success: false, error: "Liste ikke funnet" };
+
+  await db.delete(sharedLinks).where(
+    and(
+      eq(sharedLinks.householdId, householdId),
+      eq(sharedLinks.resourceType, "shoppingList"),
+      eq(sharedLinks.resourceId, listId)
+    )
+  );
+
+  revalidatePath("/handleliste");
+  return { success: true };
+}
+
 /**
  * Extract just the ingredient name from originalText.
  * Handles formats:

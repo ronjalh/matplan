@@ -128,15 +128,17 @@ export async function addEvent(
   description?: string
 ) {
   const householdId = await getHouseholdId();
+  const validEventTypes = ["aktivitet", "avtale", "paamminnelse", "hendelse"];
+  if (!validEventTypes.includes(eventType)) return { success: false, error: "Ugyldig hendelsestype" };
 
   await db.insert(calendarEvents).values({
     householdId,
     date,
-    title,
+    title: title.slice(0, 200),
     eventType: eventType as any,
     startTime: startTime || null,
     endTime: endTime || null,
-    description: description || null,
+    description: description?.slice(0, 2000) || null,
   });
 
   revalidatePath("/kalender");

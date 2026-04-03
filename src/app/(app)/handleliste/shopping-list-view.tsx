@@ -17,13 +17,14 @@ import {
   removeItem,
   addShoppingTrip,
   fetchPricesForList,
+  revokeSharedLinks,
 } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ShoppingCart, Loader2, Trash2, Share2, Square, CheckSquare,
-  Pencil, Check, X, Plus, CalendarPlus, Eye, EyeOff, Zap, ZapOff,
+  Pencil, Check, X, Plus, CalendarPlus, Eye, EyeOff, Zap, ZapOff, Unlink,
 } from "lucide-react";
 
 interface ShoppingListItem {
@@ -309,6 +310,17 @@ export function ShoppingListView({
           className="gap-1"
         >
           <Share2 className="w-4 h-4" /> {shareUrl ? "Kopiert!" : "Del"}
+        </Button>
+        <Button
+          variant="ghost" size="sm"
+          onClick={async () => {
+            if (!confirm("Fjerne alle delenker for denne listen? De som har lenken vil ikke lenger ha tilgang.")) return;
+            await revokeSharedLinks(list.id);
+          }}
+          className="gap-1 text-muted-foreground hover:text-destructive"
+          title="Fjern alle delte lenker"
+        >
+          <Unlink className="w-4 h-4" />
         </Button>
         <Button variant="outline" size="sm" onClick={() => setAddingToCalendar(!addingToCalendar)} className="gap-1">
           <CalendarPlus className="w-4 h-4" /> Handletur

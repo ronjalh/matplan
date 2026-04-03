@@ -98,16 +98,26 @@ export async function createRecipe(formData: FormData): Promise<ActionResult> {
     .returning();
 
   if (ingredientsJson) {
-    const ingredients: IngredientInput[] = JSON.parse(ingredientsJson);
-    if (ingredients.length > 0) {
-      await db.insert(recipeIngredients).values(
-        ingredients.map((ing) => ({
-          recipeId: recipe.id,
-          quantity: ing.quantity,
-          unit: ing.unit,
-          originalText: `${ing.quantity} ${ing.unit} ${ing.name}`,
-        }))
-      );
+    try {
+      const parsed = JSON.parse(ingredientsJson);
+      if (!Array.isArray(parsed)) return { success: false, error: "Ugyldig ingrediensliste" };
+      const ingredients = parsed.map((ing: any) => ({
+        name: String(ing.name ?? "").slice(0, 200),
+        quantity: Number(ing.quantity) || 0,
+        unit: String(ing.unit ?? "stk").slice(0, 20),
+      }));
+      if (ingredients.length > 0) {
+        await db.insert(recipeIngredients).values(
+          ingredients.map((ing) => ({
+            recipeId: recipe.id,
+            quantity: ing.quantity,
+            unit: ing.unit,
+            originalText: `${ing.quantity} ${ing.unit} ${ing.name}`,
+          }))
+        );
+      }
+    } catch {
+      return { success: false, error: "Ugyldig ingrediensdata" };
     }
   }
 
@@ -157,20 +167,31 @@ export async function updateRecipe(recipeId: number, formData: FormData): Promis
     .where(eq(recipes.id, recipeId));
 
   if (ingredientsJson) {
-    await db
-      .delete(recipeIngredients)
-      .where(eq(recipeIngredients.recipeId, recipeId));
+    try {
+      const parsed = JSON.parse(ingredientsJson);
+      if (!Array.isArray(parsed)) return { success: false, error: "Ugyldig ingrediensliste" };
+      const ingredients = parsed.map((ing: any) => ({
+        name: String(ing.name ?? "").slice(0, 200),
+        quantity: Number(ing.quantity) || 0,
+        unit: String(ing.unit ?? "stk").slice(0, 20),
+      }));
 
-    const ingredients: IngredientInput[] = JSON.parse(ingredientsJson);
-    if (ingredients.length > 0) {
-      await db.insert(recipeIngredients).values(
-        ingredients.map((ing) => ({
-          recipeId,
-          quantity: ing.quantity,
-          unit: ing.unit,
-          originalText: `${ing.quantity} ${ing.unit} ${ing.name}`,
-        }))
-      );
+      await db
+        .delete(recipeIngredients)
+        .where(eq(recipeIngredients.recipeId, recipeId));
+
+      if (ingredients.length > 0) {
+        await db.insert(recipeIngredients).values(
+          ingredients.map((ing) => ({
+            recipeId,
+            quantity: ing.quantity,
+            unit: ing.unit,
+            originalText: `${ing.quantity} ${ing.unit} ${ing.name}`,
+          }))
+        );
+      }
+    } catch {
+      return { success: false, error: "Ugyldig ingrediensdata" };
     }
   }
 
