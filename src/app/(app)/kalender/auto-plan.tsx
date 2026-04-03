@@ -37,8 +37,9 @@ export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }
   const defaultSource = recipes.length > 0 ? "mine" as RecipeSource : "matprat" as RecipeSource;
   const [source, setSource] = useState<RecipeSource>(defaultSource);
   const [kidFriendly, setKidFriendly] = useState(false);
+  const [mealPrep, setMealPrep] = useState(false);
   const [plan, setPlan] = useState(() =>
-    generateWeekPlan(getRecipePool(defaultSource, recipes), diet as any, 2, false)
+    generateWeekPlan(getRecipePool(defaultSource, recipes), diet as any, 2, false, false)
   );
   const [saving, setSaving] = useState(false);
 
@@ -50,10 +51,11 @@ export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }
     }
   }
 
-  function regen(src?: RecipeSource, kid?: boolean) {
+  function regen(src?: RecipeSource, kid?: boolean, prep?: boolean) {
     const s = src ?? source;
     const k = kid ?? kidFriendly;
-    setPlan(generateWeekPlan(getRecipePool(s, recipes), diet as any, 2, k));
+    const p = prep ?? mealPrep;
+    setPlan(generateWeekPlan(getRecipePool(s, recipes), diet as any, 2, k, p));
   }
 
   function changeSource(src: RecipeSource) {
@@ -65,6 +67,12 @@ export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }
     const next = !kidFriendly;
     setKidFriendly(next);
     regen(undefined, next);
+  }
+
+  function toggleMealPrep() {
+    const next = !mealPrep;
+    setMealPrep(next);
+    regen(undefined, undefined, next);
   }
 
   function regenerate() {
@@ -158,6 +166,14 @@ export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }
             }`}
           >
             Barnevennlig
+          </button>
+          <button
+            onClick={toggleMealPrep}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+              mealPrep ? "bg-[var(--color-terracotta)] text-white" : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Meal prep
           </button>
         </div>
 
