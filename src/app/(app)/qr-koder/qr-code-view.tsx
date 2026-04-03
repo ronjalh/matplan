@@ -82,7 +82,7 @@ export function QrCodeView({ codes }: { codes: QrCodeItem[] }) {
   );
 }
 
-type QrVariant = "vanlig" | "panda" | "katt";
+type QrVariant = "vanlig" | "panda" | "katt" | "elprint" | "propulse";
 
 function renderLogoQr(
   canvas: HTMLCanvasElement,
@@ -108,10 +108,39 @@ function renderLogoQr(
   });
 }
 
+function renderImageQr(canvas: HTMLCanvasElement, url: string, imageSrc: string) {
+  QRCode.toCanvas(canvas, url, {
+    width: 200,
+    margin: 2,
+    errorCorrectionLevel: "H",
+    color: { dark: "#2D3436", light: "#FFFFFF" },
+  }, () => {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const img = new Image();
+    img.onload = () => {
+      const logoSize = Math.floor(canvas.width * 0.26);
+      const x = Math.floor((canvas.width - logoSize) / 2);
+      const y = Math.floor((canvas.height - logoSize) / 2);
+      // White background with rounded rect
+      ctx.fillStyle = "#FFFFFF";
+      const pad = 4;
+      ctx.beginPath();
+      ctx.roundRect(x - pad, y - pad, logoSize + pad * 2, logoSize + pad * 2, 6);
+      ctx.fill();
+      // Draw logo
+      ctx.drawImage(img, x, y, logoSize, logoSize);
+    };
+    img.src = imageSrc;
+  });
+}
+
 function QrCard({ code }: { code: QrCodeItem }) {
   const plainRef = useRef<HTMLCanvasElement>(null);
   const pandaRef = useRef<HTMLCanvasElement>(null);
   const catRef = useRef<HTMLCanvasElement>(null);
+  const elprintRef = useRef<HTMLCanvasElement>(null);
+  const propulseRef = useRef<HTMLCanvasElement>(null);
   const [variant, setVariant] = useState<QrVariant>("vanlig");
   const [deleting, setDeleting] = useState(false);
 
@@ -123,11 +152,13 @@ function QrCard({ code }: { code: QrCodeItem }) {
     }
     if (pandaRef.current) renderLogoQr(pandaRef.current, code.url, drawPixelPanda);
     if (catRef.current) renderLogoQr(catRef.current, code.url, drawPixelCat);
+    if (elprintRef.current) renderImageQr(elprintRef.current, code.url, "/elprint_til_qr.png");
+    if (propulseRef.current) renderImageQr(propulseRef.current, code.url, "/propulse_til_qr.png");
   }, [code.url]);
 
   function handleDownload() {
     const refs: Record<QrVariant, React.RefObject<HTMLCanvasElement | null>> = {
-      vanlig: plainRef, panda: pandaRef, katt: catRef,
+      vanlig: plainRef, panda: pandaRef, katt: catRef, elprint: elprintRef, propulse: propulseRef,
     };
     const canvas = refs[variant].current;
     if (!canvas) return;
@@ -149,13 +180,15 @@ function QrCard({ code }: { code: QrCodeItem }) {
     { key: "vanlig", label: "Vanlig" },
     { key: "panda", label: "Panda" },
     { key: "katt", label: "Katt" },
+    { key: "elprint", label: "Elprint" },
+    { key: "propulse", label: "Propulse" },
   ];
 
   return (
     <Card className="overflow-hidden">
       <CardContent className="pt-4 space-y-3">
         {/* Variant tabs */}
-        <div className="flex gap-1 justify-center">
+        <div className="flex flex-wrap gap-1 justify-center">
           {variants.map((v) => (
             <button
               key={v.key}
@@ -172,6 +205,8 @@ function QrCard({ code }: { code: QrCodeItem }) {
           <canvas ref={plainRef} className={`rounded-md ${variant === "vanlig" ? "" : "hidden"}`} />
           <canvas ref={pandaRef} className={`rounded-md ${variant === "panda" ? "" : "hidden"}`} />
           <canvas ref={catRef} className={`rounded-md ${variant === "katt" ? "" : "hidden"}`} />
+          <canvas ref={elprintRef} className={`rounded-md ${variant === "elprint" ? "" : "hidden"}`} />
+          <canvas ref={propulseRef} className={`rounded-md ${variant === "propulse" ? "" : "hidden"}`} />
         </div>
         <div className="space-y-1">
           <h3 className="font-medium text-sm truncate">{code.name}</h3>
