@@ -43,7 +43,7 @@ export function OnboardingWizard({ userName }: { userName: string }) {
               Velkommen, {userName.split(" ")[0]}!
             </h2>
             <p className="text-muted-foreground">
-              Matplan hjelper deg med å planlegge måltider, sammenligne priser og holde styr på budsjettet.
+              Matplan hjelper deg med å planlegge måltider, lage handlelister og holde styr på budsjettet.
               La oss sette opp appen for deg — det tar under ett minutt.
             </p>
             <Button onClick={next} className="gap-2">
