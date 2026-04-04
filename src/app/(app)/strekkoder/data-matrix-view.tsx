@@ -21,7 +21,8 @@ export function DataMatrixView() {
         bcid: "datamatrix",
         text: text.trim(),
         scale: 4,
-        padding: 4,
+        paddingwidth: 4,
+        paddingheight: 4,
       });
       setGenerated(true);
     } catch {
