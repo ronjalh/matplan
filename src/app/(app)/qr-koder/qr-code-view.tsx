@@ -82,7 +82,7 @@ export function QrCodeView({ codes }: { codes: QrCodeItem[] }) {
   );
 }
 
-type QrVariant = "vanlig" | "panda" | "katt" | "elprint" | "propulse" | "eget";
+type QrVariant = "vanlig" | "panda" | "katt" | "propulse" | "eget";
 
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"];
 const MAX_IMAGE_SIZE = 1024 * 1024; // 1 MB
@@ -90,13 +90,14 @@ const MAX_IMAGE_SIZE = 1024 * 1024; // 1 MB
 function renderLogoQr(
   canvas: HTMLCanvasElement,
   url: string,
-  drawFn: (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => void
+  drawFn: (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => void,
+  darkColor = "#2D3436"
 ) {
   QRCode.toCanvas(canvas, url, {
     width: 200,
     margin: 2,
     errorCorrectionLevel: "H",
-    color: { dark: "#2D3436", light: "#FFFFFF" },
+    color: { dark: darkColor, light: "#FFFFFF" },
   }, () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -111,12 +112,12 @@ function renderLogoQr(
   });
 }
 
-function renderImageQr(canvas: HTMLCanvasElement, url: string, imageSrc: string) {
+function renderImageQr(canvas: HTMLCanvasElement, url: string, imageSrc: string, darkColor = "#2D3436") {
   QRCode.toCanvas(canvas, url, {
     width: 200,
     margin: 2,
     errorCorrectionLevel: "H",
-    color: { dark: "#2D3436", light: "#FFFFFF" },
+    color: { dark: darkColor, light: "#FFFFFF" },
   }, () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -142,7 +143,6 @@ function QrCard({ code }: { code: QrCodeItem }) {
   const plainRef = useRef<HTMLCanvasElement>(null);
   const pandaRef = useRef<HTMLCanvasElement>(null);
   const catRef = useRef<HTMLCanvasElement>(null);
-  const elprintRef = useRef<HTMLCanvasElement>(null);
   const propulseRef = useRef<HTMLCanvasElement>(null);
   const customRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -150,24 +150,24 @@ function QrCard({ code }: { code: QrCodeItem }) {
   const [deleting, setDeleting] = useState(false);
   const [customImage, setCustomImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [qrColor, setQrColor] = useState("#2D3436");
 
   useEffect(() => {
     if (plainRef.current) {
       QRCode.toCanvas(plainRef.current, code.url, {
-        width: 200, margin: 2, color: { dark: "#2D3436", light: "#FFFFFF" },
+        width: 200, margin: 2, color: { dark: qrColor, light: "#FFFFFF" },
       });
     }
-    if (pandaRef.current) renderLogoQr(pandaRef.current, code.url, drawPixelPanda);
-    if (catRef.current) renderLogoQr(catRef.current, code.url, drawPixelCat);
-    if (elprintRef.current) renderImageQr(elprintRef.current, code.url, "/elprint_til_qr.png");
-    if (propulseRef.current) renderImageQr(propulseRef.current, code.url, "/propulse_til_qr.png");
-  }, [code.url]);
+    if (pandaRef.current) renderLogoQr(pandaRef.current, code.url, drawPixelPanda, qrColor);
+    if (catRef.current) renderLogoQr(catRef.current, code.url, drawPixelCat, qrColor);
+    if (propulseRef.current) renderImageQr(propulseRef.current, code.url, "/propulse_til_qr.png", qrColor);
+  }, [code.url, qrColor]);
 
   useEffect(() => {
     if (customImage && customRef.current) {
-      renderImageQr(customRef.current, code.url, customImage);
+      renderImageQr(customRef.current, code.url, customImage, qrColor);
     }
-  }, [customImage, code.url]);
+  }, [customImage, code.url, qrColor]);
 
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     setImageError(null);
@@ -204,7 +204,7 @@ function QrCard({ code }: { code: QrCodeItem }) {
 
   function handleDownload() {
     const refs: Record<QrVariant, React.RefObject<HTMLCanvasElement | null>> = {
-      vanlig: plainRef, panda: pandaRef, katt: catRef, elprint: elprintRef, propulse: propulseRef, eget: customRef,
+      vanlig: plainRef, panda: pandaRef, katt: catRef, propulse: propulseRef, eget: customRef,
     };
     const canvas = refs[variant].current;
     if (!canvas) return;
@@ -226,7 +226,6 @@ function QrCard({ code }: { code: QrCodeItem }) {
     { key: "vanlig", label: "Vanlig" },
     { key: "panda", label: "Panda" },
     { key: "katt", label: "Katt" },
-    { key: "elprint", label: "Elprint" },
     { key: "propulse", label: "Propulse" },
     { key: "eget", label: "Eget bilde" },
   ];
@@ -261,6 +260,44 @@ function QrCard({ code }: { code: QrCodeItem }) {
             onChange={handleImageUpload}
           />
         </div>
+        {/* Color picker */}
+        <div className="flex items-center justify-center gap-1.5">
+          {[
+            { color: "#2D3436", label: "Svart" },
+            { color: "#0984E3", label: "Blå" },
+            { color: "#00B894", label: "Grønn" },
+            { color: "#E17055", label: "Rød" },
+            { color: "#6C5CE7", label: "Lilla" },
+            { color: "#E84393", label: "Rosa" },
+          ].map((c) => (
+            <button
+              key={c.color}
+              title={c.label}
+              onClick={() => setQrColor(c.color)}
+              className={`w-5 h-5 rounded-full cursor-pointer transition-all ${
+                qrColor === c.color ? "ring-2 ring-primary ring-offset-2" : "hover:scale-110"
+              }`}
+              style={{ backgroundColor: c.color }}
+            />
+          ))}
+          <label className="relative cursor-pointer">
+            <input
+              type="color"
+              value={qrColor}
+              onChange={(e) => setQrColor(e.target.value)}
+              className="absolute inset-0 w-5 h-5 opacity-0 cursor-pointer"
+            />
+            <span
+              className={`block w-5 h-5 rounded-full border-2 border-dashed border-muted-foreground transition-all ${
+                ![
+                  "#2D3436", "#0984E3", "#00B894", "#E17055", "#6C5CE7", "#E84393",
+                ].includes(qrColor) ? "ring-2 ring-primary ring-offset-2" : "hover:scale-110"
+              }`}
+              style={{ background: `conic-gradient(red, yellow, lime, aqua, blue, magenta, red)` }}
+              title="Egendefinert farge"
+            />
+          </label>
+        </div>
         {imageError && (
           <p className="text-xs text-destructive text-center">{imageError}</p>
         )}
@@ -268,7 +305,6 @@ function QrCard({ code }: { code: QrCodeItem }) {
           <canvas ref={plainRef} className={`rounded-md ${variant === "vanlig" ? "" : "hidden"}`} />
           <canvas ref={pandaRef} className={`rounded-md ${variant === "panda" ? "" : "hidden"}`} />
           <canvas ref={catRef} className={`rounded-md ${variant === "katt" ? "" : "hidden"}`} />
-          <canvas ref={elprintRef} className={`rounded-md ${variant === "elprint" ? "" : "hidden"}`} />
           <canvas ref={propulseRef} className={`rounded-md ${variant === "propulse" ? "" : "hidden"}`} />
           <canvas ref={customRef} className={`rounded-md ${variant === "eget" ? "" : "hidden"}`} />
           {variant === "eget" && !customImage && (
