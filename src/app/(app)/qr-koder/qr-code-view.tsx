@@ -1,3 +1,7 @@
+// TODO: Avansert modus — la brukeren laste opp et bilde som brukes som "fyll" i QR-modulene.
+// I stedet for ensfarget farge tegnes modulene som masker som viser deler av det opplastede bildet,
+// slik at QR-koden fremstår som et bilde sett gjennom QR-formede vinduer.
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
