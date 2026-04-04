@@ -309,12 +309,12 @@ function renderCustomQr(canvas: HTMLCanvasElement, url: string, opts: AdvRenderO
     }
   }
 
-  // 3. Finder patterns
-  const fpLight = opts.transparentBg && !opts.bgImageEl ? null : "#FFFFFF";
+  // 3. Finder patterns — always use null for lightColor so the offscreen canvas
+  // middle ring is transparent, naturally showing the main canvas background through
   const fps = 7 * ms;
-  drawFinderPatternAdv(ctx, margin, margin, fps, opts.pixelStyle, opts.darkColor, fpLight);
-  drawFinderPatternAdv(ctx, margin + (mc - 7) * ms, margin, fps, opts.pixelStyle, opts.darkColor, fpLight);
-  drawFinderPatternAdv(ctx, margin, margin + (mc - 7) * ms, fps, opts.pixelStyle, opts.darkColor, fpLight);
+  drawFinderPatternAdv(ctx, margin, margin, fps, opts.pixelStyle, opts.darkColor, null);
+  drawFinderPatternAdv(ctx, margin + (mc - 7) * ms, margin, fps, opts.pixelStyle, opts.darkColor, null);
+  drawFinderPatternAdv(ctx, margin, margin + (mc - 7) * ms, fps, opts.pixelStyle, opts.darkColor, null);
 
   // 4. Logo
   if (opts.logoType !== "ingen") {
