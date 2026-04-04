@@ -91,13 +91,14 @@ function renderLogoQr(
   canvas: HTMLCanvasElement,
   url: string,
   drawFn: (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => void,
-  darkColor = "#2D3436"
+  darkColor = "#2D3436",
+  lightColor = "#FFFFFF"
 ) {
   QRCode.toCanvas(canvas, url, {
     width: 200,
     margin: 2,
     errorCorrectionLevel: "H",
-    color: { dark: darkColor, light: "#FFFFFF" },
+    color: { dark: darkColor, light: lightColor },
   }, () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -112,12 +113,12 @@ function renderLogoQr(
   });
 }
 
-function renderImageQr(canvas: HTMLCanvasElement, url: string, imageSrc: string, darkColor = "#2D3436") {
+function renderImageQr(canvas: HTMLCanvasElement, url: string, imageSrc: string, darkColor = "#2D3436", lightColor = "#FFFFFF") {
   QRCode.toCanvas(canvas, url, {
     width: 200,
     margin: 2,
     errorCorrectionLevel: "H",
-    color: { dark: darkColor, light: "#FFFFFF" },
+    color: { dark: darkColor, light: lightColor },
   }, () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -151,23 +152,26 @@ function QrCard({ code }: { code: QrCodeItem }) {
   const [customImage, setCustomImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [qrColor, setQrColor] = useState("#2D3436");
+  const [transparentBg, setTransparentBg] = useState(false);
+
+  const bgColor = transparentBg ? "#00000000" : "#FFFFFF";
 
   useEffect(() => {
     if (plainRef.current) {
       QRCode.toCanvas(plainRef.current, code.url, {
-        width: 200, margin: 2, color: { dark: qrColor, light: "#FFFFFF" },
+        width: 200, margin: 2, color: { dark: qrColor, light: bgColor },
       });
     }
-    if (pandaRef.current) renderLogoQr(pandaRef.current, code.url, drawPixelPanda, qrColor);
-    if (catRef.current) renderLogoQr(catRef.current, code.url, drawPixelCat, qrColor);
-    if (propulseRef.current) renderImageQr(propulseRef.current, code.url, "/propulse_til_qr.png", qrColor);
-  }, [code.url, qrColor]);
+    if (pandaRef.current) renderLogoQr(pandaRef.current, code.url, drawPixelPanda, qrColor, bgColor);
+    if (catRef.current) renderLogoQr(catRef.current, code.url, drawPixelCat, qrColor, bgColor);
+    if (propulseRef.current) renderImageQr(propulseRef.current, code.url, "/propulse_til_qr.png", qrColor, bgColor);
+  }, [code.url, qrColor, bgColor]);
 
   useEffect(() => {
     if (customImage && customRef.current) {
-      renderImageQr(customRef.current, code.url, customImage, qrColor);
+      renderImageQr(customRef.current, code.url, customImage, qrColor, bgColor);
     }
-  }, [customImage, code.url, qrColor]);
+  }, [customImage, code.url, qrColor, bgColor]);
 
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     setImageError(null);
@@ -288,7 +292,7 @@ function QrCard({ code }: { code: QrCodeItem }) {
               className="absolute inset-0 w-5 h-5 opacity-0 cursor-pointer"
             />
             <span
-              className={`block w-5 h-5 rounded-full border-2 border-dashed border-muted-foreground transition-all ${
+              className={`block w-5 h-5 rounded-full transition-all ${
                 ![
                   "#2D3436", "#0984E3", "#00B894", "#E17055", "#6C5CE7", "#E84393",
                 ].includes(qrColor) ? "ring-2 ring-primary ring-offset-2" : "hover:scale-110"
@@ -298,6 +302,15 @@ function QrCard({ code }: { code: QrCodeItem }) {
             />
           </label>
         </div>
+        <label className="flex items-center justify-center gap-1.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={transparentBg}
+            onChange={(e) => setTransparentBg(e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-xs text-muted-foreground">Transparent bakgrunn</span>
+        </label>
         {imageError && (
           <p className="text-xs text-destructive text-center">{imageError}</p>
         )}
