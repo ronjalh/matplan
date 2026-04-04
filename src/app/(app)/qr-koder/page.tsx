@@ -13,7 +13,7 @@ export default async function QrKoderPage() {
         </h1>
         <Link
           href="/strekkoder"
-          className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          className="text-sm px-3 py-1.5 rounded-md bg-muted text-muted-foreground hover:text-foreground transition-colors"
         >
           Strekkoder →
         </Link>
