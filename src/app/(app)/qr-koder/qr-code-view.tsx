@@ -105,10 +105,12 @@ function renderLogoQr(
     const size = Math.floor(canvas.width * 0.24);
     const x = Math.floor((canvas.width - size) / 2);
     const y = Math.floor((canvas.height - size) / 2);
-    ctx.fillStyle = "#FFFFFF";
-    ctx.beginPath();
-    ctx.arc(x + size / 2, y + size / 2, size / 2 + 3, 0, Math.PI * 2);
-    ctx.fill();
+    if (lightColor === "#FFFFFF") {
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.arc(x + size / 2, y + size / 2, size / 2 + 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
     drawFn(ctx, x, y, size);
   });
 }
@@ -127,12 +129,14 @@ function renderImageQr(canvas: HTMLCanvasElement, url: string, imageSrc: string,
       const logoSize = Math.floor(canvas.width * 0.26);
       const x = Math.floor((canvas.width - logoSize) / 2);
       const y = Math.floor((canvas.height - logoSize) / 2);
-      // White background with rounded rect
-      ctx.fillStyle = "#FFFFFF";
-      const pad = 4;
-      ctx.beginPath();
-      ctx.roundRect(x - pad, y - pad, logoSize + pad * 2, logoSize + pad * 2, 6);
-      ctx.fill();
+      if (lightColor === "#FFFFFF") {
+        // White background with rounded rect
+        ctx.fillStyle = "#FFFFFF";
+        const pad = 4;
+        ctx.beginPath();
+        ctx.roundRect(x - pad, y - pad, logoSize + pad * 2, logoSize + pad * 2, 6);
+        ctx.fill();
+      }
       // Draw logo
       ctx.drawImage(img, x, y, logoSize, logoSize);
     };
