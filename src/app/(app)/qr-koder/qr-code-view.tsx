@@ -190,62 +190,71 @@ function drawFinderPatternAdv(
 ) {
   const ms = size / 7;
 
+  // Draw finder pattern to an offscreen canvas first, then composite
+  const offscreen = document.createElement("canvas");
+  offscreen.width = Math.ceil(size) + 2;
+  offscreen.height = Math.ceil(size) + 2;
+  const oc = offscreen.getContext("2d")!;
+
   if (style === "prikk") {
-    const cx = x + size / 2;
-    const cy = y + size / 2;
+    const cx = size / 2 + 1;
+    const cy = size / 2 + 1;
 
-    ctx.fillStyle = darkColor;
-    ctx.beginPath();
-    ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
-    ctx.fill();
+    // Outer ring
+    oc.fillStyle = darkColor;
+    oc.beginPath();
+    oc.arc(cx, cy, size / 2, 0, Math.PI * 2);
+    oc.fill();
 
+    // Middle gap (cut hole for transparent, fill white otherwise)
     if (lightColor) {
-      ctx.fillStyle = lightColor;
-      ctx.beginPath();
-      ctx.arc(cx, cy, size / 2 - ms, 0, Math.PI * 2);
-      ctx.fill();
+      oc.fillStyle = lightColor;
     } else {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, cy, size / 2 - ms, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.clearRect(x, y, size, size);
-      ctx.restore();
+      oc.globalCompositeOperation = "destination-out";
+      oc.fillStyle = "#000";
     }
+    oc.beginPath();
+    oc.arc(cx, cy, size / 2 - ms, 0, Math.PI * 2);
+    oc.fill();
+    oc.globalCompositeOperation = "source-over";
 
-    ctx.fillStyle = darkColor;
-    ctx.beginPath();
-    ctx.arc(cx, cy, size / 2 - ms * 2, 0, Math.PI * 2);
-    ctx.fill();
+    // Inner dot
+    oc.fillStyle = darkColor;
+    oc.beginPath();
+    oc.arc(cx, cy, size / 2 - ms * 2, 0, Math.PI * 2);
+    oc.fill();
   } else {
     const r1 = style === "avrundet" ? ms * 1.2 : 0;
     const r2 = style === "avrundet" ? ms * 0.8 : 0;
     const r3 = style === "avrundet" ? ms * 0.5 : 0;
 
-    ctx.fillStyle = darkColor;
-    ctx.beginPath();
-    ctx.roundRect(x, y, size, size, r1);
-    ctx.fill();
+    // Outer
+    oc.fillStyle = darkColor;
+    oc.beginPath();
+    oc.roundRect(1, 1, size, size, r1);
+    oc.fill();
 
+    // Middle gap
     if (lightColor) {
-      ctx.fillStyle = lightColor;
-      ctx.beginPath();
-      ctx.roundRect(x + ms, y + ms, size - 2 * ms, size - 2 * ms, r2);
-      ctx.fill();
+      oc.fillStyle = lightColor;
     } else {
-      ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(x + ms, y + ms, size - 2 * ms, size - 2 * ms, r2);
-      ctx.clip();
-      ctx.clearRect(x, y, size, size);
-      ctx.restore();
+      oc.globalCompositeOperation = "destination-out";
+      oc.fillStyle = "#000";
     }
+    oc.beginPath();
+    oc.roundRect(1 + ms, 1 + ms, size - 2 * ms, size - 2 * ms, r2);
+    oc.fill();
+    oc.globalCompositeOperation = "source-over";
 
-    ctx.fillStyle = darkColor;
-    ctx.beginPath();
-    ctx.roundRect(x + 2 * ms, y + 2 * ms, size - 4 * ms, size - 4 * ms, r3);
-    ctx.fill();
+    // Inner
+    oc.fillStyle = darkColor;
+    oc.beginPath();
+    oc.roundRect(1 + 2 * ms, 1 + 2 * ms, size - 4 * ms, size - 4 * ms, r3);
+    oc.fill();
   }
+
+  // Composite the finished finder pattern onto main canvas
+  ctx.drawImage(offscreen, x - 1, y - 1);
 }
 
 interface AdvRenderOptions {
