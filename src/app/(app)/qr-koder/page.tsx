@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getQrCodes } from "./actions";
 import { QrCodeView } from "./qr-code-view";
 
@@ -6,9 +7,17 @@ export default async function QrKoderPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
-      <h1 className="text-2xl font-[family-name:var(--font-fraunces)] font-semibold">
-        QR-koder
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-[family-name:var(--font-fraunces)] font-semibold">
+          QR-koder
+        </h1>
+        <Link
+          href="/strekkoder"
+          className="text-sm text-muted-foreground hover:text-primary transition-colors"
+        >
+          Strekkoder →
+        </Link>
+      </div>
       <QrCodeView
         codes={codes.map((c) => ({
           id: c.id,
