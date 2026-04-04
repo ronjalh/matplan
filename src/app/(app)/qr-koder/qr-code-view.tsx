@@ -90,10 +90,11 @@ const MAX_IMAGE_SIZE = 1024 * 1024; // 1 MB
 function renderLogoQr(
   canvas: HTMLCanvasElement,
   url: string,
-  drawFn: (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => void,
+  drawFn: (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, transparent: boolean) => void,
   darkColor = "#2D3436",
   lightColor = "#FFFFFF"
 ) {
+  const transparent = lightColor !== "#FFFFFF";
   QRCode.toCanvas(canvas, url, {
     width: 200,
     margin: 2,
@@ -105,13 +106,15 @@ function renderLogoQr(
     const size = Math.floor(canvas.width * 0.24);
     const x = Math.floor((canvas.width - size) / 2);
     const y = Math.floor((canvas.height - size) / 2);
-    if (lightColor === "#FFFFFF") {
+    if (transparent) {
+      ctx.clearRect(x - 3, y - 3, size + 6, size + 6);
+    } else {
       ctx.fillStyle = "#FFFFFF";
       ctx.beginPath();
       ctx.arc(x + size / 2, y + size / 2, size / 2 + 3, 0, Math.PI * 2);
       ctx.fill();
     }
-    drawFn(ctx, x, y, size);
+    drawFn(ctx, x, y, size, transparent);
   });
 }
 
@@ -129,13 +132,14 @@ function renderImageQr(canvas: HTMLCanvasElement, url: string, imageSrc: string,
       const logoSize = Math.floor(canvas.width * 0.26);
       const x = Math.floor((canvas.width - logoSize) / 2);
       const y = Math.floor((canvas.height - logoSize) / 2);
+      const pad = 4;
       if (lightColor === "#FFFFFF") {
-        // White background with rounded rect
         ctx.fillStyle = "#FFFFFF";
-        const pad = 4;
         ctx.beginPath();
         ctx.roundRect(x - pad, y - pad, logoSize + pad * 2, logoSize + pad * 2, 6);
         ctx.fill();
+      } else {
+        ctx.clearRect(x - pad, y - pad, logoSize + pad * 2, logoSize + pad * 2);
       }
       // Draw logo
       ctx.drawImage(img, x, y, logoSize, logoSize);
@@ -377,14 +381,14 @@ function QrCard({ code }: { code: QrCodeItem }) {
 /** Draw pixel art from a grid definition */
 function drawPixelGrid(
   ctx: CanvasRenderingContext2D, x: number, y: number, size: number,
-  rows: string[], colors: Record<string, string>
+  rows: string[], colors: Record<string, string>, skipChars: string[] = []
 ) {
   const grid = rows.length;
   const px = size / grid;
   for (let r = 0; r < rows.length; r++) {
     for (let c = 0; c < rows[r].length; c++) {
       const ch = rows[r][c];
-      if (ch === "_") continue;
+      if (ch === "_" || skipChars.includes(ch)) continue;
       ctx.fillStyle = colors[ch] ?? "#000";
       ctx.fillRect(x + c * px, y + r * px, Math.ceil(px), Math.ceil(px));
     }
@@ -392,7 +396,7 @@ function drawPixelGrid(
 }
 
 /** Pixel-art panda face — 12x12 grid */
-function drawPixelPanda(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
+function drawPixelPanda(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, transparent = false) {
   const rows = [
     "_BB______BB_",
     "BBWB____BWBB",
@@ -407,11 +411,11 @@ function drawPixelPanda(ctx: CanvasRenderingContext2D, x: number, y: number, siz
     "____WWWW____",
     "____________",
   ];
-  drawPixelGrid(ctx, x, y, size, rows, { B: "#3D3028", W: "#FFF9F5", P: "#FFB5C5" });
+  drawPixelGrid(ctx, x, y, size, rows, { B: "#3D3028", W: "#FFF9F5", P: "#FFB5C5" }, transparent ? ["W"] : []);
 }
 
 /** Pixel-art cat face — 12x12 grid */
-function drawPixelCat(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
+function drawPixelCat(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, transparent = false) {
   const rows = [
     "O__________O",
     "OO________OO",
@@ -426,5 +430,5 @@ function drawPixelCat(ctx: CanvasRenderingContext2D, x: number, y: number, size:
     "__OOOOOO____",
     "____________",
   ];
-  drawPixelGrid(ctx, x, y, size, rows, { O: "#F4A460", W: "#FFF9F5", G: "#5A8F5A", P: "#FFB5C5", B: "#3D3028" });
+  drawPixelGrid(ctx, x, y, size, rows, { O: "#F4A460", W: "#FFF9F5", G: "#5A8F5A", P: "#FFB5C5", B: "#3D3028" }, transparent ? ["W"] : []);
 }
