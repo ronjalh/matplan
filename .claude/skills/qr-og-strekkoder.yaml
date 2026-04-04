@@ -1,0 +1,72 @@
+name: qr-og-strekkoder
+description: QR code generator with simple/advanced modes and Data Matrix barcode generator
+version: 1.0.0
+tags: [qr, barcode, canvas, bwip-js]
+
+instructions: |
+  # QR-koder og Strekkoder
+
+  ## Arkitektur
+  - `/qr-koder` — QR-kode generator (lagres i DB per husstand)
+  - `/strekkoder` — Data Matrix generator (kun klient, ingen DB)
+  - Lenker mellom sidene i header
+
+  ## QR-koder — To moduser
+
+  ### Enkel modus (standard)
+  - Bruker `QRCode.toCanvas()` fra `qrcode`-pakken
+  - Varianter: Vanlig, Panda, Katt, Propulse, Eget bilde
+  - Felles farge-picker (6 presets + egendefinert)
+  - Transparent bakgrunn (checkbox)
+  - Separate canvas-refs per variant
+
+  ### Avansert modus
+  - Bruker `QRCode.create()` for rå modul-data, tegner manuelt på canvas
+  - Canvas: 400x400 rendert, vist som 200x200 (retina)
+  - **Pikselstil**: firkant, avrundet (roundRect), prikk (arc/dots)
+  - **Finder patterns**: tegnes på offscreen canvas med `destination-out` compositing
+    for korrekt transparent midtring uten hvite artefakter
+  - **Logo**: ingen/panda/katt/propulse/eget bilde, i firkant eller sirkel-form
+  - **Bakgrunn**: hvit, transparent, eller eget bakgrunnsbilde
+  - **Overlay**: eget bilde med justerbar opacity (5-80%)
+  - **Kontrastadvarsel**: vises ved lav kontrast (<3:1) eller bakgrunnsbilde/overlay
+  - Bruker alltid `lightColor=null` for finder patterns — bakgrunnen vises naturlig gjennom compositing
+
+  ## Viktige tekniske detaljer
+
+  ### Offscreen canvas for finder patterns
+  Finder patterns (hjørnefirkantene) tegnes på en midlertidig offscreen canvas:
+  1. Tegn ytre ring (dark)
+  2. Kutt midtring med `globalCompositeOperation = "destination-out"`
+  3. Tegn indre prikk (dark)
+  4. Composite hele resultatet over på hovedcanvas med `drawImage()`
+
+  Dette sikrer at midtringen alltid er transparent og viser hovedcanvasens
+  bakgrunn (hvit, bilde, eller transparent) korrekt uten hvite piksler.
+
+  ### Pixel art logoer
+  - `drawPixelGrid()` — generisk tegner for piksel-grid med fargeoppslag
+  - Panda og katt er 12x12 grids med tegnkoder (B=svart, W=hvit, P=rosa, etc.)
+  - I transparent modus hoppes hvite piksler (`W`) over
+
+  ### Kontrast-beregning
+  Bruker WCAG relative luminance-formel:
+  - `hexToLuminance()` — konverterer hex til relativ luminans
+  - `getContrastRatio()` — beregner kontrastratio mellom to farger
+  - Advarsel ved ratio < 3:1
+
+  ## Strekkoder (Data Matrix)
+  - Bruker `bwip-js` pakken med `toCanvas()` i klienten
+  - Enkel: skriv tekst → generer → last ned PNG
+  - `bcid: "datamatrix"`, scale: 4, padding: 4
+
+  ## Filer
+  - `src/app/(app)/qr-koder/qr-code-view.tsx` — QR-komponent (enkel + avansert)
+  - `src/app/(app)/qr-koder/actions.ts` — server actions (CRUD)
+  - `src/app/(app)/qr-koder/page.tsx` — side
+  - `src/app/(app)/strekkoder/data-matrix-view.tsx` — Data Matrix-komponent
+  - `src/app/(app)/strekkoder/page.tsx` — side
+
+  ## TODO
+  - Bilde-fyll i QR-moduler: la brukeren laste opp et bilde som vises gjennom
+    QR-modulene som en maske (modulene fungerer som vinduer inn i bildet)
