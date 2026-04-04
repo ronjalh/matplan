@@ -23,6 +23,7 @@ export function DataMatrixView() {
         scale: 4,
         paddingwidth: 4,
         paddingheight: 4,
+        backgroundcolor: "FFFFFF",
       });
       setGenerated(true);
     } catch {
@@ -61,7 +62,7 @@ export function DataMatrixView() {
         <div className="flex justify-center">
           <canvas
             ref={canvasRef}
-            className={`rounded-md ${generated ? "" : "hidden"}`}
+            className={`rounded-md bg-white p-2 ${generated ? "" : "hidden"}`}
           />
         </div>
         {generated && (
