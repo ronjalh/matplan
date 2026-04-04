@@ -245,13 +245,6 @@ export function AutoPlan({ recipes, diet, weekDates, existingMealDays, onClose }
           </div>
         )}
 
-        {/* Info about matprat recipes */}
-        {source !== "mine" && plan.meals.some((m) => isMatpratRecipe(m.recipe.id)) && (
-          <p className="text-[11px] text-muted-foreground">
-            Forslag-oppskrifter legges til som fritekst. Du kan søke opp oppskriften på matprat.no.
-          </p>
-        )}
-
         {/* Actions */}
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={regenerate} className="gap-1">
