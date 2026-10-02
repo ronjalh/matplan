@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { auth } from "@/lib/auth/auth-config";
 import { getQrCodes } from "./actions";
 import { QrCodeView } from "./qr-code-view";
 
 export default async function QrKoderPage() {
-  const codes = await getQrCodes();
+  const session = await auth();
+  const codes = session ? await getQrCodes() : [];
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
@@ -19,6 +21,7 @@ export default async function QrKoderPage() {
         </Link>
       </div>
       <QrCodeView
+        isLoggedIn={!!session}
         codes={codes.map((c) => ({
           id: c.id,
           name: c.name,

@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { qrCodes, householdMembers } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { validateQrInput } from "@/lib/qr/validate";
 
 async function getHouseholdId() {
   const session = await auth();
@@ -27,14 +28,8 @@ export async function getQrCodes() {
 export async function createQrCode(name: string, url: string) {
   const householdId = await getHouseholdId();
 
-  if (!name.trim()) return { success: false, error: "QR-koden trenger et navn" };
-  if (!url.trim()) return { success: false, error: "URL mangler" };
-
-  try {
-    new URL(url);
-  } catch {
-    return { success: false, error: "Ugyldig URL" };
-  }
+  const validation = validateQrInput(name, url);
+  if (!validation.ok) return { success: false, error: validation.error };
 
   const [qr] = await db.insert(qrCodes).values({
     householdId,

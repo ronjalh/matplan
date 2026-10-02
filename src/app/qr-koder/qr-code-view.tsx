@@ -7,6 +7,7 @@
 import { useState, useRef, useEffect } from "react";
 import QRCode from "qrcode";
 import { createQrCode, deleteQrCode } from "./actions";
+import { validateQrInput } from "@/lib/qr/validate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,10 +16,30 @@ import { Plus, Trash2, Download, ExternalLink, Loader2, AlertTriangle, Settings2
 // ─── Types ───────────────────────────────────────────
 
 interface QrCodeItem {
-  id: number;
+  id: number | string;
   name: string;
   url: string;
   createdAt: string;
+}
+
+const ANON_STORAGE_KEY = "matplan-qr-codes-anon";
+
+function loadAnonCodes(): QrCodeItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = sessionStorage.getItem(ANON_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveAnonCodes(codes: QrCodeItem[]) {
+  try {
+    sessionStorage.setItem(ANON_STORAGE_KEY, JSON.stringify(codes));
+  } catch {
+    // sessionStorage unavailable (private browsing, quota, disabled) — keep working in memory only
+  }
 }
 
 type QrVariant = "vanlig" | "panda" | "katt" | "propulse" | "eget";
@@ -423,20 +444,59 @@ function drawPixelCat(ctx: CanvasRenderingContext2D, x: number, y: number, size:
 
 // ─── Components ──────────────────────────────────────
 
-export function QrCodeView({ codes }: { codes: QrCodeItem[] }) {
+export function QrCodeView({ codes, isLoggedIn }: { codes: QrCodeItem[]; isLoggedIn: boolean }) {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [anonCodes, setAnonCodes] = useState<QrCodeItem[]>([]);
+
+  useEffect(() => {
+    if (!isLoggedIn) setAnonCodes(loadAnonCodes());
+  }, [isLoggedIn]);
+
+  const displayCodes = isLoggedIn ? codes : anonCodes;
 
   async function handleCreate() {
     if (creating) return;
     setCreating(true);
     setError(null);
-    const result = await createQrCode(name, url);
+
+    if (isLoggedIn) {
+      const result = await createQrCode(name, url);
+      setCreating(false);
+      if (result.success) { setName(""); setUrl(""); }
+      else setError(result.error ?? "Noe gikk galt");
+      return;
+    }
+
+    const validation = validateQrInput(name, url);
     setCreating(false);
-    if (result.success) { setName(""); setUrl(""); }
-    else setError(result.error ?? "Noe gikk galt");
+    if (!validation.ok) {
+      setError(validation.error);
+      return;
+    }
+    const item: QrCodeItem = {
+      id: crypto.randomUUID(),
+      name: name.trim().slice(0, 200),
+      url: url.trim().slice(0, 2000),
+      createdAt: new Date().toISOString(),
+    };
+    const updated = [item, ...anonCodes];
+    setAnonCodes(updated);
+    saveAnonCodes(updated);
+    setName("");
+    setUrl("");
+  }
+
+  async function handleDeleteCode(id: number | string) {
+    if (isLoggedIn) {
+      await deleteQrCode(id as number);
+      return;
+    }
+    const updated = anonCodes.filter((c) => c.id !== id);
+    setAnonCodes(updated);
+    saveAnonCodes(updated);
   }
 
   return (
@@ -450,6 +510,11 @@ export function QrCodeView({ codes }: { codes: QrCodeItem[] }) {
               placeholder="https://example.com" onKeyDown={(e) => e.key === "Enter" && handleCreate()} />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
+          {!isLoggedIn && (
+            <p className="text-xs text-muted-foreground">
+              Du er ikke logget inn — QR-kodene lagres kun i denne nettleserfanen.
+            </p>
+          )}
           <Button onClick={handleCreate} disabled={creating || !name.trim() || !url.trim()} className="gap-2">
             {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
             Opprett QR-kode
@@ -457,11 +522,11 @@ export function QrCodeView({ codes }: { codes: QrCodeItem[] }) {
         </CardContent>
       </Card>
 
-      {codes.length === 0 ? (
+      {displayCodes.length === 0 ? (
         <p className="text-center text-muted-foreground py-8">Ingen QR-koder ennå. Opprett en ovenfor.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {codes.map((code) => <QrCard key={code.id} code={code} />)}
+          {displayCodes.map((code) => <QrCard key={code.id} code={code} onDelete={handleDeleteCode} />)}
         </div>
       )}
     </div>
@@ -498,7 +563,7 @@ const tabCls = (active: boolean) =>
 
 // ─── QR Card ─────────────────────────────────────────
 
-function QrCard({ code }: { code: QrCodeItem }) {
+function QrCard({ code, onDelete }: { code: QrCodeItem; onDelete: (id: number | string) => void | Promise<void> }) {
   const [advanced, setAdvanced] = useState(false);
   const [qrColor, setQrColor] = useState("#2D3436");
   const [transparentBg, setTransparentBg] = useState(false);
@@ -616,7 +681,7 @@ function QrCard({ code }: { code: QrCodeItem }) {
   async function handleDelete() {
     if (!confirm(`Slette "${code.name}"?`)) return;
     setDeleting(true);
-    await deleteQrCode(code.id);
+    await onDelete(code.id);
     setDeleting(false);
   }
 
